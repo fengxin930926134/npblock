@@ -3,9 +3,9 @@ package com.np.block.activity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.widget.Toast;
-
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.util.ConstUtils;
 
 /**
  * 更新页
@@ -13,7 +13,7 @@ import com.np.block.base.BaseActivity;
  */
 public class UpdateActivity extends BaseActivity {
 
-    private long temptime;
+    private long tempTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,17 +21,20 @@ public class UpdateActivity extends BaseActivity {
         setContentView(R.layout.activity_update);
     }
 
+    /**
+     * 对这个函数的复写 实现2次返回退出游戏
+     * 后面改成弹窗
+     */
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)//主要是对这个函数的复写
+    public boolean onKeyDown(int keyCode, KeyEvent event)
     {
         if((keyCode == KeyEvent.KEYCODE_BACK)&&(event.getAction() == KeyEvent.ACTION_DOWN))
         {
             // 2s内再次选择back键有效
-            if(System.currentTimeMillis() - temptime > 2000)
+            if(System.currentTimeMillis() - tempTime > ConstUtils.BACK_TIME)
             {
-                System.out.println(Toast.LENGTH_LONG);
-                Toast.makeText(this, "请在按一次返回退出", Toast.LENGTH_LONG).show();
-                temptime = System.currentTimeMillis();
+                Toast.makeText(this, "再按一次返回退出", Toast.LENGTH_LONG).show();
+                tempTime = System.currentTimeMillis();
             }
             else {
                 finish();
