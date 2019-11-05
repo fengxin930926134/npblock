@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--adjustViewBounds,图片宽度填满，高度自适配,用于保持宽高比-->
+    <!--ContentDescription,声明不提供任何内容或启用用户操作-->
+    <ImageView
+        android:id="@+id/welcome_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false"
+        android:background="@drawable/welcome_background"
+        tools:ignore="ContentDescription" />
+</LinearLayout>
