@@ -12,17 +12,19 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <!-- 基类activity注册 -->
-        <activity android:name="com.np.block.base.BaseActivity" />
+        <activity android:name="com.np.block.base.BaseActivity"
+            android:screenOrientation="sensorLandscape"/>
         <!-- 首页欢迎界面activity注册 -->
-        <activity android:name="com.np.block.activity.WelcomeActivity">
+        <activity android:name="com.np.block.activity.WelcomeActivity"
+            android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <!-- 更新界面activity注册 -->
-        <activity android:name="com.np.block.activity.UpdateActivity"/>
+        <activity android:name="com.np.block.activity.UpdateActivity"
+            android:screenOrientation="sensorLandscape"/>
     </application>
 
 </manifest>
