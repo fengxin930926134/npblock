@@ -1,14 +1,13 @@
 package com.np.block.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import androidx.annotation.Nullable;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.manager.ActivityManager;
 
 /**
  * 首页
@@ -19,9 +18,7 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
     ImageView welcomeImage;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
+    public void init() {
         welcomeImage = findViewById(R.id.welcome_image_view);
         // 配置动画
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.welcome_anim);
@@ -31,6 +28,11 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
         animation.setFillAfter(true);
         animation.setAnimationListener(this);
         welcomeImage.setAnimation(animation);
+    }
+
+    @Override
+    public int getContentView() {
+        return R.layout.activity_welcome;
     }
 
     /**
@@ -48,6 +50,7 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
     public void onAnimationEnd(Animation animation) {
         // 跳转至更新界面
         startActivity(new Intent(this, UpdateActivity.class));
+        ActivityManager.getInstance().removeActivity(this);
         this.finish();
     }
 
