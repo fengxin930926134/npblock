@@ -52,6 +52,8 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
         startActivity(new Intent(this, UpdateActivity.class));
         ActivityManager.getInstance().removeActivity(this);
         this.finish();
+        // 设置activity的切换效果为无
+        overridePendingTransition( 0,0);
     }
 
     /**
