@@ -1,6 +1,7 @@
 package com.np.block.base;
 
-
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
@@ -9,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.util.ConstUtils;
+import com.np.block.util.DialogUtils;
 
 /**
  * 基类activity
@@ -22,7 +24,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 隐藏菜单
+        // 隐藏状态栏
         if (getSupportActionBar() != null){
             getSupportActionBar().hide();
         }
@@ -68,19 +70,48 @@ public abstract class BaseActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if((keyCode == KeyEvent.KEYCODE_BACK) && (event.getAction() == KeyEvent.ACTION_DOWN))
         {
-            // 2s内再次选择back键有效
-            if(System.currentTimeMillis() - tempTime > ConstUtils.BACK_TIME)
-            {
-                Toast.makeText(this, "再按一次返回退出", Toast.LENGTH_LONG).show();
-                tempTime = System.currentTimeMillis();
-            }
-            else {
-                ActivityManager.getInstance().finishAll();
-                //凡是非零都表示异常退出!0表示正常退出!
-                System.exit(0);
+            //判断sdk版本是否大于等于19
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                 DialogUtils.showDialog(this,
+                        "提示",
+                        "是否退出游戏？",
+                        "取消",
+                        "确定",
+                        false,
+                        false,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                exitApp();
+                            }
+                        });
+            }else {
+                // 2s内再次选择back键有效
+                if(System.currentTimeMillis() - tempTime > ConstUtils.BACK_TIME)
+                {
+                    Toast.makeText(this, "再按一次退出游戏", Toast.LENGTH_LONG).show();
+                    tempTime = System.currentTimeMillis();
+                }
+                else {
+                    exitApp();
+                }
             }
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * 退出app需要做的事
+     */
+    private void exitApp() {
+        ActivityManager.getInstance().finishAll();
     }
 }
