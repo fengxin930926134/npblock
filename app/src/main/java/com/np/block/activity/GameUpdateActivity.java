@@ -6,6 +6,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.manager.ThreadPoolManager;
 
 /**
  * 用作游戏更新
@@ -24,7 +25,8 @@ public class GameUpdateActivity extends BaseActivity {
         left = findViewById(R.id.bottom_left_text);
         left.setText("正在检查更新...");
         right = findViewById(R.id.bottom_right_text);
-        new Thread(new Runnable() {
+        //开启线程更新
+        ThreadPoolManager.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -32,7 +34,7 @@ public class GameUpdateActivity extends BaseActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                updateUI("开始更新游戏...", "0%", 0);
+                updateUi("开始更新游戏...", "0%", 0);
                 do {
                     try {
                         Thread.sleep(500);
@@ -41,9 +43,9 @@ public class GameUpdateActivity extends BaseActivity {
                     }
                     progress = progress + 10;
                     String barProgress = progress + "%";
-                    updateUI("正在更新游戏...", barProgress, progress);
+                    updateUi("正在更新游戏...", barProgress, progress);
                 } while (progress != 100);
-                updateUI("游戏更新完成", "100%", progress);
+                updateUi("游戏更新完成", "100%", progress);
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -51,10 +53,10 @@ public class GameUpdateActivity extends BaseActivity {
                 }
                 startActivity(new Intent(GameUpdateActivity.this, LoginActivity.class));
             }
-        }).start();
+        });
     }
 
-    private void updateUI(final String text1, final String text2, final int progress){
+    private void updateUi(final String text1, final String text2, final int progress){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
