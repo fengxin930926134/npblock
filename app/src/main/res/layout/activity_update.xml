@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/d51cb0d17545d9ff71cf2f8f42189f43">
+    android:background="@drawable/bg_1">
 
     <!--系统提供的水平进度条-->
     <ProgressBar
