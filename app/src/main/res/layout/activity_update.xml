@@ -1,19 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.np.block.activity.UpdateActivity">
+    android:background="@drawable/d51cb0d17545d9ff71cf2f8f42189f43">
 
+    <!--系统提供的水平进度条-->
+    <ProgressBar
+        android:id="@+id/update_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/spacing_view"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:max="100"
+        android:progress="0"
+        android:layout_marginStart="10dp" />
+
+    <!-- 用来设置和进度条的间距-->
     <TextView
+        android:id="@+id/spacing_view"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_above="@+id/bottom_left_text"/>
+
+    <!--左下text-->
+    <TextView
+        android:id="@+id/bottom_left_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        tools:ignore="MissingConstraints"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_above="@+id/bottom_view"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/colorWhite"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!--右下text-->
+    <TextView
+        android:id="@+id/bottom_right_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottom_view"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_alignParentEnd="true"
+        android:textColor="@color/colorWhite"/>
+
+    <!-- 用来设置底部空间-->
+    <TextView
+        android:id="@+id/bottom_view"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>

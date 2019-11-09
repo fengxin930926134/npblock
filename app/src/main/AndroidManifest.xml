@@ -22,8 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- 更新界面activity注册 -->
-        <activity android:name="com.np.block.activity.UpdateActivity"
+        <!-- 游戏更新界面activity注册 -->
+        <activity android:name=".activity.GameUpdateActivity"
+            android:screenOrientation="sensorLandscape"/>
+        <!-- 登陆界面activity注册 -->
+        <activity android:name="com.np.block.activity.LoginActivity"
+            android:screenOrientation="sensorLandscape"/>
+        <!-- 主界面activity注册 -->
+        <activity android:name="com.np.block.activity.MainActivity"
             android:screenOrientation="sensorLandscape"/>
     </application>
 
