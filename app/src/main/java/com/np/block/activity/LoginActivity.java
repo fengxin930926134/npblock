@@ -1,10 +1,11 @@
 package com.np.block.activity;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.VideoView;
-
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 
@@ -16,26 +17,24 @@ public class LoginActivity extends BaseActivity {
 
     /**创建播放视频的控件对象*/
     private VideoView videoview;
-    private boolean show = true;
 
     @Override
     public void init() {
         //加载视频资源控件
         videoview = findViewById(R.id.video_view);
         initVideo();
-        Button hide = findViewById(R.id.test_button);
-        final Button hh = findViewById(R.id.test_2);
-        hide.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        TextView userName = findViewById(R.id.user_name);
+        Button cancellation = findViewById(R.id.cancellation);
+        Button beginGame = findViewById(R.id.begin_game);
 
-                if (show){
-                    hh.setVisibility(View.VISIBLE);
-                    show = false;
-                }else {
-                    hh.setVisibility(View.INVISIBLE);
-                    show = true;
-                }
+        userName.setText("封测者");
+        userName.setVisibility(View.VISIBLE);
+        cancellation.setVisibility(View.VISIBLE);
+        beginGame.setVisibility(View.VISIBLE);
+        beginGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
             }
         });
     }

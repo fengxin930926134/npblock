@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">这个方块贼牛皮</string>
+    <string name="cancellation">注销</string>
+    <string name="begin_game">开始游戏</string>
+    <string name="service_name">贵阳一区</string>
+    <string name="version_text">假装这个是版号</string>
 </resources>

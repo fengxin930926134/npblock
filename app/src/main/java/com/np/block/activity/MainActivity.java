@@ -1,5 +1,6 @@
 package com.np.block.activity;
 
+import com.np.block.R;
 import com.np.block.base.BaseActivity;
 
 /**
@@ -14,6 +15,6 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public int getContentView() {
-        return 0;
+        return R.layout.activity_main;
     }
 }
