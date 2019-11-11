@@ -97,4 +97,27 @@ public class DialogUtils {
         dialog.getWindow().setLayout(ResolutionUtils.dpChangePx(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.setContentView(view);
     }
+
+    /**
+     * 小圆圈弹窗
+     *
+     * @param context 上下文
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public synchronized static AlertDialog showDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog dialog = builder.create();
+        // 设置点击dialog的外部能否取消弹窗
+        dialog.setCanceledOnTouchOutside(false);
+        // 设置能不能返回键取消弹窗
+        dialog.setCancelable(false);
+        View view = View.inflate(context, R.layout.alert_round_dialog, null);
+        dialog.show();
+        //设置背景透明,去四个角
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);
+        //设置固定宽带，高度自适应
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.setContentView(view);
+        return dialog;
+    }
 }
