@@ -1,5 +1,6 @@
 package com.np.block.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.view.KeyEvent;
 import android.widget.ProgressBar;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.util.DialogUtils;
 
 /**
  * 用作游戏更新

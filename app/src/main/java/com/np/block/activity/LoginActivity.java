@@ -1,40 +1,79 @@
 package com.np.block.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.util.DialogUtils;
+import com.np.block.util.HttpRequestUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 登陆和更新
  * @author fengxin
  */
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     /**创建播放视频的控件对象*/
     private VideoView videoview;
+    private AlertDialog alertDialog;
+    private TextView userName;
+    private Button cancellation;
+    private Button beginGame;
+    private Button phoneLogin;
+    private Button qqLogin;
 
     @Override
     public void init() {
+        alertDialog = DialogUtils.showDialog(LoginActivity.this);
         //加载视频资源控件
         videoview = findViewById(R.id.video_view);
         initVideo();
-        TextView userName = findViewById(R.id.user_name);
-        Button cancellation = findViewById(R.id.cancellation);
-        Button beginGame = findViewById(R.id.begin_game);
+        //用户名
+        userName = findViewById(R.id.user_name);
+        qqLogin = findViewById(R.id.qq_login);
+        phoneLogin = findViewById(R.id.phone_login);
+        phoneLogin.setOnClickListener(this);
+        //注销
+        cancellation = findViewById(R.id.cancellation);
+        cancellation.setOnClickListener(this);
+        beginGame = findViewById(R.id.begin_game);
+        beginGame.setOnClickListener(this);
+        //检查本地token 无
+        showLogin();
+        alertDialog.cancel();
+    }
 
-        userName.setText("封测者");
-        userName.setVisibility(View.VISIBLE);
-        cancellation.setVisibility(View.VISIBLE);
-        beginGame.setVisibility(View.VISIBLE);
-        beginGame.setOnClickListener(new View.OnClickListener() {
+    private void showLogin(){
+        qqLogin.setVisibility(View.VISIBLE);
+        phoneLogin.setVisibility(View.VISIBLE);
+        userName.setVisibility(View.INVISIBLE);
+        cancellation.setVisibility(View.INVISIBLE);
+        beginGame.setVisibility(View.INVISIBLE);
+    }
+
+    private void show(final String name){
+        runOnUiThread(new Runnable() {
             @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            public void run() {
+                userName.setText(name);
+                userName.setVisibility(View.VISIBLE);
+                cancellation.setVisibility(View.VISIBLE);
+                beginGame.setVisibility(View.VISIBLE);
+                qqLogin.setVisibility(View.INVISIBLE);
+                phoneLogin.setVisibility(View.INVISIBLE);
+                alertDialog.cancel();
             }
         });
     }
@@ -70,5 +109,51 @@ public class LoginActivity extends BaseActivity {
         //防止锁屏或者切出的时候，音乐在播放
         videoview.stopPlayback();
         super.onStop();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.begin_game:
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                break;
+            case R.id.phone_login:
+                alertDialog = DialogUtils.showDialog(LoginActivity.this);
+                login();
+                break;
+            case R.id.cancellation:
+                showLogin();
+                break;
+                default:
+        }
+    }
+
+    private void login() {
+        ThreadPoolManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, Object> jsonObject = new HashMap<>(2);
+                jsonObject.put("phone","admin");
+                jsonObject.put("password",1231223);
+                String result = HttpRequestUtils.sendPostRequest("/login/verify",jsonObject,null,false);
+                if (result != null) {
+                    try {
+                        JSONObject jsonObject1 = new JSONObject(result);
+                        int code = jsonObject1.getInt("code");
+                        if (code > 80000) {
+                            alertDialog.cancel();
+                            Looper.prepare();
+                            Toast.makeText(LoginActivity.this, jsonObject1.getString("msg"), Toast.LENGTH_SHORT).show();
+                            Looper.loop();
+                        }else {
+                            JSONObject rest = jsonObject1.getJSONObject("result");
+                            show(rest.getString("name"));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }

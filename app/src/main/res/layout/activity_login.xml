@@ -6,6 +6,25 @@
     <include layout="@layout/login_bg"/>
     <!--需要判断情况是否存在token-->
 
+    <!--  手机登陆  -->
+    <Button
+        android:id="@+id/phone_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/phone_login_text"
+        android:layout_above="@+id/login_middle"
+        android:layout_toStartOf="@+id/login_middle"
+        android:visibility="invisible"/>
+    <!--  QQ登陆  -->
+    <Button
+        android:id="@+id/qq_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/qq_login_text"
+        android:layout_above="@+id/login_middle"
+        android:layout_toEndOf="@+id/login_middle"
+        android:visibility="invisible"/>
+
     <!--  区服  -->
     <TextView
         android:layout_width="100dp"
@@ -16,7 +35,8 @@
         android:layout_marginBottom="10dp"
         android:gravity="center"
         android:background="@color/colorGrayTransparent"
-        android:text="@string/service_name"/>
+        android:text="@string/service_name"
+        android:visibility="invisible"/>
     <!-- 开始游戏 -->
     <Button
         android:id="@+id/begin_game"
@@ -33,7 +53,6 @@
         android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:layout_toLeftOf="@+id/cancellation"
         android:layout_toStartOf="@+id/cancellation"
         android:layout_alignBottom="@+id/cancellation"
         android:gravity="center"
@@ -44,11 +63,9 @@
         android:id="@+id/cancellation"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:layout_alignParentRight="true"
         android:text="@string/cancellation"
         android:visibility="invisible"
         android:layout_marginTop="20dp"
-        android:layout_marginRight="40dp"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="40dp" />
 
