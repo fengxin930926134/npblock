@@ -18,12 +18,17 @@ import com.np.block.util.DialogUtils;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
+    /**
+     * log TAG
+     */
+    public static String TAG;
     /**退出时间*/
     private long tempTime = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TAG = this.getClass().getName();
         // 隐藏状态栏
         if (getSupportActionBar() != null){
             getSupportActionBar().hide();

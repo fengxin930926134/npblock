@@ -64,7 +64,8 @@ public class HttpRequestUtils {
             outputStream.write(data.getBytes());
             outputStream.flush();
             //读取返回数据
-            if (httpURLConnection.getResponseCode() < ConstUtils.CODE) {
+            int code = 400;
+            if (httpURLConnection.getResponseCode() < code) {
                 inputStream = httpURLConnection.getInputStream();
             }else {
                 inputStream = httpURLConnection.getErrorStream();

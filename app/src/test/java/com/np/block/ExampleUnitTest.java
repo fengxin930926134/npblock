@@ -1,10 +1,7 @@
 package com.np.block;
 
-import android.widget.Toast;
-
 import com.alibaba.fastjson.JSONObject;
-import com.np.block.activity.LoginActivity;
-import com.np.block.util.HttpOkUtils;
+import com.np.block.util.OkHttpUtils;
 
 import org.junit.Test;
 
@@ -21,7 +18,7 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws IOException {
         assertEquals(4, 2 + 2);
-        String response = HttpOkUtils.get("http://192.168.2.112:8083/hello");
+        String response = OkHttpUtils.get("/hello");
         System.out.println(response);
 
 
@@ -34,7 +31,7 @@ public class ExampleUnitTest {
 
 
         try {
-            String response1 = HttpOkUtils.post("http://192.168.2.112:8083/login/verify", jsonObject.toJSONString());
+            String response1 = OkHttpUtils.post("/login/verify", jsonObject.toJSONString());
             JSONObject parse = JSONObject.parseObject(response1);
             if (parse.getIntValue("status") == 200) {
                 parse = parse.getJSONObject("body");

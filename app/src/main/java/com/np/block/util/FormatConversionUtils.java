@@ -8,7 +8,7 @@ import java.util.Map;
  * 格式转换工具类
  * @author fengxin
  */
-public class FormatConversionUtils {
+class FormatConversionUtils {
 
     /**
      * 将map转化为url参数形式
@@ -16,7 +16,7 @@ public class FormatConversionUtils {
      * @param map map集合
      * @return url参数
      */
-    public static String getUrlParamsByMap(Map<String, Object> map) {
+    static String getUrlParamsByMap(Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry i : map.entrySet()) {
             try {

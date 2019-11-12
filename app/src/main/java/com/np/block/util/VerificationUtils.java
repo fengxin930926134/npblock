@@ -7,13 +7,19 @@ import static java.util.regex.Pattern.compile;
 public class VerificationUtils {
 
     /**
+     * 手机位数
+     */
+    private static final int PHONE_NUM = 11;
+
+    /**
      * 手机号校验
      */
     public static boolean phoneValidate(String phoneNum){
-        if(phoneNum.length() != 11) {
+        if(phoneNum.length() != PHONE_NUM) {
             return false;
         }
-        if(phoneNum.contains(" ")) {
+        String kong = " ";
+        if(phoneNum.contains(kong)) {
             return false;
         }
         String regex = "^((13[0-9])|(14[0-9])|(15[0-9])|(16[0-9])|(17[0-9])|(18[0-9])|(19[0-9]))\\d{8}$";
