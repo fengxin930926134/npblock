@@ -15,7 +15,7 @@ public class ConstUtils {
 
     public static final int CODE = 400;
 
-    public static final String URL = "http://192.168.10.228:8083";
+    public static final String URL = "http://192.168.2.112:8083";
 
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

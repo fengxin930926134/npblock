@@ -13,6 +13,7 @@ import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.util.DialogUtils;
+import com.np.block.util.HttpOkUtils;
 import com.np.block.util.HttpRequestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,12 +120,40 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 break;
             case R.id.phone_login:
                 alertDialog = DialogUtils.showDialog(LoginActivity.this);
-                login();
+                loginV2();
                 break;
             case R.id.cancellation:
                 showLogin();
                 break;
                 default:
+        }
+    }
+
+    private void loginV2(){
+        com.alibaba.fastjson.JSONObject jsonObject = new com.alibaba.fastjson.JSONObject();
+        com.alibaba.fastjson.JSONObject jsonObject1 = new com.alibaba.fastjson.JSONObject();
+        jsonObject1.put("phone","admin");
+        jsonObject1.put("password",123123);
+        jsonObject.put("params",jsonObject1);
+        try {
+            String response = HttpOkUtils.post("/login/verify", jsonObject.toJSONString());
+            com.alibaba.fastjson.JSONObject parse = com.alibaba.fastjson.JSONObject.parseObject(response);
+            if (parse.getIntValue("status") == 200) {
+                parse = parse.getJSONObject("body");
+                if (parse.getIntValue("code") > 80000){
+                    Toast.makeText(LoginActivity.this, parse.getString("msg"), Toast.LENGTH_SHORT).show();
+                }else {
+                    com.alibaba.fastjson.JSONObject rest = com.alibaba.fastjson.JSONObject.parseObject(parse.getString("result"));
+                    show(rest.getString("name"));
+                }
+            }else {
+                Toast.makeText(LoginActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(LoginActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+        }finally {
+            alertDialog.cancel();
         }
     }
 
