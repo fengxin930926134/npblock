@@ -18,8 +18,8 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws IOException {
         assertEquals(4, 2 + 2);
-        String response = OkHttpUtils.get("/hello");
-        System.out.println(response);
+//        String response = OkHttpUtils.get("/hello");
+//        System.out.println(response);
 
 
 
@@ -41,9 +41,11 @@ public class ExampleUnitTest {
                     System.out.println(parse.getString("result"));
                 }
             }else {
+                System.out.println(parse);
                 System.out.println("网络异常");
             }
-        }catch (Exception exception){
+        }catch (Exception e){
+            e.printStackTrace();
             System.out.println("网络异常");
         }
 
