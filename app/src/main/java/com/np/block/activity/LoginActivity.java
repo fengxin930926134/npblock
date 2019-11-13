@@ -9,17 +9,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
 import com.np.block.util.OkHttpUtils;
-import com.np.block.util.HttpRequestUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 登陆和更新
@@ -121,7 +117,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 break;
             case R.id.phone_login:
                 alertDialog = DialogUtils.showDialog(LoginActivity.this);
-                loginV2();
+                login();
                 break;
             case R.id.cancellation:
                 showLogin();
@@ -131,9 +127,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
-    private void loginV2(){
-        final com.alibaba.fastjson.JSONObject jsonObject = new com.alibaba.fastjson.JSONObject();
-        com.alibaba.fastjson.JSONObject jsonObject1 = new com.alibaba.fastjson.JSONObject();
+    private void login(){
+        final JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
         jsonObject1.put("phone","admin");
         jsonObject1.put("password",123123);
         jsonObject.put("params",jsonObject1);
@@ -142,7 +138,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void run() {
                 try {
                     String response = OkHttpUtils.post("/login/verify", jsonObject.toJSONString());
-                    com.alibaba.fastjson.JSONObject parse = com.alibaba.fastjson.JSONObject.parseObject(response);
+                    JSONObject parse = JSONObject.parseObject(response);
                     if (parse.getIntValue("status") == 200) {
                         parse = parse.getJSONObject("body");
                         if (parse.getIntValue("code") > 80000){
@@ -150,7 +146,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             Toast.makeText(LoginActivity.this, parse.getString("msg"), Toast.LENGTH_SHORT).show();
                             Looper.loop();
                         }else {
-                            com.alibaba.fastjson.JSONObject rest = com.alibaba.fastjson.JSONObject.parseObject(parse.getString("result"));
+                            JSONObject rest = JSONObject.parseObject(parse.getString("result"));
                             show(rest.getString("name"));
                         }
                     }else {
@@ -158,44 +154,28 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         Toast.makeText(LoginActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                         Looper.loop();
                     }
+                    alertDialog.cancel();
                 }catch (Exception e){
                     LogUtils.e(TAG, e.getMessage());
+                    if (alertDialog != null) {
+                        alertDialog.cancel();
+                    }
                     Looper.prepare();
                     Toast.makeText(LoginActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                     Looper.loop();
                 }finally {
-                    alertDialog.cancel();
+                    if (alertDialog != null) {
+                        alertDialog.cancel();
+                    }
                 }
             }
         });
     }
 
-    private void login() {
-        ThreadPoolManager.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                Map<String, Object> jsonObject = new HashMap<>(2);
-                jsonObject.put("phone","admin");
-                jsonObject.put("password",123123);
-                String result = HttpRequestUtils.sendPostRequest("/login/verify",jsonObject,null,false);
-                if (result != null) {
-                    try {
-                        JSONObject jsonObject1 = new JSONObject(result);
-                        int code = jsonObject1.getInt("code");
-                        if (code > 80000) {
-                            alertDialog.cancel();
-                            Looper.prepare();
-                            Toast.makeText(LoginActivity.this, jsonObject1.getString("msg"), Toast.LENGTH_SHORT).show();
-                            Looper.loop();
-                        }else {
-                            JSONObject rest = jsonObject1.getJSONObject("result");
-                            show(rest.getString("name"));
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
+    /**
+     * 模拟请求服务器的过程
+     */
+    public void test() {
+
     }
 }
