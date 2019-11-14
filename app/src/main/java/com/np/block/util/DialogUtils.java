@@ -1,5 +1,6 @@
 package com.np.block.util;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,11 +8,13 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import com.np.block.R;
 import java.util.Objects;
+import static com.np.block.util.ResolutionUtils.dpChangePx;
 
 /**
  * 弹窗工具类
@@ -48,7 +51,7 @@ public class DialogUtils {
         dialog.setCanceledOnTouchOutside(touchOutside);
         // 设置能不能返回键取消弹窗
         dialog.setCancelable(cancelable);
-        View view = View.inflate(context, R.layout.alert_dialog, null);
+        View view = View.inflate(context, R.layout.alert_dialog_select, null);
         //标题
         TextView tvTitle = view.findViewById(R.id.tv_alert_title);
         //内容
@@ -94,7 +97,7 @@ public class DialogUtils {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);
         //设置固定宽带，高度自适应
         int dialogWidth = 290;
-        dialog.getWindow().setLayout(ResolutionUtils.dpChangePx(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setLayout(dpChangePx(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.setContentView(view);
     }
 
@@ -111,7 +114,7 @@ public class DialogUtils {
         dialog.setCanceledOnTouchOutside(false);
         // 设置能不能返回键取消弹窗
         dialog.setCancelable(false);
-        View view = View.inflate(context, R.layout.alert_round_dialog, null);
+        View view = View.inflate(context, R.layout.alert_dialog_round, null);
         dialog.show();
         //设置背景透明,去四个角
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);
@@ -120,4 +123,137 @@ public class DialogUtils {
         dialog.setContentView(view);
         return dialog;
     }
+
+    /**
+     * 登陆弹窗
+     *
+     * @param context        上下文
+     * @param loginListener  登陆按钮的点击事件
+     */
+    @SuppressLint("SetJavaScriptEnabled")
+    public synchronized static void showDialogLogin(Context context,
+                                                    DialogInterface.OnClickListener loginListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(true);
+
+        View view = View.inflate(context, R.layout.alert_dialog_login, null);
+        //finish按钮
+        ImageView imageView = view.findViewById(R.id.alert_login_finish);
+        Button login = view.findViewById(R.id.alert_login_btn);
+        final AlertDialog dialogFinal = dialog;
+        final DialogInterface.OnClickListener finalLoginListener = loginListener;
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finalLoginListener.onClick(dialogFinal, DialogInterface.BUTTON_POSITIVE);
+            }
+        });
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogFinal.cancel();
+            }
+        });
+        //设置背景透明,去四个角
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
+        dialog.getWindow().setLayout(dpChangePx(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.setContentView(view);
+
+    }
+
+//    /**
+//     * @param context        上下文
+//     * @param title          顶部标题
+//     * @param webUrl         网页的url
+//     * @param btnText        按钮的文字
+//     * @param checkText      CheckBox的文字
+//     * @param touchOutside   点击外部取消
+//     * @param sureListener   确定按钮的点击事件
+//     * @param cancleListener 取消按钮的点击事件
+//     * @param checkListener  checkbox的点击事件
+//     * @return
+//     */
+//    @SuppressLint("SetJavaScriptEnabled")
+//    public synchronized static AlertDialog showDialogXieYi(Context context,
+//                                                           String title,
+//                                                           String webUrl,
+//                                                           String btnText,
+//                                                           String checkText,
+//                                                           boolean touchOutside,
+//                                                           DialogInterface.OnClickListener cancleListener,
+//                                                           DialogInterface.OnClickListener sureListener,
+//                                                           DialogInterface.OnMultiChoiceClickListener checkListener) {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//        AlertDialog dialog = builder.create();
+//        dialog.setCanceledOnTouchOutside(touchOutside);
+//        dialog.setCancelable(false);
+//
+//        // 是否包含标题，设置Title
+//        if (TextUtils.isEmpty(title)) {
+//            title = "提示";
+//        }
+//        View view = View.inflate(context, R.layout.alert_dialog_login, null);
+//        //提示框title
+//        TextView tvTitle = view.findViewById(R.id.alert_tv_title);
+//        //网页webView
+//        WebView webView = view.findViewById(R.id.alert_wv);
+//        //按钮
+//        final Button button = view.findViewById(R.id.alert_btn);
+//        //CheckBox的说明文字
+//        TextView tvCheck = view.findViewById(R.id.alert_tv_check);
+//        //finish按钮
+//        ImageView imageView = view.findViewById(R.id.alert_iv_finish);
+//        //协议选中框
+//        CheckBox checkBox = view.findViewById(R.id.alert_cb);
+//
+//        tvTitle.setText(title);
+//        button.setText(TextUtils.isEmpty(btnText) ? "确定" : btnText);
+//        tvCheck.setText(TextUtils.isEmpty(checkText) ? "" : checkText);
+//        webView.setWebViewClient(new WebViewClient());
+//        webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+//        //设置webView里字体大小
+//        WebSettings settings = webView.getSettings();
+//        settings.setTextZoom(55);
+//        settings.setJavaScriptEnabled(true);
+//        settings.setSupportZoom(true);
+//        settings.setBuiltInZoomControls(true);
+//        webView.loadUrl(webUrl);
+//        final AlertDialog dialogFinal = dialog;
+//        final DialogInterface.OnClickListener finalSureListener = sureListener;
+//        final DialogInterface.OnClickListener finalCancleListener = cancleListener;
+//        final DialogInterface.OnMultiChoiceClickListener finalCheckListener = checkListener;
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                finalSureListener.onClick(dialogFinal, DialogInterface.BUTTON_POSITIVE);
+//            }
+//        });
+//        imageView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                finalCancleListener.onClick(dialogFinal, DialogInterface.BUTTON_NEGATIVE);
+//            }
+//        });
+//        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                finalCheckListener.onClick(dialogFinal, 0, isChecked);
+//                if (isChecked) {
+//                    button.setEnabled(true);
+//                } else {
+//                    button.setEnabled(false);
+//                }
+//            }
+//        });
+//        //设置背景透明,去四个角
+//        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+//        dialog.show();
+//        dialog.getWindow().setLayout(dpChangePx(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
+//        dialog.setContentView(view);
+//
+//        return dialog;
+//    }
 }

@@ -6,4 +6,9 @@
     <string name="version_text">假装这个是版号</string>
     <string name="qq_login_text">QQ登陆</string>
     <string name="phone_login_text">手机登陆</string>
+    <string name="alert_login_finish_text">关闭</string>
+    <string name="alert_login_title_text">登陆</string>
+    <string name="alert_login_btn_text">登陆</string>
+    <string name="login_phone_text">手机号</string>
+    <string name="password_text">密码</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.np.block.activity;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Looper;
@@ -116,8 +117,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 break;
             case R.id.phone_login:
-                alertDialog = DialogUtils.showDialog(LoginActivity.this);
-                login();
+                DialogUtils.showDialogLogin(LoginActivity.this, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(LoginActivity.this, "点了登陆", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                //alertDialog = DialogUtils.showDialog(LoginActivity.this);
+                //login();
                 break;
             case R.id.cancellation:
                 showLogin();
