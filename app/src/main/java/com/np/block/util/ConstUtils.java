@@ -7,9 +7,34 @@ package com.np.block.util;
 public class ConstUtils {
 
     /**
+     * 腾讯appID
+     */
+    public static final String APP_ID = "101825468";
+
+    /**
      * 再按一次返回退出的触发时间
      */
     public static final int BACK_TIME = 2000;
+
+    /**
+     * 执行接口成功
+     */
+    public static final int CODE_SUCCESS = 80000;
+
+    /**
+     * 状态码 成功
+     */
+    public static final int STATUS_SUCCESS = 200;
+
+    /**
+     * 请求服务器返回的状态码
+     */
+    public static final String STATUS = "status";
+
+    /**
+     * 接口返回的状态
+     */
+    public static final String CODE = "code";
 
     /**
      * 字符编码

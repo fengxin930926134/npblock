@@ -1,5 +1,6 @@
 package com.np.block.base;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,10 +25,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     public static String TAG;
     /**退出时间*/
     private long tempTime = 0;
+    public Context context;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = this;
         TAG = this.getClass().getName();
         // 隐藏状态栏
         if (getSupportActionBar() != null){

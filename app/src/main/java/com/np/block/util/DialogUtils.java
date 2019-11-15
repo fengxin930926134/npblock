@@ -120,48 +120,28 @@ public class DialogUtils {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);
         //设置固定宽带，高度自适应
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        view.bringToFront();
         dialog.setContentView(view);
         return dialog;
     }
 
     /**
      * 登陆弹窗
+     *  @param context        上下文
      *
-     * @param context        上下文
-     * @param loginListener  登陆按钮的点击事件
+     * @return View
      */
     @SuppressLint("SetJavaScriptEnabled")
-    public synchronized static void showDialogLogin(Context context,
-                                                    DialogInterface.OnClickListener loginListener) {
+    public synchronized static AlertDialog showDialogLogin(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         AlertDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(true);
-
-        View view = View.inflate(context, R.layout.alert_dialog_login, null);
-        //finish按钮
-        ImageView imageView = view.findViewById(R.id.alert_login_finish);
-        Button login = view.findViewById(R.id.alert_login_btn);
-        final AlertDialog dialogFinal = dialog;
-        final DialogInterface.OnClickListener finalLoginListener = loginListener;
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finalLoginListener.onClick(dialogFinal, DialogInterface.BUTTON_POSITIVE);
-            }
-        });
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialogFinal.cancel();
-            }
-        });
         //设置背景透明,去四个角
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
         dialog.getWindow().setLayout(dpChangePx(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.setContentView(view);
-
+        return dialog;
     }
 
 //    /**
