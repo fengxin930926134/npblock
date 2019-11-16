@@ -39,7 +39,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -61,7 +63,7 @@
                 android:textColorHint="#95A1AA"
                 android:singleLine="true"
                 android:inputType="phone"
-                android:importantForAutofill="no" />
+                android:importantForAutofill="no"/>
         </LinearLayout>
 
         <LinearLayout

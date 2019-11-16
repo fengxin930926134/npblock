@@ -1,15 +1,23 @@
 package com.np.block.activity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Looper;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
@@ -18,6 +26,11 @@ import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
 import com.np.block.util.OkHttpUtils;
+import com.tencent.connect.UserInfo;
+import com.tencent.connect.auth.QQToken;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 
 /**
  * 登陆和更新
@@ -41,14 +54,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private Button qqLogin;
     /** 区服 */
     private TextView districtService;
+    private Tencent mTencent;
+    private IUiListener qqLoginListener;
 
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void init() {
         //加载视频资源控件
         videoview = findViewById(R.id.video_view);
         initVideo();
-
+        //Tencent类是SDK的主要实现类，开发者可通过Tencent类访问腾讯开放的OpenAPI。
+        mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
+        qqLoginListener = new BaseUiListener();
         //用户名
         userName = findViewById(R.id.user_name);
         qqLogin = findViewById(R.id.qq_login);
@@ -74,6 +91,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         cancellation.setVisibility(View.INVISIBLE);
         beginGame.setVisibility(View.INVISIBLE);
         districtService.setVisibility(View.INVISIBLE);
+//        mTencent.logout(this);
     }
 
     /**
@@ -145,13 +163,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 loginOut();
                 break;
             case R.id.qq_login:
-                //login();
+                qqLogin();
                 break;
                 default:
                     Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void qqLogin(){
+        mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
+        if (!mTencent.isSessionValid())
+        {
+            mTencent.login(this, "get_simple_userinfo", qqLoginListener);
+        }
+    }
 
     /**
      * 手机登陆启动
@@ -167,6 +192,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             }
         });
         view.findViewById(R.id.alert_login_btn).setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
                 loginDialog.cancel();
@@ -219,10 +245,62 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         loginDialog.setContentView(view);
     }
 
-    /**
-     * 模拟请求服务器的过程
-     */
-    public void test() {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        // 回调
+        super.onActivityResult(requestCode, resultCode, data);
+        Tencent.onActivityResultData(requestCode,resultCode,data,qqLoginListener);
+    }
 
+    /**
+     *  实现回调 IUiListener
+     *  调用SDK已经封装好的接口时，例如：登录、快速支付登录、应用分享、应用邀请等接口，需传入该回调的实例。
+     */
+    private class BaseUiListener implements IUiListener {
+
+        @Override
+        public void onComplete(Object o) {
+            Toast.makeText(context, "onComplete"+o.toString(), Toast.LENGTH_SHORT).show();
+            JSONObject jsonObject = (JSONObject) o;
+            LogUtils.i(TAG, jsonObject.toJSONString());
+            String token;
+            String expiresIn;
+            String uniqueCode;
+            uniqueCode = jsonObject.getString("openid");//QQ的openid
+            token = jsonObject.getString("access_token");
+            expiresIn = jsonObject.getString("expires_in");
+            //获取QQ返回的用户信息
+            QQToken qqtoken = mTencent.getQQToken();
+            mTencent.setOpenId(uniqueCode);
+            mTencent.setAccessToken(token, expiresIn);
+            UserInfo info = new UserInfo(getApplicationContext(), qqtoken);
+            info.getUserInfo(new IUiListener() {
+                @Override
+                public void onComplete(Object o) {
+                    JSONObject jsonObject = (JSONObject) o;
+                    LogUtils.i(TAG, jsonObject.toJSONString());
+                }
+
+                @Override
+                public void onError(UiError uiError) {
+
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+            });
+        }
+
+        @Override
+        public void onError(UiError e) {
+            Toast.makeText(context, "onError:"+ "code:" + e.errorCode + ", msg:"
+                    + e.errorMessage + ", detail:" + e.errorDetail, Toast.LENGTH_SHORT).show();
+        }
+        @Override
+        public void onCancel() {
+            Toast.makeText(context, "取消登陆", Toast.LENGTH_SHORT).show();
+        }
     }
 }

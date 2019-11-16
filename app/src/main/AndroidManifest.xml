@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <!--要继续使用 Apache HTTP 客户端，以 Android 9 及更高版本为目标的应用
+        可以向其 AndroidManifest.xml的application节点下 添加以下内容：-->
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
         <!-- 基类activity注册 -->
         <activity android:name="com.np.block.base.BaseActivity"
             android:screenOrientation="sensorLandscape"/>
@@ -31,8 +34,23 @@
         <activity android:name="com.np.block.activity.LoginActivity"
             android:screenOrientation="sensorLandscape"/>
         <!-- 主界面activity注册 -->
-        <activity android:name="com.np.block.activity.MainActivity"
-            android:screenOrientation="sensorLandscape"/>
+        <activity android:name="com.np.block.activity.MainActivity"/>
+        <activity
+            android:name="com.tencent.tauth.AuthActivity"
+            android:noHistory="true"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tencent101825468" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.tencent.connect.common.AssistActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="behind"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

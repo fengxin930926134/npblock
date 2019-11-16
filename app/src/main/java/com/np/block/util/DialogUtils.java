@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -141,6 +142,8 @@ public class DialogUtils {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
         dialog.getWindow().setLayout(dpChangePx(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
+        //AlertDialog默认设置了WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM这个标志，所以键盘不会显示
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         return dialog;
     }
 
