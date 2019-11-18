@@ -105,4 +105,9 @@
         android:textColor="#ffffff"
         android:textSize="16sp" />
 
+    <Button
+        android:id="@+id/alert_login_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/alert_login_register"/>
 </LinearLayout>

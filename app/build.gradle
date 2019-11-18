@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.mob.sdk'
 
 android {
     compileSdkVersion 29
@@ -29,4 +30,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.2.2'
     implementation 'com.alibaba:fastjson:1.2.62'
     implementation files('libs/open_sdk_r53890096d0e731f134f448c1286e48c2043b484b_lite.jar')
+}
+
+MobSDK {
+    appKey "2cf1d77c5d090"
+    appSecret "b98e82a8012cd74aa59af51f1d9df640"
+    SMSSDK {}
 }

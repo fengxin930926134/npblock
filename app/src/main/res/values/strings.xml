@@ -11,4 +11,6 @@
     <string name="alert_login_btn_text">登陆</string>
     <string name="login_phone_text">手机号</string>
     <string name="password_text">密码</string>
+    <string name="classic_tetris">经典俄罗斯方块</string>
+    <string name="alert_login_register">注册</string>
 </resources>

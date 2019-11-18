@@ -42,10 +42,20 @@ public class ConstUtils {
     public static final String CHARSET = "UTF-8";
 
     /**
+     * 短信appKey
+     */
+    public static final String APPKEY = "101732155b605";
+
+    /**
+     * 短信APPSECRETE
+     */
+    public static final String APPSECRETE = "69d1850f4b74100266ab576b64e6cb16";
+
+    /**
      * 请求url
      */
-    public static final String URL = "http://192.168.10.228:8083";
-//    public static final String URL = "http://192.168.2.112:8083";
+//    public static final String URL = "http://192.168.10.228:8083";
+    public static final String URL = "http://192.168.2.112:8083";
 
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

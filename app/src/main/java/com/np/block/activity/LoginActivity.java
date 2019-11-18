@@ -1,15 +1,11 @@
 package com.np.block.activity;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Looper;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -17,7 +13,6 @@ import android.widget.Toast;
 import android.widget.VideoView;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
@@ -26,6 +21,7 @@ import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
 import com.np.block.util.OkHttpUtils;
+import com.np.block.util.VerificationUtils;
 import com.tencent.connect.UserInfo;
 import com.tencent.connect.auth.QQToken;
 import com.tencent.tauth.IUiListener;
@@ -54,8 +50,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private Button qqLogin;
     /** 区服 */
     private TextView districtService;
+    /**腾讯服务*/
     private Tencent mTencent;
     private IUiListener qqLoginListener;
+    /**判断是否QQ登陆*/
+    private boolean isQQLogin;
+    /**手机号输入框*/
+    private EditText inputPhoneEt;
+    /**验证码输入框*/
+    private EditText inputCodeEt;
+    /**获取验证码按钮*/
+    private Button requestCodeBtn;
+    /**注册提交按钮*/
+    private Button commitBtn;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -71,6 +78,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         qqLogin = findViewById(R.id.qq_login);
         phoneLogin = findViewById(R.id.phone_login);
         districtService = findViewById(R.id.district_service);
+//        inputPhoneEt = findViewById(R.id.login_input_phone_et);
+//        inputCodeEt = findViewById(R.id.login_input_code_et);
+//        requestCodeBtn = findViewById(R.id.login_request_code_btn);
+//        commitBtn = findViewById(R.id.login_commit_btn);
+//        requestCodeBtn.setOnClickListener(this);
+//        commitBtn.setOnClickListener(this);
+
         phoneLogin.setOnClickListener(this);
         //注销
         cancellation = findViewById(R.id.cancellation);
@@ -91,7 +105,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         cancellation.setVisibility(View.INVISIBLE);
         beginGame.setVisibility(View.INVISIBLE);
         districtService.setVisibility(View.INVISIBLE);
-//        mTencent.logout(this);
+        if (isQQLogin){
+            mTencent.logout(this);
+        }
     }
 
     /**
@@ -154,23 +170,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.begin_game:
+                //开始游戏
                 startActivity(new Intent(context, MainActivity.class));
                 break;
             case R.id.phone_login:
+                //手机登陆
                 loginForPhone();
                 break;
             case R.id.cancellation:
+                //注销按钮
                 loginOut();
                 break;
             case R.id.qq_login:
-                qqLogin();
+                //QQ登陆
+                loginForQQ();
                 break;
                 default:
                     Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void qqLogin(){
+    /**
+     * QQ登陆启动
+     */
+    private void loginForQQ(){
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
         if (!mTencent.isSessionValid())
         {
@@ -182,7 +205,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 手机登陆启动
      */
     private void loginForPhone(){
-        final AlertDialog loginDialog = DialogUtils.showDialogLogin(context);
+        final AlertDialog loginDialog = DialogUtils.showDialogDefault(context);
         final View view = View.inflate(context, R.layout.alert_dialog_login, null);
         //finish按钮
         view.findViewById(R.id.alert_login_finish).setOnClickListener(new View.OnClickListener() {
@@ -191,60 +214,106 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 loginDialog.cancel();
             }
         });
+        //注册按钮
+        view.findViewById(R.id.alert_login_register).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginDialog.cancel();
+                phoneRegister();
+            }
+        });
+        //登陆按钮
         view.findViewById(R.id.alert_login_btn).setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
-                loginDialog.cancel();
-                alertDialog = DialogUtils.showDialog(context);
                 EditText password = view.findViewById(R.id.password);
                 EditText phone = view.findViewById(R.id.phone_number);
-                final JSONObject jsonObject = new JSONObject();
-                jsonObject.put("phone",phone.getText().toString());
-                jsonObject.put("password",password.getText().toString());
-                ThreadPoolManager.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            JSONObject params = new JSONObject();
-                            params.put("params", jsonObject);
-                            String response = OkHttpUtils.post("/login/verify",params.toJSONString());
-                            JSONObject parse = JSONObject.parseObject(response);
-                            if (parse.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                parse = parse.getJSONObject("body");
-                                if (parse.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                    Looper.prepare();
-                                    Toast.makeText(context, parse.getString("msg"), Toast.LENGTH_SHORT).show();
-                                    Looper.loop();
+                //验证手机号和密码
+                if (VerificationUtils.phoneValidate(phone.getText().toString())){
+                    //关闭弹窗
+                    loginDialog.cancel();
+                    //打开小圆圈 请求服务器
+                    alertDialog = DialogUtils.showDialog(context);
+                    final JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("phone",phone.getText().toString());
+                    jsonObject.put("password",password.getText().toString());
+                    ThreadPoolManager.getInstance().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                JSONObject params = new JSONObject();
+                                params.put("params", jsonObject);
+                                //请求服务器
+                                String response = OkHttpUtils.post("/login/verify",params.toJSONString());
+                                JSONObject data = JSONObject.parseObject(response);
+                                //解析返回数据
+                                if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                                    data = data.getJSONObject("body");
+                                    if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
+                                        Looper.prepare();
+                                        Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
+                                        Looper.loop();
+                                    }else {
+                                        JSONObject rest = JSONObject.parseObject(data.getString("result"));
+                                        updateUiAfterLogin(rest.getString("name"));
+                                        isQQLogin = false;
+                                    }
                                 }else {
-                                    JSONObject rest = JSONObject.parseObject(parse.getString("result"));
-                                    updateUiAfterLogin(rest.getString("name"));
+                                    Looper.prepare();
+                                    Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                                    Looper.loop();
                                 }
-                            }else {
+                            }catch (Exception e){
+                                LogUtils.e(TAG, e.getMessage());
+                                if (alertDialog != null) {
+                                    alertDialog.cancel();
+                                }
                                 Looper.prepare();
                                 Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
                                 Looper.loop();
-                            }
-                        }catch (Exception e){
-                            LogUtils.e(TAG, e.getMessage());
-                            if (alertDialog != null) {
-                                alertDialog.cancel();
-                            }
-                            Looper.prepare();
-                            Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
-                            Looper.loop();
-                        }finally {
-                            if (alertDialog != null) {
-                                alertDialog.cancel();
+                            }finally {
+                                if (alertDialog != null) {
+                                    alertDialog.cancel();
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } else {
+                    Toast.makeText(context, "请输入正确手机号", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         loginDialog.setContentView(view);
     }
 
+    /**
+     * 手机注册
+     */
+    private void phoneRegister() {
+        AlertDialog registerDialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_register, null);
+        registerDialog.setContentView(view);
+        // 启动短信验证sdk
+//        SMSSDK.initSDK(this, APPKEY, APPSECRETE);
+//        EventHandler eventHandler = new EventHandler(){
+//            @Override
+//            public void afterEvent(int event, int result, Object data) {
+//                Message msg = new Message();
+//                msg.arg1 = event;
+//                msg.arg2 = result;
+//                msg.obj = data;
+//                handler.sendMessage(msg);
+//            }
+//        };
+    }
+
+    /**
+     * activity回调
+     * @param requestCode 请求码
+     * @param resultCode 返回码
+     * @param data 返回数据
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         // 回调
@@ -279,16 +348,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 public void onComplete(Object o) {
                     JSONObject jsonObject = (JSONObject) o;
                     LogUtils.i(TAG, jsonObject.toJSONString());
+                    isQQLogin = true;
                 }
 
                 @Override
                 public void onError(UiError uiError) {
-
+                    //失败
                 }
 
                 @Override
                 public void onCancel() {
-
+                    //取消
                 }
             });
         }
