@@ -1,50 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@drawable/shape_radian_dialog_white">
+    android:background="@drawable/shape_radian_dialog_white"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/alert_register_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="15dp"
+            android:text="@string/alert_register_title_text"
+            android:textColor="#525b6c"
+            android:textSize="26sp"
+            tools:ignore="RelativeOverlap" />
+
+        <ImageView
+            android:id="@+id/alert_register_finish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@mipmap/ic_calculator_close"
+            android:padding="3dp"
+            android:contentDescription="@string/alert_login_finish_text" />
+    </RelativeLayout>
 
 
     <EditText
-        android:id="@+id/login_input_phone_et"
+        android:id="@+id/register_input_phone"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="107dp"
-        android:ems="10"
-        android:hint="请输入手机号"
-        android:inputType="phone" />
-
-    <requestFocus />
+        android:ems="11"
+        android:hint="@string/register_input_phone_text"
+        android:inputType="phone"
+        android:importantForAutofill="no"/>
 
     <EditText
-        android:id="@+id/login_input_code_et"
-        android:layout_width="170dp"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/login_input_phone_et"
-        android:layout_below="@+id/login_input_phone_et"
-        android:layout_marginTop="44dp"
-        android:hint="请输入验证码"
-        android:inputType="textPassword" >
-    </EditText>
-
-    <Button
-        android:id="@+id/login_request_code_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/login_input_phone_et"
-        android:layout_alignTop="@+id/login_input_code_et"
-        android:text="获取验证码" />
-
-    <Button
-        android:id="@+id/login_commit_btn"
+        android:id="@+id/register_input_password"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/login_input_code_et"
-        android:layout_below="@+id/login_input_code_et"
-        android:layout_marginTop="44dp"
-        android:text="注册" />
+        android:hint="@string/register_input_password_text"
+        android:inputType="textPassword"
+        android:importantForAutofill="no"/>
 
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/register_input_code"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/register_input_code_text"
+            android:inputType="textPassword"
+            android:importantForAutofill="no">
+        </EditText>
+
+        <Button
+            android:id="@+id/register_request_code_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/register_request_code_btn_text" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/register_commit_btn"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/register_commit_btn_text" />
+
+</LinearLayout>

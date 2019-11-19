@@ -56,9 +56,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     /**判断是否QQ登陆*/
     private boolean isQQLogin;
     /**手机号输入框*/
-    private EditText inputPhoneEt;
+    private EditText inputPhone;
     /**验证码输入框*/
-    private EditText inputCodeEt;
+    private EditText inputCode;
     /**获取验证码按钮*/
     private Button requestCodeBtn;
     /**注册提交按钮*/
@@ -67,32 +67,42 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void init() {
-        //加载视频资源控件
-        videoview = findViewById(R.id.video_view);
+        //初始化控件
+        initFind();
+        //初始化背景
         initVideo();
         //Tencent类是SDK的主要实现类，开发者可通过Tencent类访问腾讯开放的OpenAPI。
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
         qqLoginListener = new BaseUiListener();
+        //检查本地token
+    }
+
+    /**
+     * 初始化find和click(this)
+     */
+    private void initFind() {
+        //加载视频资源控件
+        videoview = findViewById(R.id.video_view);
         //用户名
         userName = findViewById(R.id.user_name);
         qqLogin = findViewById(R.id.qq_login);
         phoneLogin = findViewById(R.id.phone_login);
         districtService = findViewById(R.id.district_service);
-//        inputPhoneEt = findViewById(R.id.login_input_phone_et);
-//        inputCodeEt = findViewById(R.id.login_input_code_et);
-//        requestCodeBtn = findViewById(R.id.login_request_code_btn);
-//        commitBtn = findViewById(R.id.login_commit_btn);
-//        requestCodeBtn.setOnClickListener(this);
-//        commitBtn.setOnClickListener(this);
-
-        phoneLogin.setOnClickListener(this);
         //注销
         cancellation = findViewById(R.id.cancellation);
+        //开始游戏
+        beginGame = findViewById(R.id.begin_game);
+        //注册
+        inputPhone = findViewById(R.id.register_input_phone);
+        inputCode = findViewById(R.id.register_input_code);
+        requestCodeBtn = findViewById(R.id.register_request_code_btn);
+        commitBtn = findViewById(R.id.register_commit_btn);
+        requestCodeBtn.setOnClickListener(this);
+        commitBtn.setOnClickListener(this);
+        phoneLogin.setOnClickListener(this);
         cancellation.setOnClickListener(this);
         qqLogin.setOnClickListener(this);
-        beginGame = findViewById(R.id.begin_game);
         beginGame.setOnClickListener(this);
-        //检查本地token
     }
 
     /**
@@ -295,17 +305,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         View view = View.inflate(context, R.layout.alert_dialog_register, null);
         registerDialog.setContentView(view);
         // 启动短信验证sdk
-//        SMSSDK.initSDK(this, APPKEY, APPSECRETE);
-//        EventHandler eventHandler = new EventHandler(){
-//            @Override
-//            public void afterEvent(int event, int result, Object data) {
-//                Message msg = new Message();
-//                msg.arg1 = event;
-//                msg.arg2 = result;
-//                msg.obj = data;
-//                handler.sendMessage(msg);
-//            }
-//        };
     }
 
     /**

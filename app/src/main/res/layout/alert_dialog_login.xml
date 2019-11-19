@@ -60,6 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:hint="@string/login_phone_text"
+                android:ems="11"
                 android:textColorHint="#95A1AA"
                 android:singleLine="true"
                 android:inputType="phone"
@@ -109,5 +110,7 @@
         android:id="@+id/alert_login_register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
         android:text="@string/alert_login_register"/>
 </LinearLayout>
