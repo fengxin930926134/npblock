@@ -521,15 +521,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         @Override
         public void onComplete(Object o) {
-            Toast.makeText(context, "onComplete"+o.toString(), Toast.LENGTH_SHORT).show();
-            JSONObject jsonObject = (JSONObject) o;
-            LogUtils.i(TAG, jsonObject.toJSONString());
-            String token;
-            String expiresIn;
-            String uniqueCode;
-            uniqueCode = jsonObject.getString("openid");//QQ的openid
-            token = jsonObject.getString("access_token");
-            expiresIn = jsonObject.getString("expires_in");
+            JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
+            String uniqueCode = jsonObject.getString("openid");//QQ的openid
+            String token = jsonObject.getString("access_token");
+            String expiresIn = jsonObject.getString("expires_in");
             //获取QQ返回的用户信息
             QQToken qqtoken = mTencent.getQQToken();
             mTencent.setOpenId(uniqueCode);
@@ -538,14 +533,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             info.getUserInfo(new IUiListener() {
                 @Override
                 public void onComplete(Object o) {
-                    JSONObject jsonObject = (JSONObject) o;
-                    LogUtils.i(TAG, jsonObject.toJSONString());
+                    JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
+                    LogUtils.i(TAG, "[测试]"+jsonObject.toJSONString());
                     isQQLogin = true;
                 }
 
                 @Override
                 public void onError(UiError uiError) {
                     //失败
+                    LogUtils.i(TAG, uiError.errorMessage);
                 }
 
                 @Override
@@ -562,7 +558,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
         @Override
         public void onCancel() {
-            Toast.makeText(context, "取消登陆", Toast.LENGTH_SHORT).show();
+            LogUtils.i(TAG, "取消登陆");
         }
     }
 }
