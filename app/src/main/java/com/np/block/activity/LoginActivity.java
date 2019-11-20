@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -63,40 +62,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     /**获取验证码按钮*/
     private Button requestCodeBtn;
 
-    /**消息队列*/
-    private Handler handler = new Handler() {
-        public void handleMessage(Message msg) {
-            if (msg.what == -9) {
-                requestCodeBtn.setText("重新发送(" + i + ")");
-            } else if (msg.what == -8) {
-                requestCodeBtn.setText("获取验证码");
-                requestCodeBtn.setClickable(true);
-                i = 30;
-            } else {
-                int event = msg.arg1;
-                int result = msg.arg2;
-                Object data = msg.obj;
-                Log.e("event", "event=" + event);
-                if (result == SMSSDK.RESULT_COMPLETE) {
-                    // 短信注册成功后，返回MainActivity,然后提示
-                    if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {// 提交验证码成功
-                        Toast.makeText(getApplicationContext(), "提交验证码成功",
-                                Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this,
-                                MainActivity.class);
-                        startActivity(intent);
-                    } else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
-                        Toast.makeText(getApplicationContext(), "正在获取验证码",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        ((Throwable) data).printStackTrace();
-                    }
-                }
-            }
-        }
-    };
-    private int i;
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void init() {
@@ -107,6 +72,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //Tencent类是SDK的主要实现类，开发者可通过Tencent类访问腾讯开放的OpenAPI。
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
         qqLoginListener = new BaseUiListener();
+        // 注册mod回调监听接口
+        SMSSDK.registerEventHandler(new EventHandler() {
+            public void afterEvent(int event, int result, Object data) {
+                // afterEvent会在子线程被调用，因此如果后续有UI相关操作，需要将数据发送到UI线程
+                Message msg = new Message();
+                msg.arg1 = event;
+                msg.arg2 = result;
+                msg.obj = data;
+                handler.sendMessage(msg);
+            }
+        });
         //检查本地token
     }
 
@@ -334,69 +310,77 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     private void phoneRegister() {
         AlertDialog registerDialog = DialogUtils.showDialogDefault(context);
+        //初始化注册布局
+        View view = initSendCode();
+        //设置弹窗视图
+        registerDialog.setContentView(view);
+    }
+
+    /**
+     * 给注册布局初始化验证码的全部事件
+     *
+     * @return 注册布局
+     */
+    private View initSendCode() {
         View view = View.inflate(context, R.layout.alert_dialog_register, null);
         //发送验证码按钮
-        requestCodeBtn =  view.findViewById(R.id.register_request_code_btn);
-        TextView register_input_phone = view.findViewById(R.id.register_input_phone);
-        final String phoneNum = register_input_phone.getText().toString();
+        requestCodeBtn = view.findViewById(R.id.register_request_code_btn);
+        final TextView register_input_phone = view.findViewById(R.id.register_input_phone);
         final TextView inputCode = view.findViewById(R.id.register_input_code);
         //提交验证码
         view.findViewById(R.id.register_commit_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String phoneNum = register_input_phone.getText().toString();
                 //将收到的验证码和手机号提交再次核对
                 SMSSDK.submitVerificationCode("86", phoneNum, inputCode
                         .getText().toString());
             }
         });
+
         //发送验证码
         requestCodeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String phoneNum = register_input_phone.getText().toString().trim();
+                LogUtils.i(TAG, phoneNum);
                 // 1. 通过规则判断手机号
                 if (!VerificationUtils.phoneValidate(phoneNum)) {
-                    return;
-                } // 2. 通过sdk发送短信验证
-                SMSSDK.getVerificationCode("86", phoneNum);
-
-                // 3. 把按钮变成不可点击，并且显示倒计时（正在获取）
-                requestCodeBtn.setClickable(false);
-                requestCodeBtn.setText("重新发送(" + i + ")");
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (; i > 0; i--) {
-                            handler.sendEmptyMessage(-9);
-                            if (i <= 0) {
-                                break;
-                            }
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        handler.sendEmptyMessage(-8);
-                    }
-                }).start();
+                    Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "发送验证码"+phoneNum, Toast.LENGTH_SHORT).show();
+                    // 2. 通过sdk请求验证码
+                    SMSSDK.getVerificationCode("86", phoneNum);
+                }
             }
         });
-        //设置弹窗视图
-        registerDialog.setContentView(view);
-        //设置短信验证EventHandler
-        EventHandler eventHandler = new EventHandler(){
-            @Override
-            public void afterEvent(int event, int result, Object data) {
-                Message msg = new Message();
-                msg.arg1 = event;
-                msg.arg2 = result;
-                msg.obj = data;
-                handler.sendMessage(msg);
-            }
-        };
-        // 注册回调监听接口
-        SMSSDK.registerEventHandler(eventHandler);
+        return view;
     }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int event = msg.arg1;
+            int result = msg.arg2;
+            Object data = msg.obj;
+            if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
+                if (result == SMSSDK.RESULT_COMPLETE) {
+                    // 处理成功得到验证码的结果
+                    // 请注意，此时只是完成了发送验证码的请求，验证码短信还需要几秒钟之后才送达
+                } else {
+                    //  处理错误的结果
+                    ((Throwable) data).printStackTrace();
+                }
+            } else if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {
+                if (result == SMSSDK.RESULT_COMPLETE) {
+                    // 处理验证码验证通过的结果
+                } else {
+                    // 处理错误的结果
+                    ((Throwable) data).printStackTrace();
+                }
+            }
+        }
+    };
 
     /**
      * activity回调

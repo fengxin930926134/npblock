@@ -35,8 +35,11 @@ dependencies {
 MobSDK {
     appKey "2cf1d77c5d090"
     appSecret "b98e82a8012cd74aa59af51f1d9df640"
+
     SMSSDK {
-        // 若使用GUI的自动填充验证码功能，需打开此设置
+        //默认使用GUI，若不使用GUI，通过以下开关关闭
+        gui false
+        //若使用GUI的自动填充验证码功能，需打开此设置
 //        autoSMS true
     }
 }
