@@ -1,22 +1,9 @@
 package com.np.block.util;
 
-import java.io.BufferedReader;
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import okhttp3.CertificatePinner;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,8 +20,10 @@ public class OkHttpUtils {
 
     private static OkHttpClient client  = new OkHttpClient();
 
-    public static String post(String url, String json) throws IOException {
-        RequestBody body = RequestBody.create(json, JSON);
+    public static String post(String url, JSONObject json) throws IOException {
+        JSONObject params = new JSONObject();
+        params.put("params", json);
+        RequestBody body = RequestBody.create(params.toJSONString(), JSON);
         Request request = new Request.Builder()
                 .url(ConstUtils.URL + url)
                 .post(body)
