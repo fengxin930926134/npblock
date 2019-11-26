@@ -42,6 +42,16 @@ public class ConstUtils {
     public static final String CHARSET = "UTF-8";
 
     /**
+     * sp 保存token的key值
+     */
+    public static final String SP_TOKEN = "spToken";
+
+    /**
+     * sp 保存token超时时间的key值
+     */
+    public static final String SP_TOKEN_TIME = "spTokenTime";
+
+    /**
      * 请求url
      */
 //    public static final String URL = "http://192.168.10.228:8083";
