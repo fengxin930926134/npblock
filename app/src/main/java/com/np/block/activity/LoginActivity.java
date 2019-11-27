@@ -26,6 +26,7 @@ import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
 import com.np.block.util.OkHttpUtils;
+import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.util.VerificationUtils;
 import com.tencent.connect.UserInfo;
 import com.tencent.connect.auth.QQToken;
@@ -60,8 +61,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     /**腾讯服务*/
     private Tencent mTencent;
     private IUiListener qqLoginListener;
-    /**判断是否QQ登陆*/
-    private boolean isQQLogin;
     /**获取验证码按钮*/
     private Button requestCodeBtn;
     /**传递Message对象*/
@@ -70,6 +69,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static String phone;
     /**暂存密码*/
     private static String password;
+    /**获取QQ登陆的name*/
+    private static String name = null;
     /**注册弹窗*/
     private static AlertDialog registerDialog;
 
@@ -117,9 +118,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         cancellation.setVisibility(View.INVISIBLE);
         beginGame.setVisibility(View.INVISIBLE);
         districtService.setVisibility(View.INVISIBLE);
-        if (isQQLogin){
-            mTencent.logout(this);
-        }
     }
 
     /**
@@ -137,7 +135,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 districtService.setVisibility(View.VISIBLE);
                 qqLogin.setVisibility(View.INVISIBLE);
                 phoneLogin.setVisibility(View.INVISIBLE);
-                alertDialog.cancel();
+                if (alertDialog != null) {
+                    alertDialog.cancel();
+                }
             }
         });
     }
@@ -176,6 +176,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //防止锁屏或者切出的时候，音乐在播放
         videoview.stopPlayback();
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -267,7 +272,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     }else {
                                         JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                         updateUiAfterLogin(rest.getString("name"));
-                                        isQQLogin = false;
+                                        //保存token
+                                        SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
                                     }
                                 }else {
                                     Looper.prepare();
@@ -421,9 +427,24 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        // 回调
         super.onActivityResult(requestCode, resultCode, data);
+        alertDialog = DialogUtils.showDialog(context);
+        // 回调
         Tencent.onActivityResultData(requestCode,resultCode,data,qqLoginListener);
+        //延迟分析回调结果
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (name != null) {
+                    updateUiAfterLogin(name);
+                }else {
+                    Toast.makeText(context, "登陆失败", Toast.LENGTH_SHORT).show();
+                    if (alertDialog != null) {
+                        alertDialog.cancel();
+                    }
+                }
+            }
+        }, 1000);
     }
 
     /**
@@ -477,7 +498,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                             Looper.loop();
                                         }else {
                                             //正确结果
-//                                            JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                             Looper.prepare();
                                             alertDialog.cancel();
                                             registerDialog.cancel();
@@ -522,10 +542,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         @Override
         public void onComplete(Object o) {
             JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
-            String uniqueCode = jsonObject.getString("openid");//QQ的openid
-            String token = jsonObject.getString("access_token");
+            final String uniqueCode = jsonObject.getString("openid");//QQ的openid
+            final String token = jsonObject.getString("access_token");
             String expiresIn = jsonObject.getString("expires_in");
-            //获取QQ返回的用户信息
+            //授权成功
             QQToken qqtoken = mTencent.getQQToken();
             mTencent.setOpenId(uniqueCode);
             mTencent.setAccessToken(token, expiresIn);
@@ -533,32 +553,71 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             info.getUserInfo(new IUiListener() {
                 @Override
                 public void onComplete(Object o) {
-                    JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
-                    LogUtils.i(TAG, "[测试]"+jsonObject.toJSONString());
-                    isQQLogin = true;
+                    try {
+                        //获取用户信息
+                        JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
+//                        name = jsonObject.getString("nickname");
+                        final String nickname = jsonObject.getString("nickname");
+                        //请求login接口
+                        ThreadPoolManager.getInstance().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("openId", uniqueCode);
+                                jsonObject.put("name", nickname);
+                                try {
+                                    String response = OkHttpUtils.post("/user/login", jsonObject);
+                                    JSONObject data = JSONObject.parseObject(response);
+                                    //解析返回数据
+                                    if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                                        data = data.getJSONObject("body");
+                                        if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
+                                            Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
+                                        }else {
+                                            //正确结果
+                                            JSONObject rest = JSONObject.parseObject(data.getString("result"));
+                                            //保存token
+                                            SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
+                                        }
+                                    }else {
+                                        Toast.makeText(context, "请求服务器异常", Toast.LENGTH_SHORT).show();
+                                    }
+                                    updateUiAfterLogin(name);
+                                }catch (Exception e){
+                                    LogUtils.e(TAG, e.getMessage());
+                                    Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }catch (Exception e){
+                        LogUtils.i(TAG, "[错误信息]"+e.getMessage());
+                    }finally {
+                        mTencent.logout(context);
+                    }
                 }
 
                 @Override
                 public void onError(UiError uiError) {
                     //失败
-                    LogUtils.i(TAG, uiError.errorMessage);
+                    LogUtils.i(TAG, "[测试]"+uiError.toString());
                 }
 
                 @Override
                 public void onCancel() {
-                    //取消
+                    //失败
+                    LogUtils.i(TAG, "[测试]取消");
                 }
             });
         }
 
         @Override
         public void onError(UiError e) {
-            Toast.makeText(context, "onError:"+ "code:" + e.errorCode + ", msg:"
-                    + e.errorMessage + ", detail:" + e.errorDetail, Toast.LENGTH_SHORT).show();
+            LogUtils.i(TAG, "[测试]onError:"+ "code:" + e.errorCode + ", msg:"
+                    + e.errorMessage + ", detail:" + e.errorDetail);
         }
         @Override
         public void onCancel() {
-            LogUtils.i(TAG, "取消登陆");
+            LogUtils.i(TAG, "[测试]取消登陆");
         }
     }
 }
