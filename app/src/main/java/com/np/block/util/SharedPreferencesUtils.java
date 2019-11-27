@@ -38,9 +38,14 @@ public class SharedPreferencesUtils {
     public static Map<String, Object> readToken(Context context) {
         Map<String, Object> map = new HashMap<>();
         sp = context.getSharedPreferences(SP_TOKEN, Context.MODE_PRIVATE);
-        map.put(ConstUtils.SP_TOKEN, sp.getString(ConstUtils.SP_TOKEN,null));
-        map.put(ConstUtils.SP_TOKEN_TIME, sp.getString(ConstUtils.SP_TOKEN_TIME,null));
-        return map;
+        String token = sp.getString(ConstUtils.SP_TOKEN, null);
+        long tokenTime = sp.getLong(ConstUtils.SP_TOKEN_TIME, 0);
+        if (token != null && tokenTime != 0) {
+            map.put(ConstUtils.SP_TOKEN, token);
+            map.put(ConstUtils.SP_TOKEN_TIME, tokenTime);
+            return map;
+        }
+        return null;
     }
 
     /**私有化构造方法*/

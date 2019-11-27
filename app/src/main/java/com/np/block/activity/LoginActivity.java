@@ -35,6 +35,7 @@ import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
 import org.jetbrains.annotations.NotNull;
 import java.lang.ref.WeakReference;
+import java.util.Map;
 
 /**
  * 登陆和更新
@@ -84,7 +85,22 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //Tencent类是SDK的主要实现类，开发者可通过Tencent类访问腾讯开放的OpenAPI。
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
         qqLoginListener = new BaseUiListener();
+        tokenLogin();
+    }
+
+    /**
+     * token登陆
+     */
+    private void tokenLogin() {
         //检查本地token
+        Map<String, Object> map = SharedPreferencesUtils.readToken(context);
+        if (map != null) {
+            Object o = map.get(ConstUtils.SP_TOKEN_TIME);
+            if (o instanceof Long && System.currentTimeMillis() < (Long) o){
+                //执行token登陆
+                LogUtils.i(TAG, "[测试] 获取到了" + o);
+            }
+        }
     }
 
     /**
