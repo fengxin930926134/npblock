@@ -34,6 +34,8 @@ import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
@@ -95,10 +97,41 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //检查本地token
         Map<String, Object> map = SharedPreferencesUtils.readToken(context);
         if (map != null) {
-            Object o = map.get(ConstUtils.SP_TOKEN_TIME);
-            if (o instanceof Long && System.currentTimeMillis() < (Long) o){
+            final Object o = map.get(ConstUtils.SP_TOKEN_TIME);
+            if (o instanceof Long){
+                final Object token = map.get(ConstUtils.SP_TOKEN);
                 //执行token登陆
-                LogUtils.i(TAG, "[测试] 获取到了" + o);
+                ThreadPoolManager.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("token", token);
+                        jsonObject.put("tokenTime", o);
+                        try {
+                            String response = OkHttpUtils.post("/user/login", jsonObject);
+                            JSONObject data = JSONObject.parseObject(response);
+                            //解析返回数据
+                            if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                                data = data.getJSONObject("body");
+                                if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
+                                    Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
+                                }else {
+                                    //正确结果
+                                    JSONObject rest = JSONObject.parseObject(data.getString("result"));
+                                    //保存token
+                                    SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
+                                    //更新ui
+                                    updateUiAfterLogin(rest.getString("name"));
+                                }
+                            }else {
+                                Toast.makeText(context, "请求服务器异常", Toast.LENGTH_SHORT).show();
+                            }
+                        }catch (Exception e){
+                            LogUtils.e(TAG, e.getMessage());
+                            Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         }
     }
@@ -590,6 +623,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                         if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                             Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                         }else {
+                                            name = nickname;
                                             //正确结果
                                             JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                             //保存token
@@ -598,7 +632,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     }else {
                                         Toast.makeText(context, "请求服务器异常", Toast.LENGTH_SHORT).show();
                                     }
-                                    updateUiAfterLogin(name);
                                 }catch (Exception e){
                                     LogUtils.e(TAG, e.getMessage());
                                     Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
