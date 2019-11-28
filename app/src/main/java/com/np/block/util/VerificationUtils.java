@@ -23,7 +23,7 @@ public class VerificationUtils {
      * @param phoneNum 手机号
      * @return boolean
      */
-    public static boolean phoneValidate(String phoneNum){
+    public static boolean validatePhone(String phoneNum){
         if(phoneNum.length() != PHONE_NUM) {
             return false;
         }
@@ -43,9 +43,20 @@ public class VerificationUtils {
      */
     public static boolean validatePwd(String pwd) {
         if (TextUtils.isEmpty(pwd)){
-            return Boolean.FALSE;
+            return false;
         }
         return Pattern.matches(PASSWORD_PATTERN, pwd);
+    }
+
+    /**
+     * 验证昵称
+     * @param name 昵称
+     * @return boolean
+     */
+    public static boolean validateName(String name) {
+        if (TextUtils.isEmpty(name)){
+            return false;
+        }else return !name.contains(" ");
     }
 
     private VerificationUtils() {}

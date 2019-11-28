@@ -48,6 +48,18 @@ public class SharedPreferencesUtils {
         return null;
     }
 
+    /**
+     * 清理token
+     * @param context 上下文
+     * @return boolean
+     */
+    public static boolean clearToken(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(SP_TOKEN, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        return editor.commit();
+    }
+
     /**私有化构造方法*/
     private SharedPreferencesUtils(){
     }

@@ -70,7 +70,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static String phone;
     /**暂存密码*/
     private static String password;
-    /**获取QQ登陆的name*/
+    /**获取QQ登陆的name || 手机注册name暂存*/
     private static String name = null;
     /**注册弹窗*/
     private static AlertDialog registerDialog;
@@ -99,6 +99,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             if (o instanceof Long){
                 final Object token = map.get(ConstUtils.SP_TOKEN);
                 //执行token登陆
+                alertDialog = DialogUtils.showDialog(context);
                 ThreadPoolManager.getInstance().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -117,7 +118,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     //正确结果
                                     JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                     //保存token
-                                    SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
+                                    if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                        LogUtils.i(TAG, "[SP] token保存失败");
+                                    }
                                     //更新ui
                                     updateUiAfterLogin(rest.getString("name"));
                                 }
@@ -125,8 +128,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
-                            LogUtils.e(TAG, e.getMessage());
-                            Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                            LogUtils.e(TAG,"[token登陆]" + e.getMessage());
+                        }finally {
+                            if (alertDialog != null) {
+                                alertDialog.cancel();
+                            }
                         }
                     }
                 });
@@ -165,6 +171,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         cancellation.setVisibility(View.INVISIBLE);
         beginGame.setVisibility(View.INVISIBLE);
         districtService.setVisibility(View.INVISIBLE);
+        //清除token
+        if (!SharedPreferencesUtils.clearToken(context)){
+            LogUtils.i(TAG, "[SP] token清理失败");
+        }
     }
 
     /**
@@ -295,7 +305,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 EditText password = view.findViewById(R.id.password);
                 EditText phone = view.findViewById(R.id.phone_number);
                 //验证手机号和密码
-                if (VerificationUtils.phoneValidate(phone.getText().toString())){
+                if (VerificationUtils.validatePhone(phone.getText().toString())){
                     //关闭弹窗
                     loginDialog.cancel();
                     //打开小圆圈 请求服务器
@@ -321,7 +331,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                         JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                         updateUiAfterLogin(rest.getString("name"));
                                         //保存token
-                                        SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
+                                        if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                            LogUtils.i(TAG, "[SP] token保存失败");
+                                        }
                                     }
                                 }else {
                                     Looper.prepare();
@@ -391,6 +403,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         });
         //发送验证码按钮
         requestCodeBtn = view.findViewById(R.id.register_request_code_btn);
+        final EditText register_input_name = view.findViewById(R.id.register_input_name);
         final EditText register_input_phone = view.findViewById(R.id.register_input_phone);
         final EditText inputCode = view.findViewById(R.id.register_input_code);
         final EditText register_input_password = view.findViewById(R.id.register_input_password);
@@ -400,7 +413,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void onClick(View v) {
                 String phoneNum = register_input_phone.getText().toString().trim();
                 String passWord = register_input_password.getText().toString().trim();
-                if (!VerificationUtils.phoneValidate(phoneNum)) {
+                String nameText = register_input_name.getText().toString();
+                if (!VerificationUtils.validateName(nameText)){
+                    Toast.makeText(context, "昵称格式不正确", Toast.LENGTH_SHORT).show();
+                }else if (!VerificationUtils.validatePhone(phoneNum)) {
                     Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
                 } else if (!VerificationUtils.validatePwd(passWord)) {
                     // 判断密码正确性
@@ -413,6 +429,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     SMSSDK.submitVerificationCode("86", phoneNum, inputCode
                             .getText().toString());
                     //暂存
+                    name =  nameText;
                     phone = phoneNum;
                     password = passWord;
                 }
@@ -426,7 +443,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 String phoneNum = register_input_phone.getText().toString().trim();
                 LogUtils.i(TAG, phoneNum);
                 // 1. 通过规则判断手机号
-                if (!VerificationUtils.phoneValidate(phoneNum)) {
+                if (!VerificationUtils.validatePhone(phoneNum)) {
                     Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
                 } else {
                     // 2. 通过sdk请求验证码
@@ -537,6 +554,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             @Override
                             public void run() {
                                 JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("name", name);
                                 jsonObject.put("phone", phone);
                                 jsonObject.put("password", password);
                                 try {
@@ -633,7 +651,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                             name = nickname;
                                             JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                             //保存token
-                                            SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
+                                            if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                                LogUtils.i(TAG, "[SP] token保存失败");
+                                            }
                                         }
                                     }else {
                                         Looper.prepare();

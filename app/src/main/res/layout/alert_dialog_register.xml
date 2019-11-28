@@ -36,6 +36,14 @@
             android:contentDescription="@string/alert_login_finish_text" />
     </RelativeLayout>
 
+    <EditText
+        android:id="@+id/register_input_name"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:ems="8"
+        android:hint="@string/register_input_name_text"
+        android:inputType="text"
+        android:importantForAutofill="no"/>
 
     <EditText
         android:id="@+id/register_input_phone"

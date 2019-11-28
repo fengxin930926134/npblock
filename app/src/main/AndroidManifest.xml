@@ -41,7 +41,8 @@
         <activity android:name="com.np.block.activity.LoginActivity"
             android:screenOrientation="sensorLandscape"/>
         <!-- 主界面activity注册 -->
-        <activity android:name="com.np.block.activity.MainActivity"/>
+        <activity android:name="com.np.block.activity.MainActivity"
+            android:screenOrientation="sensorLandscape"/>
         <!-- 腾讯 -->
         <activity
             android:name="com.tencent.tauth.AuthActivity"
