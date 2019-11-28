@@ -47,15 +47,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private VideoView videoview;
     /**圆圈弹窗*/
     private AlertDialog alertDialog;
-    /**登陆后名字*/
+    /**登录后名字*/
     private TextView userName;
     /**注销按钮*/
     private Button cancellation;
     /**开始游戏按钮*/
     private Button beginGame;
-    /**手机登陆按钮*/
+    /**手机登录按钮*/
     private Button phoneLogin;
-    /**QQ登陆按钮*/
+    /**QQ登录按钮*/
     private Button qqLogin;
     /** 区服 */
     private TextView districtService;
@@ -70,8 +70,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static String phone;
     /**暂存密码*/
     private static String password;
-    /**获取QQ登陆的name || 手机注册name暂存*/
+    /**获取QQ登录的name || 手机注册name暂存*/
     private static String name = null;
+    /**获取QQ登录的openId*/
+    private static String openId;
+    /**是否取消登录 false取消*/
+    private static boolean flag = true;
     /**注册弹窗*/
     private static AlertDialog registerDialog;
 
@@ -269,6 +273,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     private void loginForQQ(){
         name = null;
+        flag = true;
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
         if (!mTencent.isSessionValid())
         {
@@ -492,29 +497,77 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        alertDialog = DialogUtils.showDialog(context);
-        ThreadPoolManager.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    if (name != null) {
-                        if (name.equals("")){
+        // 回调
+        if (Tencent.onActivityResultData(requestCode, resultCode, data, qqLoginListener)){
+            if (flag){
+                alertDialog = DialogUtils.showDialog(context);
+                //请求login接口  通过线程休眠来保证能获取到name 但并不是一个好的解决办法
+                ThreadPoolManager.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int number = 40;
+                        while (name == null) {
+                            number --;
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            if (number <= 0){
+                                break;
+                            }
+                        }
+                        if (number > 0){
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("openId", openId);
+                            jsonObject.put("name", name);
+                            try {
+                                String response = OkHttpUtils.post("/user/login", jsonObject);
+                                JSONObject data = JSONObject.parseObject(response);
+                                //解析返回数据
+                                if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                                    data = data.getJSONObject("body");
+                                    if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
+                                        Looper.prepare();
+                                        Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
+                                        Looper.loop();
+                                    }else {
+                                        JSONObject rest = JSONObject.parseObject(data.getString("result"));
+                                        //保存token
+                                        if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                            LogUtils.i(TAG, "[SP] token保存失败");
+                                        }
+                                        updateUiAfterLogin(name);
+                                    }
+                                }else {
+                                    Looper.prepare();
+                                    Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                    Looper.loop();
+                                }
+                            }catch (Exception e){
+                                LogUtils.e(TAG, e.getMessage());
+                            }finally {
+                                if (alertDialog != null) {
+                                    alertDialog.cancel();
+                                }
+                            }
+                        }else {
                             Looper.prepare();
-                            Toast.makeText(context, "登陆失败", Toast.LENGTH_SHORT).show();
                             if (alertDialog != null) {
                                 alertDialog.cancel();
                             }
+                            Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
                             Looper.loop();
-                        }else {
-                            updateUiAfterLogin(name);
                         }
-                        break;
                     }
-                }
+                });
             }
-        });
-        // 回调
-        Tencent.onActivityResultData(requestCode, resultCode, data, qqLoginListener);
+        }else {
+            Toast.makeText(context, "授权失败", Toast.LENGTH_SHORT).show();
+            if (alertDialog != null) {
+                alertDialog.cancel();
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -613,91 +666,56 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         @Override
         public void onComplete(Object o) {
-            JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
-            final String uniqueCode = jsonObject.getString("openid");//QQ的openid
-            final String token = jsonObject.getString("access_token");
-            String expiresIn = jsonObject.getString("expires_in");
-            //授权成功
-            QQToken qqtoken = mTencent.getQQToken();
-            mTencent.setOpenId(uniqueCode);
-            mTencent.setAccessToken(token, expiresIn);
-            UserInfo info = new UserInfo(getApplicationContext(), qqtoken);
-            info.getUserInfo(new IUiListener() {
-                @Override
-                public void onComplete(Object o) {
-                    try {
+            try {
+                JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
+                openId = jsonObject.getString("openid");//QQ的openid
+                final String token = jsonObject.getString("access_token");
+                String expiresIn = jsonObject.getString("expires_in");
+                //授权成功
+                QQToken qqtoken = mTencent.getQQToken();
+                mTencent.setOpenId(openId);
+                mTencent.setAccessToken(token, expiresIn);
+                UserInfo info = new UserInfo(getApplicationContext(), qqtoken);
+                info.getUserInfo(new IUiListener() {
+                    @Override
+                    public void onComplete(Object o) {
                         //获取用户信息
                         JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
-                        final String nickname = jsonObject.getString("nickname");
-                        //请求login接口
-                        ThreadPoolManager.getInstance().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("openId", uniqueCode);
-                                jsonObject.put("name", nickname);
-                                try {
-                                    String response = OkHttpUtils.post("/user/login", jsonObject);
-                                    JSONObject data = JSONObject.parseObject(response);
-                                    //解析返回数据
-                                    if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                        data = data.getJSONObject("body");
-                                        if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                            Looper.prepare();
-                                            Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                                            Looper.loop();
-                                        }else {
-                                            //正确结果
-                                            name = nickname;
-                                            JSONObject rest = JSONObject.parseObject(data.getString("result"));
-                                            //保存token
-                                            if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
-                                                LogUtils.i(TAG, "[SP] token保存失败");
-                                            }
-                                        }
-                                    }else {
-                                        Looper.prepare();
-                                        Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
-                                        Looper.loop();
-                                    }
-                                }catch (Exception e){
-                                    LogUtils.e(TAG, e.getMessage());
-                                }finally {
-                                    if (name == null){
-                                        name = "";
-                                    }
-                                }
-                            }
-                        });
-                    }catch (Exception e){
-                        LogUtils.i(TAG, "[QQ]"+e.getMessage());
-                    }finally {
-                        mTencent.logout(context);
+                        name = jsonObject.getString("nickname");
                     }
-                }
 
-                @Override
-                public void onError(UiError uiError) {
-                    //失败
-                    LogUtils.i(TAG, "[QQ]"+uiError.toString());
-                }
+                    @Override
+                    public void onError(UiError uiError) {
+                        //失败
+                        flag = false;
+                        LogUtils.i(TAG, "[QQ]"+uiError.toString());
+                    }
 
-                @Override
-                public void onCancel() {
-                    //失败
-                    LogUtils.i(TAG, "[QQ]取消");
-                }
-            });
+                    @Override
+                    public void onCancel() {
+                        //失败
+                        flag = false;
+                        LogUtils.i(TAG, "[QQ]取消");
+                    }
+                });
+            }catch (Exception e){
+                LogUtils.i(TAG, "[QQ]"+e.getMessage());
+            }finally {
+                mTencent.logout(context);
+            }
         }
 
         @Override
         public void onError(UiError e) {
-            LogUtils.i(TAG, "[QQ登陆出错] onError:"+ "code:" + e.errorCode + ", msg:"
+            flag = false;
+            Toast.makeText(context, "登录错误", Toast.LENGTH_SHORT).show();
+            LogUtils.i(TAG, "[QQ] 登录出错 onError:"+ "code:" + e.errorCode + ", msg:"
                     + e.errorMessage + ", detail:" + e.errorDetail);
         }
         @Override
         public void onCancel() {
-            LogUtils.i(TAG, "[QQ]取消登陆");
+            flag = false;
+            LogUtils.i(TAG, "[QQ]取消登录");
         }
     }
 }
