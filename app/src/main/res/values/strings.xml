@@ -11,7 +11,7 @@
     <string name="alert_login_btn_text">登陆</string>
     <string name="login_phone_text">手机号</string>
     <string name="password_text">密码</string>
-    <string name="classic_tetris">经典俄罗斯方块</string>
+    <string name="classic_block_text">经典模式</string>
     <string name="alert_login_register">注册</string>
     <string name="alert_register_title_text">注册</string>
     <string name="register_input_phone_text">请输入手机号</string>
@@ -20,4 +20,6 @@
     <string name="register_request_code_btn_text">获取验证码</string>
     <string name="register_commit_btn_text">注册</string>
     <string name="register_input_name_text">请输入昵称</string>
+    <string name="barrier_block_text">闯关模式</string>
+    <string name="rank_block_text">排位模式</string>
 </resources>
