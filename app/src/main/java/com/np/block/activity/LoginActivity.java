@@ -34,8 +34,6 @@ import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
@@ -124,7 +122,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     updateUiAfterLogin(rest.getString("name"));
                                 }
                             }else {
-                                Toast.makeText(context, "请求服务器异常", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
                             LogUtils.e(TAG, e.getMessage());
@@ -260,6 +258,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * QQ登陆启动
      */
     private void loginForQQ(){
+        name = null;
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
         if (!mTencent.isSessionValid())
         {
@@ -476,24 +475,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         alertDialog = DialogUtils.showDialog(context);
-        // 回调
-        Tencent.onActivityResultData(requestCode,resultCode,data,qqLoginListener);
-        //延迟分析回调结果
-        mHandler.postDelayed(new Runnable() {
+        ThreadPoolManager.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                if (name != null) {
-                    updateUiAfterLogin(name);
-                }else {
-                    Toast.makeText(context, "登陆失败", Toast.LENGTH_SHORT).show();
-                    if (alertDialog != null) {
-                        alertDialog.cancel();
+                while (true) {
+                    if (name != null) {
+                        if (name.equals("")){
+                            Looper.prepare();
+                            Toast.makeText(context, "登陆失败", Toast.LENGTH_SHORT).show();
+                            if (alertDialog != null) {
+                                alertDialog.cancel();
+                            }
+                            Looper.loop();
+                        }else {
+                            updateUiAfterLogin(name);
+                        }
+                        break;
                     }
                 }
             }
-        }, 1000);
+        });
+        // 回调
+        Tencent.onActivityResultData(requestCode, resultCode, data, qqLoginListener);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -556,7 +561,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     }else {
                                         Looper.prepare();
                                         alertDialog.cancel();
-                                        Toast.makeText(activity, "请求服务器异常", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(activity, "请检查网络后重试", Toast.LENGTH_SHORT).show();
                                         Looper.loop();
                                     }
                                 }catch (Exception e){
@@ -605,7 +610,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     try {
                         //获取用户信息
                         JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
-//                        name = jsonObject.getString("nickname");
                         final String nickname = jsonObject.getString("nickname");
                         //请求login接口
                         ThreadPoolManager.getInstance().execute(new Runnable() {
@@ -621,25 +625,32 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
                                         data = data.getJSONObject("body");
                                         if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
+                                            Looper.prepare();
                                             Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
+                                            Looper.loop();
                                         }else {
-                                            name = nickname;
                                             //正确结果
+                                            name = nickname;
                                             JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                             //保存token
                                             SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"));
                                         }
                                     }else {
-                                        Toast.makeText(context, "请求服务器异常", Toast.LENGTH_SHORT).show();
+                                        Looper.prepare();
+                                        Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                        Looper.loop();
                                     }
                                 }catch (Exception e){
                                     LogUtils.e(TAG, e.getMessage());
-                                    Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                                }finally {
+                                    if (name == null){
+                                        name = "";
+                                    }
                                 }
                             }
                         });
                     }catch (Exception e){
-                        LogUtils.i(TAG, "[错误信息]"+e.getMessage());
+                        LogUtils.i(TAG, "[QQ]"+e.getMessage());
                     }finally {
                         mTencent.logout(context);
                     }
@@ -648,25 +659,25 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 @Override
                 public void onError(UiError uiError) {
                     //失败
-                    LogUtils.i(TAG, "[测试]"+uiError.toString());
+                    LogUtils.i(TAG, "[QQ]"+uiError.toString());
                 }
 
                 @Override
                 public void onCancel() {
                     //失败
-                    LogUtils.i(TAG, "[测试]取消");
+                    LogUtils.i(TAG, "[QQ]取消");
                 }
             });
         }
 
         @Override
         public void onError(UiError e) {
-            LogUtils.i(TAG, "[测试]onError:"+ "code:" + e.errorCode + ", msg:"
+            LogUtils.i(TAG, "[QQ登陆出错] onError:"+ "code:" + e.errorCode + ", msg:"
                     + e.errorMessage + ", detail:" + e.errorDetail);
         }
         @Override
         public void onCancel() {
-            LogUtils.i(TAG, "[测试]取消登陆");
+            LogUtils.i(TAG, "[QQ]取消登陆");
         }
     }
 }
