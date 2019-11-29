@@ -45,6 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         // 设置view
         setContentView(layoutId);
+        setOverridePendingTransition();
         ActivityManager.getInstance().addActivity(this);
         init();
     }
@@ -53,6 +54,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
         ActivityManager.getInstance().removeActivity(this);
+    }
+
+    /**
+     * 设置activity的切换效果
+     */
+    public void setOverridePendingTransition() {
+        // 设置activity的切换效果为无
+        overridePendingTransition( 0,0);
     }
 
     /**
