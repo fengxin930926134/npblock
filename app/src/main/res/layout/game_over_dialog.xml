@@ -30,34 +30,24 @@
            android:layout_height="match_parent">
 
            <Button
-               android:id="@+id/homepage"
+               android:id="@+id/homepageOver"
                style="@android:style/Widget.Holo.Button.Toggle"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:layout_centerInParent="true"
-               android:layout_toStartOf="@+id/refresh"
-               android:layout_marginRight="15dp"
-               android:text="主页"
-               />
-
+               android:layout_alignParentLeft="true"
+               android:layout_centerVertical="true"
+               android:layout_marginLeft="60dp"
+               android:text="主页" />
            <Button
-               android:id="@+id/refresh"
+               android:id="@+id/refreshOver"
                style="@android:style/Widget.Holo.Button.Toggle"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_centerInParent="true"
-               android:text="刷新" />
-           <Button
-               android:id="@+id/keepGame"
-               style="@android:style/Widget.Holo.Button.Toggle"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_centerInParent="true"
-               android:layout_toEndOf="@+id/refresh"
-               android:layout_marginLeft="15dp"
-               android:text="继续游戏"
+               android:layout_toEndOf="@+id/homepageOver"
+               android:layout_marginLeft="10dp"
+               android:text="刷新重来"
                />
-
        </RelativeLayout>
 
         <!--分割线-->

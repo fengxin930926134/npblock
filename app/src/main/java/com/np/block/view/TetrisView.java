@@ -106,7 +106,12 @@ public class TetrisView extends View {
         tetrisCoord = tetris.getTetris();
         // 新建下一个俄罗斯方块
         nextTetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, 0, 0);
-        invalidate();
+        father.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+            }
+        });
     }
 
     /**
@@ -189,10 +194,20 @@ public class TetrisView extends View {
         if (ControlTetrisUtils.canMoveDown(tetrisCoord, allUnitBlock)) {
             ControlTetrisUtils.toDown(tetrisCoord);
             tetris.setY(tetris.getY() + UnitBlock.BLOCK_SIZE);
-            invalidate();
+            father.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    invalidate();
+                }
+            });
             return true;
         }
-        invalidate();
+        father.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+            }
+        });
         return false;
     }
 
@@ -200,7 +215,7 @@ public class TetrisView extends View {
      * 俄罗斯方块旋转
      */
     public void toRotate() {
-        ControlTetrisUtils.toRotate(tetris);
+        ControlTetrisUtils.toRotate(tetris, allUnitBlock);
         invalidate();
     }
 
@@ -240,10 +255,9 @@ public class TetrisView extends View {
                     // 加分 等级乘方块数乘10
                     ((GameActivity) father).score.setText(Integer.parseInt(((GameActivity) father).score.getText().toString()) + COLUMN_NUM*10 + "");
                     // 设置 消除行数
-                    ((GameActivity) father).rowNum.setText(Integer.parseInt(((GameActivity) father).score.getText().toString()) + 1 + "");
+                    ((GameActivity) father).rowNum.setText(Integer.parseInt(((GameActivity) father).rowNum.getText().toString()) + 1 + "");
                 }
             });
-            invalidate();
         }
     }
 
@@ -274,6 +288,19 @@ public class TetrisView extends View {
     }
 
     /**
+     * 判断游戏是否结束
+     * @return true结束 false不结束
+     */
+    private static boolean isGameOver(List<UnitBlock> tetrisCoord) {
+        for (int i = 0; i < tetrisCoord.size(); i++) {
+            if (tetrisCoord.get(i).getY() <= BEGIN_LEN_Y ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 下落的线程
      */
     private class DownRunnable implements Runnable {
@@ -283,6 +310,18 @@ public class TetrisView extends View {
             while (beginGame) {
                 if (runningStatus) {
                     if (!toDown()) {
+                        // 如果方块超出则结束游戏
+                        if (isGameOver(tetrisCoord)){
+                            // 创建游戏结束的弹窗
+                            father.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ((GameActivity)father).createGameOverDialog();
+                                }
+                            });
+                            break;
+                        }
+                        // 重新给每行方块数赋值为0 然后重新计算每行方块数
                         Arrays.fill(tetrisRowNum, 0);
                         // 把已经固定的俄罗斯方块加入总方块
                         for (int i = 0; i < tetrisCoord.size(); i++) {

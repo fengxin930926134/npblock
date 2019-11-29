@@ -1,5 +1,6 @@
 package com.np.block.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,6 +26,8 @@ public class NextTetrisView extends View {
     private static Paint paintBlock = null;
     // 下一个俄罗斯方块
     private Tetris nextTetris = null;
+    // 调用此对象的Activity对象
+    private Activity father = null;
 
     public NextTetrisView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -43,12 +46,26 @@ public class NextTetrisView extends View {
     }
 
     /**
+     * 设置当前游戏页面的父类activity
+     *
+     * @param activity
+     */
+    public void setFather(Activity activity) {
+        this.father = activity;
+    }
+
+    /**
      * 设置下一个俄罗斯方块
      * @param nextTetris
      */
     public void setNextTetris(Tetris nextTetris) {
         this.nextTetris = nextTetris;
-        invalidate();
+        father.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+            }
+        });
     }
 
     @Override

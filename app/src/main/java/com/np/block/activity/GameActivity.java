@@ -38,7 +38,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
     // 下落按钮
     private Button down;
     // 暂停对话框
-    private AlertDialog dialog;
+    private AlertDialog dialog = null;
+    // 游戏结束对话框
+    private AlertDialog dialogOver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,7 @@ public class GameActivity extends Activity implements View.OnClickListener {
         rotate.setOnClickListener(this);
         // 设置视图对象的父类
         tetrisView.setFather(this);
+        nextTetrisView.setFather(this);
         // 暂停 tetrisView.startOrPauseDownThread();
         // 开始游戏时设置一次下一个方块视图
         setNextTetrisView();
@@ -73,22 +76,45 @@ public class GameActivity extends Activity implements View.OnClickListener {
     /**
      * 给下一个方块视图重新生成新方块
      */
-    public void setNextTetrisView() {
+    public void setNextTetrisView () {
         nextTetrisView.setNextTetris(tetrisView.getNextTetrisViewTetris());
+    }
+
+    /**
+     * 创建游戏结束的弹窗
+     */
+    public void createGameOverDialog () {
+        // 创建对话框构建器
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // 获取布局
+        View view = View.inflate(GameActivity.this,R.layout.game_over_dialog,null);
+        // 获取布局中的控件
+        Button homepageOver = view.findViewById(R.id.homepageOver);
+        Button refreshOver = view.findViewById(R.id.refreshOver);
+        // 设置对话框参数
+        builder.setTitle("游戏失败！").setIcon(R.drawable.ic_launcher_foreground)
+                .setView(view);
+        // 创建对话框
+        dialogOver = builder.create();
+        dialogOver.setCanceledOnTouchOutside(false);
+        // 设置按钮单击事件
+        homepageOver.setOnClickListener(this);
+        refreshOver.setOnClickListener(this);
+        dialogOver.show();
     }
 
     /**
      * 创建暂停时的弹窗
      */
-    private void createPauseDialog() {
+    private void createPauseDialog () {
         // 创建对话框构建器
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // 获取布局
         View view = View.inflate(GameActivity.this,R.layout.game_pause_dialog,null);
         // 获取布局中的控件
-        ImageButton homepage = view.findViewById(R.id.homepage);
-        ImageButton refresh = view.findViewById(R.id.refresh);
-        ImageButton keepGame = view.findViewById(R.id.keepGame);
+        Button homepage = view.findViewById(R.id.homepage);
+        Button refresh = view.findViewById(R.id.refresh);
+        Button keepGame = view.findViewById(R.id.keepGame);
         // 设置对话框参数
         builder.setTitle("请选择你的操作").setIcon(R.drawable.ic_launcher_foreground)
                 .setView(view);
@@ -107,7 +133,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
-            createPauseDialog();
+            if (dialog == null) {
+                createPauseDialog();
+            }
             tetrisView.startOrPauseDownThread();
             dialog.show();
         }
@@ -125,11 +153,11 @@ public class GameActivity extends Activity implements View.OnClickListener {
             case R.id.right : tetrisView.toRight(); break;
             case R.id.down : tetrisView.toDown(); break;
             case R.id.rotate : tetrisView.toRotate(); break;
-            case R.id.homepage : tetrisView.colseDownThread(); dialog.dismiss(); finish(); break;
-            case R.id.refresh : tetrisView.colseDownThread(); dialog.dismiss(); setResult(RESULT_OK); finish(); break;
+            case R.id.homepage : tetrisView.colseDownThread(); dialog.dismiss();  finish(); break;
+            case R.id.refresh : tetrisView.colseDownThread(); dialog.dismiss();   setResult(RESULT_OK); finish(); break;
             case R.id.keepGame : dialog.dismiss(); tetrisView.startOrPauseDownThread(); break;
-            default:
-                Toast.makeText(this, "尚未实现", Toast.LENGTH_SHORT).show();
+            case R.id.homepageOver : dialogOver.dismiss(); finish(); break;
+            case R.id.refreshOver : dialogOver.dismiss(); setResult(RESULT_OK); finish(); break;
         }
     }
 }

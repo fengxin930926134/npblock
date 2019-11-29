@@ -10,7 +10,7 @@ public class Tetris {
     // 俄罗斯方块类型总和
     private static final int TYPES = 7;
     // 俄罗斯方块的单位方块个数
-    private static final int TETRIS_NUMBER = 4;
+    public static final int TETRIS_NUMBER = 4;
     // 方块下落的速度
     public static final int SPEED = 1000;
     // 俄罗斯方块种类
@@ -21,9 +21,6 @@ public class Tetris {
     private int x,  y;
     // 俄罗斯方块
     private List<UnitBlock> tetris;
-
-    public Tetris() {
-    }
 
     public Tetris(int x, int y, int blockType,int color) {
         this.x = x;

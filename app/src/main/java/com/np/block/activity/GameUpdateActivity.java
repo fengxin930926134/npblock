@@ -37,7 +37,7 @@ public class GameUpdateActivity extends BaseActivity {
                 updateUi("开始更新游戏...", "0%", 0);
                 do {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
