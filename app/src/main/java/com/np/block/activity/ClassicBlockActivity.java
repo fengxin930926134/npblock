@@ -1,20 +1,20 @@
 package com.np.block.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.os.Bundle;
+import android.content.DialogInterface;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.np.block.R;
+import com.np.block.base.BaseActivity;
+import com.np.block.core.manager.ActivityManager;
+import com.np.block.util.DialogUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.TetrisView;
 
-public class GameActivity extends Activity implements View.OnClickListener {
+public class ClassicBlockActivity extends BaseActivity implements View.OnClickListener {
     // 设定GameActivity的code标识为1
     public static final int CODE = 1;
     // 自定义的俄罗斯方块视图
@@ -43,16 +43,14 @@ public class GameActivity extends Activity implements View.OnClickListener {
     private AlertDialog dialogOver = null;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
+    public void init() {
         // 获取对应的视图对象
         tetrisView = findViewById(R.id.tetrisView);
         nextTetrisView = findViewById(R.id.nextTetrisView);
         score = findViewById(R.id.score);
         grade = findViewById(R.id.grade);
-        rowNum = findViewById(R.id.rowNum);
-        maxScore = findViewById(R.id.maxScore);
+        rowNum = findViewById(R.id.row_num);
+        maxScore = findViewById(R.id.max_score);
         // 获取按钮对象
         left = findViewById(R.id.left);
         right = findViewById(R.id.right);
@@ -73,6 +71,11 @@ public class GameActivity extends Activity implements View.OnClickListener {
         tetrisView.startDownThread();
     }
 
+    @Override
+    public int getContentView() {
+        return R.layout.activity_classic_block;
+    }
+
     /**
      * 给下一个方块视图重新生成新方块
      */
@@ -83,34 +86,35 @@ public class GameActivity extends Activity implements View.OnClickListener {
     /**
      * 创建游戏结束的弹窗
      */
-    public void createGameOverDialog () {
-        // 创建对话框构建器
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // 获取布局
-        View view = View.inflate(GameActivity.this,R.layout.game_over_dialog,null);
-        // 获取布局中的控件
-        Button homepageOver = view.findViewById(R.id.homepageOver);
-        Button refreshOver = view.findViewById(R.id.refreshOver);
-        // 设置对话框参数
-        builder.setTitle("游戏失败！").setIcon(R.drawable.ic_launcher_foreground)
-                .setView(view);
-        // 创建对话框
-        dialogOver = builder.create();
-        dialogOver.setCanceledOnTouchOutside(false);
-        // 设置按钮单击事件
-        homepageOver.setOnClickListener(this);
-        refreshOver.setOnClickListener(this);
-        dialogOver.show();
+    public void startGameOverDialog() {
+        DialogUtils.showDialog(context, "游戏结束", "别灰心，再来一次就成功！",
+                "退出", "重来", false, false,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        finish();
+                        ActivityManager.getInstance().removeActivity(ClassicBlockActivity.this);
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        setResult(RESULT_OK); finish();
+                        ActivityManager.getInstance().removeActivity(ClassicBlockActivity.this);
+                    }
+                });
     }
 
     /**
      * 创建暂停时的弹窗
      */
-    private void createPauseDialog () {
+    private void startPauseDialog() {
         // 创建对话框构建器
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // 获取布局
-        View view = View.inflate(GameActivity.this,R.layout.game_pause_dialog,null);
+        View view = View.inflate(ClassicBlockActivity.this,R.layout.game_pause_dialog,null);
         // 获取布局中的控件
         Button homepage = view.findViewById(R.id.homepage);
         Button refresh = view.findViewById(R.id.refresh);
@@ -134,12 +138,12 @@ public class GameActivity extends Activity implements View.OnClickListener {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
             if (dialog == null) {
-                createPauseDialog();
+                startPauseDialog();
             }
             tetrisView.startOrPauseDownThread();
             dialog.show();
         }
-        return super.onKeyDown(keyCode, event);
+        return true;
     }
 
     /**
@@ -153,11 +157,11 @@ public class GameActivity extends Activity implements View.OnClickListener {
             case R.id.right : tetrisView.toRight(); break;
             case R.id.down : tetrisView.toDown(); break;
             case R.id.rotate : tetrisView.toRotate(); break;
-            case R.id.homepage : tetrisView.colseDownThread(); dialog.dismiss();  finish(); break;
-            case R.id.refresh : tetrisView.colseDownThread(); dialog.dismiss();   setResult(RESULT_OK); finish(); break;
+            case R.id.homepage : tetrisView.colseDownThread(); dialog.dismiss();finish();
+                ActivityManager.getInstance().removeActivity(this); break;
+            case R.id.refresh : tetrisView.colseDownThread(); dialog.dismiss();   setResult(RESULT_OK); finish();
+                ActivityManager.getInstance().removeActivity(this); break;
             case R.id.keepGame : dialog.dismiss(); tetrisView.startOrPauseDownThread(); break;
-            case R.id.homepageOver : dialogOver.dismiss(); finish(); break;
-            case R.id.refreshOver : dialogOver.dismiss(); setResult(RESULT_OK); finish(); break;
         }
     }
 }

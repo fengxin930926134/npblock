@@ -3,14 +3,14 @@ package com.np.block.util;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.view.TetrisView;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 控制俄罗斯方块的工具类
+ * @author fengxin
  */
-public class ControlTetrisUtils {
+public class tetrisControllerUtils {
 
     /**
      * 判断方块单元和所有方块是否有重叠
@@ -85,7 +85,7 @@ public class ControlTetrisUtils {
 
     /**
      * 把当前方块向左移动一格
-     * @param tetris
+     * @param tetris 俄罗斯方块坐标
      */
     public static void toLeft(List<UnitBlock> tetris){
         for (UnitBlock unitBlock : tetris) {
@@ -95,7 +95,7 @@ public class ControlTetrisUtils {
 
     /**
      * 把当前方块向右移动一格
-     * @param tetris
+     * @param tetris 俄罗斯方块坐标
      */
     public static void toRight(List<UnitBlock> tetris){
         for (UnitBlock unitBlock : tetris) {
@@ -105,7 +105,7 @@ public class ControlTetrisUtils {
 
     /**
      * 把当前方块向右下移动一格
-     * @param tetris
+     * @param tetris 俄罗斯方块坐标
      */
     public static void toDown(List<UnitBlock> tetris){
         for (UnitBlock unitBlock : tetris) {
@@ -201,7 +201,7 @@ public class ControlTetrisUtils {
         if (overlapAllBlock && (needLeftTran || needRightTran))
             return false;
         // 如果超出左边界 开始平移
-        while (needLeftTran && !overlapAllBlock) {
+        while (needLeftTran) {
             if (canMoveRight(unitBlocks,all)){
                 toRight(unitBlocks);
             }else {
@@ -216,7 +216,7 @@ public class ControlTetrisUtils {
             }
         }
         // 如果超出右边界 开始平移
-        while (needRightTran && !overlapAllBlock) {
+        while (needRightTran) {
             if (canMoveLeft(unitBlocks,all)){
                 toLeft(unitBlocks);
             }else {
@@ -272,7 +272,6 @@ public class ControlTetrisUtils {
         }
         return true;
     }
-
 
     /**
      * 删除所有在第y行的单位方块

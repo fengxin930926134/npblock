@@ -2,10 +2,14 @@ package com.np.block.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * 俄罗斯方块
+ * 俄罗斯方块 7种类型方块
  */
+@Getter
+@Setter
 public class Tetris {
     // 俄罗斯方块类型总和
     private static final int TYPES = 7;
@@ -19,7 +23,7 @@ public class Tetris {
     private int color;
     //  俄罗斯方块坐标
     private int x,  y;
-    // 俄罗斯方块
+    // 俄罗斯方块 由单元块组成
     private List<UnitBlock> tetris;
 
     public Tetris(int x, int y, int blockType,int color) {
@@ -86,45 +90,5 @@ public class Tetris {
                 }
                 break;
         }
-    }
-
-    public List<UnitBlock> getTetris() {
-        return tetris;
-    }
-
-    public void setTetris(List<UnitBlock> tetris) {
-        this.tetris = tetris;
-    }
-
-    public int getBlockType() {
-        return blockType;
-    }
-
-    public void setBlockType(int blockType) {
-        this.blockType = blockType;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
     }
 }

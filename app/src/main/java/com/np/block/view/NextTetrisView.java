@@ -8,18 +8,20 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import androidx.core.graphics.ColorUtils;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
-
 import java.util.List;
 
+/**
+ * 下一个俄罗斯方块的视图
+ * @author fengxin
+ */
 public class NextTetrisView extends View {
     // 界面开始的坐标
-    public static final  int BEGIN_LEN_X = 5;
-    public static final  int BEGIN_LEN_Y = 5;
-    private static final int BOUND_WIDTH_OF_WALL = 4;
+    public static final  int BEGIN_LEN_X = UnitBlock.BLOCK_SIZE;
+    public static final  int BEGIN_LEN_Y = UnitBlock.BLOCK_SIZE;
+    private static final int BOUND_WIDTH_OF_WALL = 3;
     // 背景画笔
     private static Paint paintWall = null;
     // 方块单元块画笔
@@ -43,6 +45,15 @@ public class NextTetrisView extends View {
         if(paintBlock == null){
             paintBlock = new Paint();
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // 重新计算高度
+        int width = UnitBlock.BLOCK_SIZE * 2 + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * Tetris.TETRIS_NUMBER + BOUND_WIDTH_OF_WALL;
+        int height = UnitBlock.BLOCK_SIZE * 2 + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * Tetris.TETRIS_NUMBER + BOUND_WIDTH_OF_WALL;
+        // 设置宽高
+        setMeasuredDimension(width, height);
     }
 
     /**
@@ -74,15 +85,15 @@ public class NextTetrisView extends View {
         int x = getWidth();
         int y = getHeight();
         RectF rectF;
-        rectF = new RectF( BEGIN_LEN_X, BEGIN_LEN_Y, x,  y);
+        rectF = new RectF( 0, 0, x,  y);
         canvas.drawRoundRect(rectF, 8, 8, paintWall);
         if (nextTetris != null) {
             List<UnitBlock> nextTetrisCoord = nextTetris.getTetris();
             // 设置画笔颜色
             for (int i = 0; i < nextTetrisCoord.size(); i++) {
                 paintBlock.setColor(ConstUtils.COLOR[nextTetris.getColor()]);
-                int mx = nextTetrisCoord.get(i).getX() + BEGIN_LEN_X + x/2;
-                int my = nextTetrisCoord.get(i).getY() + BEGIN_LEN_Y + y/2 - UnitBlock.BLOCK_SIZE;
+                int mx = nextTetrisCoord.get(i).getX() + BEGIN_LEN_X;
+                int my = nextTetrisCoord.get(i).getY() + BEGIN_LEN_Y;
                 rectF = new RectF(mx + TetrisView.BOUND_WIDTH_OF_WALL , my + TetrisView.BOUND_WIDTH_OF_WALL,
                         mx + UnitBlock.BLOCK_SIZE - TetrisView.BOUND_WIDTH_OF_WALL , my +  UnitBlock.BLOCK_SIZE  - TetrisView.BOUND_WIDTH_OF_WALL);
                 canvas.drawRoundRect(rectF, 8, 8, paintBlock);

@@ -38,7 +38,13 @@
         <!-- 主界面activity注册 -->
         <activity android:name="com.np.block.activity.MainActivity"
             android:screenOrientation="sensorLandscape"/>
-        <activity android:name=".activity.GameActivity"/>
+        <!-- 经典模式activity注册 -->
+        <activity android:name=".activity.ClassicBlockActivity"
+            android:screenOrientation="sensorLandscape"/>
+        <!-- 测试activity注册 -->
+        <activity android:name=".activity.TestActivity">
+
+        </activity>
         <!-- 腾讯 -->
         <activity
             android:name="com.tencent.tauth.AuthActivity"

@@ -3,8 +3,6 @@ package com.np.block.activity;
 import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ActivityManager;
@@ -34,21 +32,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GameActivity.CODE) {
+        if (requestCode == ClassicBlockActivity.CODE) {
             if (resultCode == RESULT_OK) {
                 ActivityManager.getInstance().finishAll();
             }
-        } else {
-            Toast.makeText(context, "没有实现", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.classic_block) {
-            startActivityForResult(new Intent(MainActivity.this, GameActivity.class), GameActivity.CODE);
-        } else {
-            Toast.makeText(context, "没有实现", Toast.LENGTH_SHORT).show();
+            startActivityForResult(new Intent(MainActivity.this, ClassicBlockActivity.class), ClassicBlockActivity.CODE);
         }
     }
 }

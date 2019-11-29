@@ -8,22 +8,23 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import com.np.block.activity.GameActivity;
+import com.np.block.activity.ClassicBlockActivity;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
-import com.np.block.util.ControlTetrisUtils;
+import com.np.block.util.tetrisControllerUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * 自定义游戏界面视图
+ * 俄罗斯方块的视图
+ * @author fengxin
  */
 public class TetrisView extends View {
     // 游戏主界面开始的坐标
-    public static final int BEGIN_LEN_X = 20;
-    public static final int BEGIN_LEN_Y = 10;
+    public static final int BEGIN_LEN_X = 5;
+    public static final int BEGIN_LEN_Y = 5;
     // 行数和列数
     private static final int ROW_NUM = 20;
     private static final int COLUMN_NUM = 10;
@@ -39,8 +40,6 @@ public class TetrisView extends View {
     private static Paint paintWall = null;
     // 方块单元块画笔
     private static Paint paintBlock = null;
-    // 游戏主线程
-    private Thread mainThread = null;
     /**
      * 游戏状态
      */
@@ -84,6 +83,15 @@ public class TetrisView extends View {
         tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, 0, 0);
         nextTetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, 0, 0);
         tetrisCoord = tetris.getTetris();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // 重新计算高度
+        int width = end_x_len - 5 * BEGIN_LEN_X - BOUND_WIDTH_OF_WALL;
+        int height = end_y_len - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
+        // 设置宽高
+        setMeasuredDimension(width, height);
     }
 
     /**
@@ -169,8 +177,8 @@ public class TetrisView extends View {
      * 俄罗斯方块左移
      */
     public void toLeft() {
-        if (ControlTetrisUtils.canMoveLeft(tetrisCoord, allUnitBlock)) {
-            ControlTetrisUtils.toLeft(tetrisCoord);
+        if (tetrisControllerUtils.canMoveLeft(tetrisCoord, allUnitBlock)) {
+            tetrisControllerUtils.toLeft(tetrisCoord);
             tetris.setX(tetris.getX() - UnitBlock.BLOCK_SIZE);
         }
         invalidate();
@@ -180,8 +188,8 @@ public class TetrisView extends View {
      * 俄罗斯方块右移
      */
     public void toRight() {
-        if (ControlTetrisUtils.canMoveRight(tetrisCoord, allUnitBlock)) {
-            ControlTetrisUtils.toRight(tetrisCoord);
+        if (tetrisControllerUtils.canMoveRight(tetrisCoord, allUnitBlock)) {
+            tetrisControllerUtils.toRight(tetrisCoord);
             tetris.setX(tetris.getX() + UnitBlock.BLOCK_SIZE);
         }
         invalidate();
@@ -191,8 +199,8 @@ public class TetrisView extends View {
      * 俄罗斯方块下移
      */
     public boolean toDown() {
-        if (ControlTetrisUtils.canMoveDown(tetrisCoord, allUnitBlock)) {
-            ControlTetrisUtils.toDown(tetrisCoord);
+        if (tetrisControllerUtils.canMoveDown(tetrisCoord, allUnitBlock)) {
+            tetrisControllerUtils.toDown(tetrisCoord);
             tetris.setY(tetris.getY() + UnitBlock.BLOCK_SIZE);
             father.runOnUiThread(new Runnable() {
                 @Override
@@ -215,7 +223,7 @@ public class TetrisView extends View {
      * 俄罗斯方块旋转
      */
     public void toRotate() {
-        ControlTetrisUtils.toRotate(tetris, allUnitBlock);
+        tetrisControllerUtils.toRotate(tetris, allUnitBlock);
         invalidate();
     }
 
@@ -247,15 +255,15 @@ public class TetrisView extends View {
                 }
             }
             // 消除的一行的上方的方块整体下移
-            ControlTetrisUtils.rowAboveToDown(allUnitBlock, row);
+            tetrisControllerUtils.rowAboveToDown(allUnitBlock, row);
             // 通过runOnUiThread对主UI进行修改
             father.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     // 加分 等级乘方块数乘10
-                    ((GameActivity) father).score.setText(Integer.parseInt(((GameActivity) father).score.getText().toString()) + COLUMN_NUM*10 + "");
+                    ((ClassicBlockActivity) father).score.setText(Integer.parseInt(((ClassicBlockActivity) father).score.getText().toString()) + COLUMN_NUM*10 + "");
                     // 设置 消除行数
-                    ((GameActivity) father).rowNum.setText(Integer.parseInt(((GameActivity) father).rowNum.getText().toString()) + 1 + "");
+                    ((ClassicBlockActivity) father).rowNum.setText(Integer.parseInt(((ClassicBlockActivity) father).rowNum.getText().toString()) + 1 + "");
                 }
             });
         }
@@ -265,7 +273,8 @@ public class TetrisView extends View {
      *  开始下落线程
      */
     public void startDownThread () {
-        mainThread = new Thread(new DownRunnable());
+        // 游戏主线程
+        Thread mainThread = new Thread(new DownRunnable());
         runningStatus = true;
         mainThread.start();
     }
@@ -316,7 +325,7 @@ public class TetrisView extends View {
                             father.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    ((GameActivity)father).createGameOverDialog();
+                                    ((ClassicBlockActivity)father).startGameOverDialog();
                                 }
                             });
                             break;
@@ -344,7 +353,7 @@ public class TetrisView extends View {
                         //生成下一个方块
                         getNextTetris();
                         // 调用activity给下一个方块视图重新生成新方块
-                        ((GameActivity) father).setNextTetrisView();
+                        ((ClassicBlockActivity) father).setNextTetrisView();
                     }
                     try {
                         Thread.sleep(Tetris.SPEED);
