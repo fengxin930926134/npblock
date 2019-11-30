@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ActivityManager;
+import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.util.DialogUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.TetrisView;
@@ -41,6 +42,8 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     private AlertDialog dialog = null;
     // 游戏结束对话框
     private AlertDialog dialogOver = null;
+    /**判断是否长点击*/
+    private boolean isLongClick = false;
 
     @Override
     public void init() {
@@ -61,6 +64,26 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         right.setOnClickListener(this);
         down.setOnClickListener(this);
         rotate.setOnClickListener(this);
+        down.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                isLongClick = true;
+                ThreadPoolManager.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        do {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } while (tetris.toDown() && isLongClick);
+                    }
+                });
+                // 如果让回调消耗该长按，返回true，否则false，如果false，其他地方监听生效
+                return false;
+            }
+        });
         // 设置子视图对象的父视图
         tetris.setFatherActivity(this);
         nextTetris.setFather(this);
@@ -176,7 +199,12 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         switch (view.getId()) {
             case R.id.left : tetris.toLeft(); break;
             case R.id.right : tetris.toRight(); break;
-            case R.id.down : tetris.toDown(); break;
+            case R.id.down : if (!isLongClick) {
+                    tetris.toDown();
+                }else {
+                    isLongClick = false;
+                }
+                break;
             case R.id.rotate : tetris.toRotate(); break;
             case R.id.homepage : tetris.closeDownThread(); dialog.dismiss();finish();
                 ActivityManager.getInstance().removeActivity(this); break;
