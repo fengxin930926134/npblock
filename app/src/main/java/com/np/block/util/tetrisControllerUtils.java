@@ -118,7 +118,7 @@ public class tetrisControllerUtils {
      * @param all 所有方块
      * @param row 被消掉的行
      */
-    public static void rowAboveToDown(List<UnitBlock> all,int row){
+    public static void blockRowsToDown(List<UnitBlock> all, int row){
         int y = row * UnitBlock.BLOCK_SIZE + TetrisView.BEGIN_LEN_Y;
         for (UnitBlock unitBlock : all) {
             if (unitBlock.getY() < y) {
@@ -198,8 +198,9 @@ public class tetrisControllerUtils {
             }
         }
         // 重叠 又超出边界
-        if (overlapAllBlock && (needLeftTran || needRightTran))
+        if (overlapAllBlock && (needLeftTran || needRightTran)) {
             return false;
+        }
         // 如果超出左边界 开始平移
         while (needLeftTran) {
             if (canMoveRight(unitBlocks,all)){
@@ -243,8 +244,9 @@ public class tetrisControllerUtils {
                             break;
                         }
                     }
-                    if (overlapAllBlock)
+                    if (overlapAllBlock) {
                         break;
+                    }
                 }
                 if (!overlapAllBlock) {
                     return true;
@@ -262,8 +264,9 @@ public class tetrisControllerUtils {
                             break;
                         }
                     }
-                    if (overlapAllBlock)
+                    if (overlapAllBlock) {
                         break;
+                    }
                 }
                 if (!overlapAllBlock) {
                     return true;

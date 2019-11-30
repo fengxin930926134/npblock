@@ -13,7 +13,7 @@ class ResolutionUtils {
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
      */
-    static int dpChangePx(Context context, float dpValue) {
+    static int dp2Px(Context context, float dpValue) {
         Resources r = context.getResources();
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 dpValue, r.getDisplayMetrics());

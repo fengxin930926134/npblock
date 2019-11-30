@@ -5,6 +5,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
 
+/**
+ * 验证工具类
+ * @author fengxin
+ */
 public class VerificationUtils {
 
     /**

@@ -261,7 +261,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 break;
             case R.id.qq_login:
                 //QQ登陆
-                loginForQQ();
+                loginforqq();
                 break;
                 default:
                     Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
@@ -271,7 +271,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     /**
      * QQ登陆启动
      */
-    private void loginForQQ(){
+    private void loginforqq(){
         name = null;
         flag = true;
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
@@ -397,6 +397,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         View view = View.inflate(context, R.layout.alert_dialog_register, null);
         // 注册mod回调监听接口
         SMSSDK.registerEventHandler(new EventHandler() {
+            @Override
             public void afterEvent(int event, int result, Object data) {
                 // afterEvent会在子线程被调用，因此如果后续有UI相关操作，需要将数据发送到UI线程
                 Message msg = new Message();
@@ -408,17 +409,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         });
         //发送验证码按钮
         requestCodeBtn = view.findViewById(R.id.register_request_code_btn);
-        final EditText register_input_name = view.findViewById(R.id.register_input_name);
-        final EditText register_input_phone = view.findViewById(R.id.register_input_phone);
+        final EditText registerInputName = view.findViewById(R.id.register_input_name);
+        final EditText registerInputPhone = view.findViewById(R.id.register_input_phone);
         final EditText inputCode = view.findViewById(R.id.register_input_code);
-        final EditText register_input_password = view.findViewById(R.id.register_input_password);
+        final EditText registerInputPassword = view.findViewById(R.id.register_input_password);
         //提交验证码
         view.findViewById(R.id.register_commit_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String phoneNum = register_input_phone.getText().toString().trim();
-                String passWord = register_input_password.getText().toString().trim();
-                String nameText = register_input_name.getText().toString();
+                String phoneNum = registerInputPhone.getText().toString().trim();
+                String passWord = registerInputPassword.getText().toString().trim();
+                String nameText = registerInputName.getText().toString();
                 if (!VerificationUtils.validateName(nameText)){
                     Toast.makeText(context, "昵称格式不正确", Toast.LENGTH_SHORT).show();
                 }else if (!VerificationUtils.validatePhone(phoneNum)) {
@@ -445,7 +446,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         requestCodeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String phoneNum = register_input_phone.getText().toString().trim();
+                String phoneNum = registerInputPhone.getText().toString().trim();
                 LogUtils.i(TAG, phoneNum);
                 // 1. 通过规则判断手机号
                 if (!VerificationUtils.validatePhone(phoneNum)) {
@@ -459,7 +460,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         @Override
                         public void run() {
                             //第一次设置
-                            for (int i = 30; i > 0; i--) {
+                            for (int i = ConstUtils.SHORT_MESSAGE_TIME; i > 0; i--) {
                                 final String text =  "重新发送("+i+")";
                                 mHandler.post(new Runnable() {
                                     @Override

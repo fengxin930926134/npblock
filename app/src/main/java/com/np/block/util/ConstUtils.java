@@ -56,12 +56,17 @@ public class ConstUtils {
     /**
      * 需要用到的颜色的数组
      */
-    public static final int[] COLOR = {Color.parseColor("#FF6600"), Color.BLUE, Color.RED, Color.GREEN, Color.GRAY};
+    public static final int[] COLOR = {Color.parseColor("#FF6600"), Color.BLUE, Color.RED, Color.GREEN, Color.BLACK};
+
+    /**
+     * 再次发送短信的秒数
+     */
+    public static final int SHORT_MESSAGE_TIME = 30;
 
     /**
      * 请求url
      */
-    public static final String URL = "https://npblock.cn";
+    static final String URL = "https://npblock.cn";
 
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

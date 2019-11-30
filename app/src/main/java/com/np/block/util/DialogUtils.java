@@ -1,6 +1,5 @@
 package com.np.block.util;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,7 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import com.np.block.R;
 import java.util.Objects;
-import static com.np.block.util.ResolutionUtils.dpChangePx;
+import static com.np.block.util.ResolutionUtils.dp2Px;
 
 /**
  * 弹窗工具类
@@ -97,7 +96,7 @@ public class DialogUtils {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);
         //设置固定宽带，高度自适应
         int dialogWidth = 290;
-        dialog.getWindow().setLayout(dpChangePx(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setLayout(dp2Px(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.setContentView(view);
     }
 
@@ -131,7 +130,6 @@ public class DialogUtils {
      *
      * @return View
      */
-    @SuppressLint("SetJavaScriptEnabled")
     public synchronized static AlertDialog showDialogDefault(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         AlertDialog dialog = builder.create();
@@ -140,7 +138,7 @@ public class DialogUtils {
         //设置背景透明,去四个角
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
-        dialog.getWindow().setLayout(dpChangePx(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setLayout(dp2Px(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
         //AlertDialog默认设置了WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM这个标志，所以键盘不会显示
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         return dialog;
