@@ -210,7 +210,6 @@ public class TetrisView extends View {
             tetrisControllerUtils.toLeft(tetrisUnits);
             tetris.setX(tetris.getX() - UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
-            generateAllBlockRectf();
         }
         invalidate();
     }
@@ -223,28 +222,58 @@ public class TetrisView extends View {
             tetrisControllerUtils.toRight(tetrisUnits);
             tetris.setX(tetris.getX() + UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
-            generateAllBlockRectf();
         }
         invalidate();
     }
 
     /**
-     * 判断俄罗斯方块是否可以下移
-     * 是则下移 返回true
-     * 否则不变 返回false
-     * @return boolean
+     * 俄罗斯方块下移
      */
-    public boolean toDown() {
+    public void toDown() {
         if (tetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock)) {
             tetrisControllerUtils.toDown(tetrisUnits);
             tetris.setY(tetris.getY() + UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
             generateAllBlockRectf();
             invalidate();
-            return true;
+            return;
         }
+        // 结束长按
+        fatherActivity.isLongClick = false;
+        // 如果方块超出则结束游戏
+        if (isGameOver(tetrisUnits)){
+            // 结束掉线程
+            beginGame = false;
+            // 启动游戏结束的弹窗
+            fatherActivity.startGameOverDialog();
+            return;
+        }
+        // 重新给每行方块数赋值为0 然后重新计算每行方块数
+        Arrays.fill(blockRowNum, 0);
+        // 把已经固定的俄罗斯方块加入总方块
+        allUnitBlock.addAll(tetrisUnits);
+        // 逆向遍历所有方块
+        for (int i = allUnitBlock.size() - 1; i >= 0; i--) {
+            // y是指方块是第几行
+            int y = (allUnitBlock.get(i).getY() - BEGIN_LEN_Y) / UnitBlock.BLOCK_SIZE;
+            for (int j = blockRowNum.length; j > 0; j--) {
+                if (y == j) {
+                    blockRowNum[j - 1]++;
+                }
+            }
+        }
+        //判断是否有满足一行 满足则消除
+        List<Integer> rows = blockCramRow();
+        if (rows.size() > 0) {
+            removeRowsBlock(rows);
+        }
+        // 所有已下落方块此时已经刷新 需要重新生成模具
+        generateAllBlockRectf();
+        // 生成新俄罗斯方块
+        generateTetris();
+        // 此时生成新方块了 需要重新刷新方块模具
+        generateTetrisRectf();
         invalidate();
-        return false;
     }
 
     /**
@@ -253,7 +282,6 @@ public class TetrisView extends View {
     public void toRotate() {
         tetrisControllerUtils.toRotate(tetris, allUnitBlock);
         generateTetrisRectf();
-        generateAllBlockRectf();
         invalidate();
     }
 
@@ -298,6 +326,8 @@ public class TetrisView extends View {
                     tetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
                 }
             }
+            // 对模具刷新
+            generateAllBlockRectf();
             // 对主UI进行修改 计算得分等
             fatherActivity.updateDataAndUi(rows.size());
         }
@@ -314,39 +344,8 @@ public class TetrisView extends View {
             public void run() {
                 while (beginGame) {
                     if (runningStatus) {
-                        if (!toDown()) {
-                            // 如果方块超出则结束游戏
-                            if (isGameOver(tetrisUnits)){
-                                // 启动游戏结束的弹窗
-                                fatherActivity.startGameOverDialog();
-                                break;
-                            }
-                            // 重新给每行方块数赋值为0 然后重新计算每行方块数
-                            Arrays.fill(blockRowNum, 0);
-                            // 把已经固定的俄罗斯方块加入总方块
-                            allUnitBlock.addAll(tetrisUnits);
-                            // 逆向遍历所有方块
-                            for (int i = allUnitBlock.size() - 1; i >= 0; i--) {
-                                // y是指方块是第几行
-                                int y = (allUnitBlock.get(i).getY() - BEGIN_LEN_Y) / UnitBlock.BLOCK_SIZE;
-                                for (int j = blockRowNum.length; j > 0; j--) {
-                                    if (y == j) {
-                                        blockRowNum[j - 1]++;
-                                    }
-                                }
-                            }
-                            //判断是否有满足一行 满足则消除
-                            List<Integer> rows = blockCramRow();
-                            if (rows.size() > 0) {
-                                removeRowsBlock(rows);
-                            }
-                            // 所有已下落方块此时已经刷新 需要重新生成模具
-                            generateAllBlockRectf();
-                            // 生成新俄罗斯方块
-                            generateTetris();
-                            // 此时生成新方块了 需要重新刷新方块模具
-                            generateTetrisRectf();
-                        }
+                        //下移
+                        toDown();
                         try {
                             Thread.sleep(fatherActivity.speed);
                         } catch (InterruptedException e) {

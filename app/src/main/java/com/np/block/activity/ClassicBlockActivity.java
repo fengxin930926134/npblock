@@ -36,7 +36,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**暂停对话框*/
     private AlertDialog dialog = null;
     /**判断是否长点击*/
-    private boolean isLongClick = false;
+    public boolean isLongClick = false;
     /**下落的速度*/
     public int speed = 1000;
 
@@ -75,12 +75,14 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         do {
+                            //下移
+                            tetris.toDown();
                             try {
-                                Thread.sleep(100);
+                                Thread.sleep(80);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                        } while (tetris.toDown() && isLongClick);
+                        } while (isLongClick);
                     }
                 });
                 // 如果让回调消耗该长按，返回true，否则false，如果false，其他地方监听生效
@@ -112,9 +114,9 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      */
     public void updateDataAndUi(int row) {
         // 等级
-        final int gradeUsed = Integer.parseInt(this.grade.getText().toString());
+        final int gradeUsed = Integer.parseInt(grade.getText().toString());
         // 成绩=等级x方块数
-        final int scoreNew = Integer.parseInt(this.score.getText().toString()) + row * TetrisView.COLUMN_NUM * gradeUsed;
+        final int scoreNew = Integer.parseInt(score.getText().toString()) + row * TetrisView.COLUMN_NUM * gradeUsed;
         // 消除行数
         final int rows = Integer.parseInt(rowNum.getText().toString()) + row;
         // 新等级
@@ -125,14 +127,14 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                 if (gradeUsed != gradeNew) {
                     Toast.makeText(ClassicBlockActivity.this, "等级提升", Toast.LENGTH_SHORT).show();
                     //设置下落速度
-                    int newSpeed = speed - 100;
+                    int newSpeed = speed - 200;
                     if (newSpeed != 0) {
                         speed = newSpeed;
                     }
-                    grade.setText(gradeUsed);
+                    grade.setText(String.valueOf(gradeNew));
                 }
-                score.setText(scoreNew);
-                rowNum.setText(rows);
+                score.setText(String.valueOf(scoreNew));
+                rowNum.setText(String.valueOf(rows));
             }
         });
     }
