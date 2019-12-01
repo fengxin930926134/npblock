@@ -31,15 +31,13 @@ public class TetrisView extends View {
      * 行数和列数
      */
     private static final int ROW_NUM = 20;
-    private static final int COLUMN_NUM = 10;
+    public static final int COLUMN_NUM = 10;
     /**墙宽度*/
     public static final int BOUND_WIDTH_OF_WALL = 3;
     /**游戏主界面结束的x坐标*/
     public static int end_x_len = BEGIN_LEN_X + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * COLUMN_NUM + BOUND_WIDTH_OF_WALL;
     /**游戏主界面结束的y坐标*/
     public static int end_y_len = BEGIN_LEN_Y + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * ROW_NUM + BOUND_WIDTH_OF_WALL;
-    /**下落的速度*/
-    public static final int SPEED = 1000;
     /**调用此对象的Activity对象 父视图*/
     private ClassicBlockActivity fatherActivity = null;
     /**背景墙画笔*/
@@ -56,8 +54,6 @@ public class TetrisView extends View {
     private Tetris tetris = null;
     /**俄罗斯方块的单元块集合*/
     private List<UnitBlock> tetrisUnits = null;
-    /**下一个要显示的俄罗斯方块*/
-    private Tetris nextTetris = null;
     /**视图中全部已下落单元块集合*/
     private List<UnitBlock> allUnitBlock = new ArrayList<>();
     /**背景矩形模具集合*/
@@ -67,7 +63,7 @@ public class TetrisView extends View {
     /**所有完成下落方块矩形模具集合*/
     private List<RectF> allBlockRectf = new ArrayList<>();
     /**视图中全部已下落单元块集合长度*/
-    private int allUnitBlockLenth = allUnitBlock.size();
+    private int allUnitBlockLength = allUnitBlock.size();
 
     public TetrisView(Context context) {
         super(context, null);
@@ -81,7 +77,7 @@ public class TetrisView extends View {
             // 设置画笔空心
             paintWall.setStyle(Paint.Style.STROKE);
             // 设置画笔颜色
-            paintWall.setColor(Color.LTGRAY);
+            paintWall.setColor(Color.GRAY);
             // 设置线宽
             paintWall.setStrokeWidth(BOUND_WIDTH_OF_WALL);
         }
@@ -103,8 +99,6 @@ public class TetrisView extends View {
         tetrisUnits = tetris.getTetris();
         // 生成俄罗斯方块模具
         generateTetrisRectf();
-        // 初始化下一个俄罗斯方块
-        nextTetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, 0, -1);
     }
 
     /**
@@ -119,43 +113,6 @@ public class TetrisView extends View {
         int height = end_y_len - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
         // 设置宽高
         setMeasuredDimension(width, height);
-    }
-
-    /**
-     * 获取下一个俄罗斯方块
-     */
-    public Tetris getNextTetrisViewTetris() {
-        return new Tetris(NextTetrisView.BEGIN_LEN_X,
-                NextTetrisView.BEGIN_LEN_Y,
-                nextTetris.getBlockType(),
-                nextTetris.getColor());
-    }
-
-    /**
-     * 获取下一个方块
-     */
-    public void getNextTetris() {
-        // 获得下一个俄罗斯方块
-        tetris = nextTetris;
-        // 获得单位方块集合
-        tetrisUnits = tetris.getTetris();
-        // 新建下一个俄罗斯方块
-        nextTetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, 0, -1);
-        fatherActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                invalidate();
-            }
-        });
-    }
-
-    /**
-     * 设置当前游戏页面的父类activity
-     *
-     * @param context 父类
-     */
-    public void setFatherActivity(Context context) {
-        this.fatherActivity = (ClassicBlockActivity)context;
     }
 
     /**
@@ -186,6 +143,27 @@ public class TetrisView extends View {
     }
 
     /**
+     * 设置当前游戏页面的父类activity
+     *
+     * @param context 父类
+     */
+    public void setFatherActivity(Context context) {
+        this.fatherActivity = (ClassicBlockActivity)context;
+    }
+
+    /**
+     * 生成俄罗斯方块
+     */
+    public void generateTetris() {
+        // 获得下一个俄罗斯方块
+        Tetris nextTetris = fatherActivity.getNextTetris();
+        // 从下一个俄罗斯方块生成当前俄罗斯方块
+        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, nextTetris.getBlockType(), nextTetris.getColor());
+        // 获得单位方块集合
+        tetrisUnits = tetris.getTetris();
+    }
+
+    /**
      * 生成俄罗斯方块模具
      */
     private void generateTetrisRectf(){
@@ -207,7 +185,7 @@ public class TetrisView extends View {
      */
     private void generateAllBlockRectf(){
         // 判断已下落的方块是否改变了 不改变就不需要重新生成
-        if (allUnitBlockLenth != allUnitBlock.size()) {
+        if (allUnitBlockLength != allUnitBlock.size()) {
             if (allBlockRectf.size() > 0) {
                 allBlockRectf.clear();
             }
@@ -220,7 +198,7 @@ public class TetrisView extends View {
                         x + UnitBlock.BLOCK_SIZE - BOUND_WIDTH_OF_WALL, y + UnitBlock.BLOCK_SIZE - BOUND_WIDTH_OF_WALL));
             }
             // 将新生成的长度保存
-            allUnitBlockLenth = allUnitBlock.size();
+            allUnitBlockLength = allUnitBlock.size();
         }
     }
 
@@ -320,9 +298,7 @@ public class TetrisView extends View {
                     tetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
                 }
             }
-            // 重新生成模具
-            generateAllBlockRectf();
-            // 对主UI进行修改
+            // 对主UI进行修改 计算得分等
             fatherActivity.updateDataAndUi(rows.size());
         }
     }
@@ -364,17 +340,15 @@ public class TetrisView extends View {
                             if (rows.size() > 0) {
                                 removeRowsBlock(rows);
                             }
-                            // 所有方块此时已经刷新 需要重新生成模具
+                            // 所有已下落方块此时已经刷新 需要重新生成模具
                             generateAllBlockRectf();
-                            //获取下一个方块
-                            getNextTetris();
+                            // 生成新俄罗斯方块
+                            generateTetris();
                             // 此时生成新方块了 需要重新刷新方块模具
                             generateTetrisRectf();
-                            // 调用activity给下一个方块视图重新生成新方块
-                            fatherActivity.setNextTetrisView();
                         }
                         try {
-                            Thread.sleep(SPEED);
+                            Thread.sleep(fatherActivity.speed);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

@@ -13,7 +13,7 @@ public class UnitBlock {
     /**单元块的边长*/
     public static final int BLOCK_SIZE = 50;
     /**单元块的角度*/
-    public static final int ANGLE = 50;
+    public static final int ANGLE = 8;
     /**单元块的颜色*/
     private int color;
     /**单元块的x坐标*/

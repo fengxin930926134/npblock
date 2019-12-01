@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_3">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -21,7 +23,8 @@
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/left_and_right"
             android:layout_alignTop="@+id/left_and_right"
-            android:text="左移" />
+            android:text="@string/left_text"
+            tools:ignore="RelativeOverlap" />
 
         <TextView
             android:id="@+id/left_and_right"
@@ -37,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/left_and_right"
             android:layout_alignTop="@+id/left_and_right"
-            android:text="右移" />
+            android:text="@string/right_text" />
     </RelativeLayout>
 
     <com.np.block.view.TetrisView
@@ -64,14 +67,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:text="分数" />
+                android:text="@string/score_text" />
 
             <TextView
                 android:id="@+id/score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Caption"
-                android:text="1" />
+                style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
 
         <!--等级-->
@@ -88,14 +90,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:text="等级" />
+                android:text="@string/grade_text" />
 
             <TextView
                 android:id="@+id/grade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Caption"
-                android:text="1" />
+                style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 
         <!--速度-->
@@ -112,14 +113,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:text="消除行数" />
+                android:text="@string/row_num_text" />
 
             <TextView
                 android:id="@+id/row_num"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Caption"
-                android:text="0" />
+                style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 
         <!--最高分-->
@@ -136,23 +136,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:text="最高分" />
+                android:text="@string/max_score_text" />
 
             <TextView
                 android:id="@+id/max_score"
                 style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <Button
             android:id="@+id/rotate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/rotate_and_down"
+            android:layout_toEndOf="@+id/rotate_and_down"
             android:layout_alignTop="@+id/rotate_and_down"
-            android:text="旋转" />
+            android:text="@string/rotate_text" />
 
         <TextView
             android:id="@+id/rotate_and_down"
@@ -166,9 +165,10 @@
             android:id="@+id/down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/rotate_and_down"
+            android:layout_toStartOf="@+id/rotate_and_down"
             android:layout_alignTop="@+id/rotate_and_down"
-            android:text="下移" />
+            android:text="@string/down_text"
+            tools:ignore="RelativeOverlap" />
     </RelativeLayout>
 
 </RelativeLayout>

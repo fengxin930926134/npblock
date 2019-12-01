@@ -1,6 +1,5 @@
 package com.np.block.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,6 +10,7 @@ import android.view.View;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,18 +18,24 @@ import java.util.List;
  * @author fengxin
  */
 public class NextTetrisView extends View {
-    // 界面开始的坐标
-    public static final  int BEGIN_LEN_X = UnitBlock.BLOCK_SIZE;
-    public static final  int BEGIN_LEN_Y = UnitBlock.BLOCK_SIZE;
-    private static final int BOUND_WIDTH_OF_WALL = 3;
-    // 背景画笔
+    /**背景墙宽*/
+    private static final int BOUND_WIDTH_OF_WALL = 5;
+    /**方块开始的坐标*/
+    private static final  int BEGIN_LEN_X = UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL + UnitBlock.BLOCK_SIZE/2;
+    private static final  int BEGIN_LEN_Y = UnitBlock.BLOCK_SIZE;
+    /**背景宽高*/
+    private static final int WIDTH = UnitBlock.BLOCK_SIZE * 2 + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * Tetris.TETRIS_NUMBER + BOUND_WIDTH_OF_WALL;
+    private static final int HEIGHT = UnitBlock.BLOCK_SIZE * 2 + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * Tetris.TETRIS_NUMBER + BOUND_WIDTH_OF_WALL;
+    /**背景画笔*/
     private static Paint paintWall = null;
-    // 方块单元块画笔
+    /**方块单元块画笔*/
     private static Paint paintBlock = null;
-    // 下一个俄罗斯方块
-    private Tetris nextTetris = null;
-    // 调用此对象的Activity对象
-    private Activity father = null;
+    /**下一个俄罗斯方块*/
+    private Tetris nextTetris;
+    /**背景矩形模具*/
+    private RectF rectf;
+    /**俄罗斯方块矩形模具集合*/
+    private List<RectF> nextTetrisRectf = new ArrayList<>();
 
     public NextTetrisView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -45,58 +51,60 @@ public class NextTetrisView extends View {
         if(paintBlock == null){
             paintBlock = new Paint();
         }
+        rectf = new RectF(0, 0, WIDTH, HEIGHT);
+        //初始化下一个俄罗斯方块
+        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, 0, -1);
+        // 生成模具
+        generateNextTetrisRectf();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // 重新计算高度
-        int width = UnitBlock.BLOCK_SIZE * 2 + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * Tetris.TETRIS_NUMBER + BOUND_WIDTH_OF_WALL;
-        int height = UnitBlock.BLOCK_SIZE * 2 + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * Tetris.TETRIS_NUMBER + BOUND_WIDTH_OF_WALL;
         // 设置宽高
-        setMeasuredDimension(width, height);
+        setMeasuredDimension(WIDTH, HEIGHT);
     }
 
     /**
-     * 设置当前游戏页面的父类activity
-     *
-     * @param activity
+     * 获取当前的（下一个俄罗斯方块）
+     * @return 俄罗斯方块
      */
-    public void setFather(Activity activity) {
-        this.father = activity;
+    public Tetris getNextTetris() {
+        Tetris tetris = nextTetris;
+        // 重新生成下一个俄罗斯方块
+        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, 0, -1);
+        // 重新生成模具
+        generateNextTetrisRectf();
+        invalidate();
+        return tetris;
     }
 
     /**
-     * 设置下一个俄罗斯方块
-     * @param nextTetris
+     * 生成下一个俄罗斯方块的模具
      */
-    public void setNextTetris(Tetris nextTetris) {
-        this.nextTetris = nextTetris;
-        father.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                invalidate();
-            }
-        });
+    private void generateNextTetrisRectf(){
+        //俄罗斯方块的单元块集合
+        List<UnitBlock> nextTetrisUnit = nextTetris.getTetris();
+        if (nextTetrisRectf.size() > 0) {
+            nextTetrisRectf.clear();
+        }
+        for (int i = 0; i < nextTetrisUnit.size(); i++) {
+            int mx = nextTetrisUnit.get(i).getX() + BEGIN_LEN_X;
+            int my = nextTetrisUnit.get(i).getY() + BEGIN_LEN_Y;
+            nextTetrisRectf.add(new RectF(mx + TetrisView.BOUND_WIDTH_OF_WALL , my + TetrisView.BOUND_WIDTH_OF_WALL,
+                    mx + UnitBlock.BLOCK_SIZE - TetrisView.BOUND_WIDTH_OF_WALL , my +  UnitBlock.BLOCK_SIZE  - TetrisView.BOUND_WIDTH_OF_WALL));
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        int x = getWidth();
-        int y = getHeight();
-        RectF rectF;
-        rectF = new RectF( 0, 0, x,  y);
-        canvas.drawRoundRect(rectF, 8, 8, paintWall);
-        if (nextTetris != null) {
-            List<UnitBlock> nextTetrisCoord = nextTetris.getTetris();
-            // 设置画笔颜色
-            for (int i = 0; i < nextTetrisCoord.size(); i++) {
-                paintBlock.setColor(ConstUtils.COLOR[nextTetris.getColor()]);
-                int mx = nextTetrisCoord.get(i).getX() + BEGIN_LEN_X;
-                int my = nextTetrisCoord.get(i).getY() + BEGIN_LEN_Y;
-                rectF = new RectF(mx + TetrisView.BOUND_WIDTH_OF_WALL , my + TetrisView.BOUND_WIDTH_OF_WALL,
-                        mx + UnitBlock.BLOCK_SIZE - TetrisView.BOUND_WIDTH_OF_WALL , my +  UnitBlock.BLOCK_SIZE  - TetrisView.BOUND_WIDTH_OF_WALL);
-                canvas.drawRoundRect(rectF, 8, 8, paintBlock);
+        // 画背景
+        canvas.drawRoundRect(rectf, UnitBlock.ANGLE, UnitBlock.ANGLE, paintWall);
+        // 画方块
+        if (nextTetrisRectf.size() > 0) {
+            paintBlock.setColor(ConstUtils.COLOR[nextTetris.getColor()]);
+            for (int i = 0; i < nextTetrisRectf.size(); i++) {
+                canvas.drawRoundRect(nextTetrisRectf.get(i), 8, 8, paintBlock);
             }
         }
     }

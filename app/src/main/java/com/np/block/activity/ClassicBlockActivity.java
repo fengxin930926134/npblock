@@ -11,39 +11,34 @@ import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Tetris;
 import com.np.block.util.DialogUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.TetrisView;
 
+/**
+ * 经典模式
+ * @author fengxin
+ */
 public class ClassicBlockActivity extends BaseActivity implements View.OnClickListener {
-    // 设定GameActivity的code标识为1
-    public static final int CODE = 1;
-    // 自定义的俄罗斯方块视图
+    /**俄罗斯方块视图*/
     private TetrisView tetris;
-    // 自定义的下一个俄罗斯方块视图
+    /**下一个俄罗斯方块视图*/
     private NextTetrisView nextTetris;
-    // 分数
-    public TextView score;
-    // 等级
+    /**分数*/
+    private TextView score;
+    /**等级*/
     private TextView grade;
-    // 消掉的行数
-    public TextView rowNum;
-    // 最高分
+    /**消掉的行数*/
+    private TextView rowNum;
+    /**最高分*/
     private TextView maxScore;
-    // 左移按钮
-    private Button left;
-    // 右移按钮
-    private Button right;
-    // 旋转按钮
-    private Button rotate;
-    // 下落按钮
-    private Button down;
-    // 暂停对话框
+    /**暂停对话框*/
     private AlertDialog dialog = null;
-    // 游戏结束对话框
-    private AlertDialog dialogOver = null;
     /**判断是否长点击*/
     private boolean isLongClick = false;
+    /**下落的速度*/
+    public int speed = 1000;
 
     @Override
     public void init() {
@@ -54,11 +49,19 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         grade = findViewById(R.id.grade);
         rowNum = findViewById(R.id.row_num);
         maxScore = findViewById(R.id.max_score);
-        // 获取按钮对象
-        left = findViewById(R.id.left);
-        right = findViewById(R.id.right);
-        down = findViewById(R.id.down);
-        rotate = findViewById(R.id.rotate);
+        // 初始化数据
+        score.setText("0");
+        grade.setText("1");
+        rowNum.setText("0");
+        maxScore.setText("0");
+        // 左移按钮
+        Button left = findViewById(R.id.left);
+        // 右移按钮
+        Button right = findViewById(R.id.right);
+        // 下落按钮
+        Button down = findViewById(R.id.down);
+        // 旋转按钮
+        Button rotate = findViewById(R.id.rotate);
         // 设置按钮单击事件
         left.setOnClickListener(this);
         right.setOnClickListener(this);
@@ -86,9 +89,6 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         });
         // 设置子视图对象的父视图
         tetris.setFatherActivity(this);
-        nextTetris.setFather(this);
-        // 开始游戏时设置一次下一个方块视图
-        setNextTetrisView();
         // 启动下落线程
         tetris.startDownThread();
     }
@@ -99,10 +99,10 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     }
 
     /**
-     * 给下一个方块视图重新生成新方块
+     * 从下一个方块视图里获取方块
      */
-    public void setNextTetrisView () {
-        nextTetris.setNextTetris(tetris.getNextTetrisViewTetris());
+    public Tetris getNextTetris() {
+        return nextTetris.getNextTetris();
     }
 
     /**
@@ -111,15 +111,48 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      * @param row 消掉的方块行数
      */
     public void updateDataAndUi(int row) {
+        // 等级
+        final int gradeUsed = Integer.parseInt(this.grade.getText().toString());
+        // 成绩=等级x方块数
+        final int scoreNew = Integer.parseInt(this.score.getText().toString()) + row * TetrisView.COLUMN_NUM * gradeUsed;
+        // 消除行数
+        final int rows = Integer.parseInt(rowNum.getText().toString()) + row;
+        // 新等级
+        final int gradeNew = computeGrade(gradeUsed, scoreNew);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // 加分 等级乘方块数乘10
-                score.setText(Integer.parseInt(score.getText().toString()) + 400 + "");
-                // 设置 消除行数
-                rowNum.setText(Integer.parseInt(rowNum.getText().toString()) + 1 + "");
+                if (gradeUsed != gradeNew) {
+                    Toast.makeText(ClassicBlockActivity.this, "等级提升", Toast.LENGTH_SHORT).show();
+                    //设置下落速度
+                    int newSpeed = speed - 100;
+                    if (newSpeed != 0) {
+                        speed = newSpeed;
+                    }
+                    grade.setText(gradeUsed);
+                }
+                score.setText(scoreNew);
+                rowNum.setText(rows);
             }
         });
+    }
+
+    /**
+     * 计算游戏等级
+     * @param grade 当前等级
+     * @param score 当前分数
+     * @return 应该处于的游戏等级
+     */
+    private int computeGrade(int grade, int score) {
+        // 计算出来的成绩
+        double computeScore = score / Math.pow(grade, 2);
+        // 满分成绩
+        int maxScore = 100;
+        if ((int)computeScore >= maxScore) {
+            return computeGrade(grade + 1, score);
+        } else {
+            return grade;
+        }
     }
 
     /**
@@ -142,9 +175,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                setResult(RESULT_OK); finish();
-                                ActivityManager.getInstance().removeActivity(ClassicBlockActivity.this);
+                                Toast.makeText(ClassicBlockActivity.this, "尚未实现", Toast.LENGTH_SHORT).show();
                             }
                         });
             }
@@ -199,20 +230,35 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         switch (view.getId()) {
             case R.id.left : tetris.toLeft(); break;
             case R.id.right : tetris.toRight(); break;
-            case R.id.down : if (!isLongClick) {
-                    tetris.toDown();
-                }else {
-                    isLongClick = false;
-                }
-                break;
+            case R.id.down : downEvent();break;
             case R.id.rotate : tetris.toRotate(); break;
-            case R.id.homepage : tetris.closeDownThread(); dialog.dismiss();finish();
-                ActivityManager.getInstance().removeActivity(this); break;
-            case R.id.refresh : tetris.closeDownThread(); dialog.dismiss();   setResult(RESULT_OK); finish();
-                ActivityManager.getInstance().removeActivity(this); break;
-            case R.id.keepGame : dialog.dismiss(); tetris.startOrPauseDownThread(true); break;
+            case R.id.homepage : exitGame();break;
+            case R.id.keepGame : dialog.dismiss();
+                tetris.startOrPauseDownThread(true);
+                break;
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 下落按钮的点击事件
+     */
+    private void downEvent() {
+        if (!isLongClick) {
+            tetris.toDown();
+        }else {
+            isLongClick = false;
+        }
+    }
+
+    /**
+     * 退出游戏
+     */
+    private void exitGame() {
+        tetris.closeDownThread();
+        dialog.dismiss();
+        finish();
+        ActivityManager.getInstance().removeActivity(this);
     }
 }

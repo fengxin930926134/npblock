@@ -5,7 +5,6 @@ import android.view.View;
 import android.widget.Button;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
-import com.np.block.core.manager.ActivityManager;
 
 /**
  * 主界面
@@ -23,26 +22,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         return R.layout.activity_main;
     }
 
-    /**
-     * 处理从上一个退出的Activity返回的数据
-     * @param requestCode 退出的Activity的code值
-     * @param resultCode 退出的Activity设置的resultCode值
-     * @param data 传递的数据
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ClassicBlockActivity.CODE) {
-            if (resultCode == RESULT_OK) {
-                ActivityManager.getInstance().finishAll();
-            }
-        }
-    }
-
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.classic_block) {
-            startActivityForResult(new Intent(MainActivity.this, ClassicBlockActivity.class), ClassicBlockActivity.CODE);
+            startActivity(new Intent(MainActivity.this, ClassicBlockActivity.class));
         }
     }
 }

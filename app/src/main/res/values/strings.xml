@@ -22,4 +22,12 @@
     <string name="register_input_name_text">请输入昵称</string>
     <string name="barrier_block_text">闯关模式</string>
     <string name="rank_block_text">排位模式</string>
+    <string name="left_text">左移</string>
+    <string name="right_text">右移</string>
+    <string name="rotate_text">旋转</string>
+    <string name="down_text">下移</string>
+    <string name="score_text">分数：</string>
+    <string name="grade_text">等级：</string>
+    <string name="row_num_text">消除行数：</string>
+    <string name="max_score_text">最高分：</string>
 </resources>

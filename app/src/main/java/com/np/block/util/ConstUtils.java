@@ -56,7 +56,7 @@ public class ConstUtils {
     /**
      * 需要用到的颜色的数组
      */
-    public static final int[] COLOR = {Color.parseColor("#FF6600"), Color.BLUE, Color.RED, Color.GREEN, Color.BLACK};
+    public static final int[] COLOR = {Color.parseColor("#FF6600"), Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW};
 
     /**
      * 再次发送短信的秒数

@@ -23,35 +23,44 @@ public class ExampleUnitTest {
 
 
 
-        JSONObject jsonObject = new JSONObject();
-        JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.put("phone","admin");
-        jsonObject1.put("password",123123);
-        jsonObject.put("params",jsonObject1);
-
-
-        try {
-            String response1 = OkHttpUtils.post("/login/verify", jsonObject.toJSONString());
-            JSONObject parse = JSONObject.parseObject(response1);
-            if (parse.getIntValue("status") == 200) {
-                parse = parse.getJSONObject("body");
-                if (parse.getIntValue("code") > 80000){
-                    System.out.println(parse.getString("msg"));
-                }else {
-                    System.out.println(parse.getString("result"));
-                }
-            }else {
-                System.out.println(parse);
-                System.out.println("网络异常");
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-            System.out.println("网络异常");
-        }
+//        JSONObject jsonObject = new JSONObject();
+//        JSONObject jsonObject1 = new JSONObject();
+//        jsonObject1.put("phone","admin");
+//        jsonObject1.put("password",123123);
+//        jsonObject.put("params",jsonObject1);
+//
+//
+//        try {
+//            String response1 = OkHttpUtils.post("/login/verify", jsonObject.toJSONString());
+//            JSONObject parse = JSONObject.parseObject(response1);
+//            if (parse.getIntValue("status") == 200) {
+//                parse = parse.getJSONObject("body");
+//                if (parse.getIntValue("code") > 80000){
+//                    System.out.println(parse.getString("msg"));
+//                }else {
+//                    System.out.println(parse.getString("result"));
+//                }
+//            }else {
+//                System.out.println(parse);
+//                System.out.println("网络异常");
+//            }
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            System.out.println("网络异常");
+//        }
 
         //System.out.println(response1);
 
+        System.out.println(cmpGrade(2, 300));
 
+    }
 
+    private int cmpGrade(int grade, int score) {
+        double a = score / Math.pow(grade, 2);
+        if ((int)a >= 100) {
+            return cmpGrade(grade + 1, score);
+        } else {
+            return grade;
+        }
     }
 }
