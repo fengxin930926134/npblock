@@ -13,6 +13,9 @@ public class SharedPreferencesUtils {
     /**token sp文件名*/
     private static final String SP_TOKEN = "np_token";
 
+    /**游戏分数 sp文件名*/
+    private static final String SP_SCORE = "np_score";
+
     /**
      * 保存token信息
      *
@@ -26,7 +29,7 @@ public class SharedPreferencesUtils {
         SharedPreferences.Editor edit = sp.edit();
         edit.putString(ConstUtils.SP_TOKEN, token);
         edit.putLong(ConstUtils.SP_TOKEN_TIME, tokenTime);
-        return edit.commit();
+        return !edit.commit();
     }
 
     /**
@@ -58,6 +61,31 @@ public class SharedPreferencesUtils {
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();
         return editor.commit();
+    }
+
+    /**
+     * 保存分数信息
+     *
+     * @param context 上下文
+     * @param score 分数
+     * @return boolean
+     */
+    public static boolean saveScore(Context context, int score) {
+        sp = context.getSharedPreferences(SP_SCORE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putInt(ConstUtils.SP_SCORE, score);
+        return !edit.commit();
+    }
+
+    /**
+     * 读取token信息
+     *
+     * @param context 上下文
+     * @return map
+     */
+    public static int readScore(Context context) {
+        sp = context.getSharedPreferences(SP_SCORE, Context.MODE_PRIVATE);
+        return sp.getInt(ConstUtils.SP_SCORE, 0);
     }
 
     /**私有化构造方法*/

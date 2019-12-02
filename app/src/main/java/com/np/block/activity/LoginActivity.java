@@ -122,7 +122,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     //正确结果
                                     JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                     //保存token
-                                    if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                    if (SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
                                         LogUtils.i(TAG, "[SP] token保存失败");
                                     }
                                     //更新ui
@@ -338,7 +338,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                         JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                         updateUiAfterLogin(rest.getString("name"));
                                         //保存token
-                                        if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                        if (SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
                                             LogUtils.i(TAG, "[SP] token保存失败");
                                         }
                                     }
@@ -535,7 +535,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     }else {
                                         JSONObject rest = JSONObject.parseObject(data.getString("result"));
                                         //保存token
-                                        if (!SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
+                                        if (SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
                                             LogUtils.i(TAG, "[SP] token保存失败");
                                         }
                                         updateUiAfterLogin(name);

@@ -54,6 +54,11 @@ public class ConstUtils {
     public static final String SP_TOKEN_TIME = "spTokenTime";
 
     /**
+     * sp 保存经典模式分数的key值
+     */
+    public static final String SP_SCORE = "spScore";
+
+    /**
      * 需要用到的颜色的数组
      */
     public static final int[] COLOR = {Color.parseColor("#FF6600"), Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW};

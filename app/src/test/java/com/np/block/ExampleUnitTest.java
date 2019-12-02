@@ -1,11 +1,14 @@
 package com.np.block;
 
 import com.alibaba.fastjson.JSONObject;
+import com.np.block.core.model.UnitBlock;
 import com.np.block.util.OkHttpUtils;
 
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -16,7 +19,7 @@ import static org.junit.Assert.*;
  */
 public class ExampleUnitTest {
     @Test
-    public void addition_isCorrect() throws IOException {
+    public void addition_isCorrect() throws IOException, CloneNotSupportedException {
         assertEquals(4, 2 + 2);
 //        String response = OkHttpUtils.get("/hello");
 //        System.out.println(response);
@@ -51,8 +54,15 @@ public class ExampleUnitTest {
 
         //System.out.println(response1);
 
-        System.out.println(cmpGrade(2, 300));
+//        System.out.println(cmpGrade(2, 300));
 
+        List<UnitBlock> list = new ArrayList<>();
+        list.add(new UnitBlock(1,2,3));
+        List<UnitBlock> test = new ArrayList<>();
+        test.add(list.get(0).clone());
+        test.get(0).setX(777);
+        System.out.println(list.get(0));
+        System.out.println(test.get(0));
     }
 
     private int cmpGrade(int grade, int score) {

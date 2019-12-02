@@ -13,6 +13,8 @@ import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
 import com.np.block.util.DialogUtils;
+import com.np.block.util.LogUtils;
+import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.TetrisView;
 
@@ -32,11 +34,11 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**消掉的行数*/
     private TextView rowNum;
     /**最高分*/
-    private TextView maxScore;
+    private int maxScore;
     /**暂停对话框*/
     private AlertDialog pauseDialog = null;
     /**判断是否长点击*/
-    public boolean isLongClick = false;
+    private boolean isLongClick = false;
     /**下落的速度*/
     private int speed = 1000;
     /**标识游戏是暂停还是运行*/
@@ -52,12 +54,13 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         score = findViewById(R.id.score);
         grade = findViewById(R.id.grade);
         rowNum = findViewById(R.id.row_num);
-        maxScore = findViewById(R.id.max_score);
+        TextView maxScore = findViewById(R.id.max_score);
         // 初始化数据
         score.setText("0");
         grade.setText("1");
         rowNum.setText("0");
-        maxScore.setText("0");
+        this.maxScore = SharedPreferencesUtils.readScore(context);
+        maxScore.setText(String.valueOf(this.maxScore));
         // 左移按钮
         Button left = findViewById(R.id.left);
         // 右移按钮
@@ -89,6 +92,22 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     @Override
     public int getContentView() {
         return R.layout.activity_classic_block;
+    }
+
+    /**
+     * 主界面的单击事件
+     * @param view 被单击对象
+     */
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.left : tetris.toLeft(); break;
+            case R.id.right : tetris.toRight(); break;
+            case R.id.down : downEvent();break;
+            case R.id.rotate : tetris.toRotate(); break;
+            default:
+                Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -153,10 +172,22 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      */
     private void startGameOverDialog() {
         beginGame = false;
+        int maxScoreNew = Integer.parseInt(score.getText().toString());
+        final String textContent;
+        if (maxScoreNew > maxScore) {
+            textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
+            //保存和上传游戏分数
+            if (SharedPreferencesUtils.saveScore(context, maxScoreNew)) {
+                LogUtils.i(TAG, "[SP] 保存成绩失败");
+            }
+        } else {
+            textContent = "别灰心，再来一次就突破！";
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                DialogUtils.showDialog(context, "游戏结束", "别灰心，再来一次就成功！",
+
+                DialogUtils.showDialog(context, "游戏结束", textContent,
                         "回到主页", "重来", false, false,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -168,7 +199,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(ClassicBlockActivity.this, "尚未实现", Toast.LENGTH_SHORT).show();
+                                refreshGame();
                             }
                         });
             }
@@ -195,7 +226,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(ClassicBlockActivity.this, "尚未实现", Toast.LENGTH_SHORT).show();
+                        refreshGame();
                     }
                 },
                 //继续游戏
@@ -237,22 +268,6 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     }
 
     /**
-     * 主界面的单击事件
-     * @param view 被单击对象
-     */
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.left : tetris.toLeft(); break;
-            case R.id.right : tetris.toRight(); break;
-            case R.id.down : downEvent();break;
-            case R.id.rotate : tetris.toRotate(); break;
-            default:
-                Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
      * 下落按钮的点击事件
      */
     private void downEvent() {
@@ -273,6 +288,13 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         beginGame = false;
         finish();
         ActivityManager.getInstance().removeActivity(this);
+    }
+
+    /**
+     * 刷新游戏
+     */
+    private void refreshGame() {
+        Toast.makeText(ClassicBlockActivity.this, "尚未实现", Toast.LENGTH_SHORT).show();
     }
 
     /**
