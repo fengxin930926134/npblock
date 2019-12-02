@@ -8,7 +8,6 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import com.np.block.activity.ClassicBlockActivity;
-import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
@@ -44,10 +43,6 @@ public class TetrisView extends View {
     private static Paint paintWall = null;
     /**单元块画笔*/
     private static Paint paintBlock = null;
-    /**标识游戏是暂停还是运行*/
-    private boolean runningStatus = false;
-    /**标识游戏是开始还是结束*/
-    private boolean beginGame = true;
     /**保存每行网格中包含俄罗斯方块单元的个数*/
     private int[] blockRowNum = new int[ROW_NUM];
     /**俄罗斯方块*/
@@ -228,25 +223,22 @@ public class TetrisView extends View {
 
     /**
      * 俄罗斯方块下移
+     *
+     * @return boolean true表示游戏结束了
      */
-    public void toDown() {
+    public boolean toDown() {
         if (tetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock)) {
             tetrisControllerUtils.toDown(tetrisUnits);
             tetris.setY(tetris.getY() + UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
             generateAllBlockRectf();
             invalidate();
-            return;
+            return false;
         }
-        // 结束长按
-        fatherActivity.isLongClick = false;
         // 如果方块超出则结束游戏
         if (isGameOver(tetrisUnits)){
-            // 结束掉线程
-            beginGame = false;
-            // 启动游戏结束的弹窗
-            fatherActivity.startGameOverDialog();
-            return;
+            invalidate();
+            return true;
         }
         // 重新给每行方块数赋值为0 然后重新计算每行方块数
         Arrays.fill(blockRowNum, 0);
@@ -274,6 +266,7 @@ public class TetrisView extends View {
         // 此时生成新方块了 需要重新刷新方块模具
         generateTetrisRectf();
         invalidate();
+        return false;
     }
 
     /**
@@ -326,44 +319,6 @@ public class TetrisView extends View {
             // 对主UI进行修改 计算得分等
             fatherActivity.updateDataAndUi(rows.size());
         }
-    }
-
-    /**
-     *  启动下落线程
-     */
-    public void startDownThread () {
-        // 初始化变量
-        runningStatus = true;
-        ThreadPoolManager.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                while (beginGame) {
-                    if (runningStatus) {
-                        //下移
-                        toDown();
-                        try {
-                            Thread.sleep(fatherActivity.speed);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    /**
-     * 开始或者暂停下落线程
-     */
-    public void startOrPauseDownThread (boolean isRunning) {
-        runningStatus = isRunning;
-    }
-
-    /**
-     *  关闭线程
-     */
-    public void closeDownThread() {
-        beginGame = false;
     }
 
     /**

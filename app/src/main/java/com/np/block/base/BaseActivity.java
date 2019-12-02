@@ -85,7 +85,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if((keyCode == KeyEvent.KEYCODE_BACK) && (event.getAction() == KeyEvent.ACTION_DOWN))
+        //event.getRepeatCount() == 0 避免长按
+        if((keyCode == KeyEvent.KEYCODE_BACK) && (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0))
         {
             //判断sdk版本是否大于等于19
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

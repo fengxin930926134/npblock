@@ -34,11 +34,15 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**最高分*/
     private TextView maxScore;
     /**暂停对话框*/
-    private AlertDialog dialog = null;
+    private AlertDialog pauseDialog = null;
     /**判断是否长点击*/
     public boolean isLongClick = false;
     /**下落的速度*/
-    public int speed = 1000;
+    private int speed = 1000;
+    /**标识游戏是暂停还是运行*/
+    private boolean runningStatus = true;
+    /**标识游戏是开始还是结束*/
+    private boolean beginGame = true;
 
     @Override
     public void init() {
@@ -70,29 +74,16 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         down.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                isLongClick = true;
-                ThreadPoolManager.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        do {
-                            //下移
-                            tetris.toDown();
-                            try {
-                                Thread.sleep(80);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        } while (isLongClick);
-                    }
-                });
+                //启动长按下落线程
+                startDownLongThread();
                 // 如果让回调消耗该长按，返回true，否则false，如果false，其他地方监听生效
                 return false;
             }
         });
         // 设置子视图对象的父视图
         tetris.setFatherActivity(this);
-        // 启动下落线程
-        tetris.startDownThread();
+        // 启动下落线程  咳咳  游戏启动
+        startDownThread();
     }
 
     @Override
@@ -160,18 +151,18 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**
      * 创建游戏结束的弹窗
      */
-    public void startGameOverDialog() {
+    private void startGameOverDialog() {
+        beginGame = false;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 DialogUtils.showDialog(context, "游戏结束", "别灰心，再来一次就成功！",
-                        "退出", "重来", false, false,
+                        "回到主页", "重来", false, false,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.cancel();
-                                finish();
-                                ActivityManager.getInstance().removeActivity(ClassicBlockActivity.this);
+                                exitGame();
                             }
                         },
                         new DialogInterface.OnClickListener() {
@@ -188,24 +179,48 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      * 创建暂停时的弹窗
      */
     private void startPauseDialog() {
-        // 创建对话框构建器
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // 获取布局
-        View view = View.inflate(ClassicBlockActivity.this,R.layout.game_pause_dialog,null);
-        // 获取布局中的控件
-        Button homepage = view.findViewById(R.id.homepage);
-        Button refresh = view.findViewById(R.id.refresh);
-        Button keepGame = view.findViewById(R.id.keepGame);
-        // 设置对话框参数
-        builder.setTitle("请选择你的操作").setIcon(R.drawable.ic_launcher_foreground)
-                .setView(view);
-        // 创建对话框
-        dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(false);
-        // 设置按钮单击事件
-        homepage.setOnClickListener(this);
-        refresh.setOnClickListener(this);
-        keepGame.setOnClickListener(this);
+        // 暂停下落
+        runningStatus = false;
+        pauseDialog = DialogUtils.showDialog(context, "游戏暂停", "客官，继续来呗！",
+                "回到主页", "重来", "继续", false, true,
+                //回到主页
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        exitGame();
+                    }
+                },
+                //刷新重来
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(ClassicBlockActivity.this, "尚未实现", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                //继续游戏
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        runningStatus = true;
+                        pauseDialog = null;
+                    }
+                },
+                //重写返回键事件
+                new DialogInterface.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                        if (event.getAction() == KeyEvent.ACTION_DOWN
+                                && keyCode == KeyEvent.KEYCODE_BACK
+                                && event.getRepeatCount() == 0) {
+                            dialog.cancel();
+                            runningStatus = true;
+                            pauseDialog = null;
+                        }
+                        return true;
+                    }
+                });
     }
 
     /**
@@ -213,12 +228,10 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
-            if (dialog == null) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0){
+            if (pauseDialog == null) {
                 startPauseDialog();
             }
-            tetris.startOrPauseDownThread(false);
-            dialog.show();
         }
         return true;
     }
@@ -234,10 +247,6 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
             case R.id.right : tetris.toRight(); break;
             case R.id.down : downEvent();break;
             case R.id.rotate : tetris.toRotate(); break;
-            case R.id.homepage : exitGame();break;
-            case R.id.keepGame : dialog.dismiss();
-                tetris.startOrPauseDownThread(true);
-                break;
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
@@ -247,8 +256,10 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      * 下落按钮的点击事件
      */
     private void downEvent() {
-        if (!isLongClick) {
-            tetris.toDown();
+        if (!isLongClick && beginGame) {
+            if (tetris.toDown()) {
+                beginGame = false;
+            }
         }else {
             isLongClick = false;
         }
@@ -258,9 +269,67 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      * 退出游戏
      */
     private void exitGame() {
-        tetris.closeDownThread();
-        dialog.dismiss();
+        //关闭游戏
+        beginGame = false;
         finish();
         ActivityManager.getInstance().removeActivity(this);
+    }
+
+    /**
+     * 启动下落游戏线程
+     */
+    private void startDownThread () {
+        ThreadPoolManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                while (beginGame) {
+                    if (runningStatus) {
+                        //下移
+                        down();
+                        try {
+                            Thread.sleep(speed);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 启动长按下落线程
+     */
+    private void startDownLongThread() {
+        isLongClick = true;
+        ThreadPoolManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                do {
+                    down();
+                    try {
+                        Thread.sleep(80);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (isLongClick && beginGame);
+            }
+        });
+    }
+
+    /**
+     * 在ui线程中执行方块下落
+     */
+    private synchronized void down() {
+        //下移
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (tetris.toDown()) {
+                    // 启动游戏结束的弹窗
+                    startGameOverDialog();
+                }
+            }
+        });
     }
 }
