@@ -139,9 +139,12 @@ public class tetrisControllerUtils {
         List<UnitBlock> tetrisCoord = tetris.getTetris();
         // 赋值一个实验变量
         List<UnitBlock> unitBlocksTest = new ArrayList<>();
-        for (int i = 0; i < tetrisCoord.size(); i++) {
-            UnitBlock unitBlock = tetrisCoord.get(i);
-            unitBlocksTest.add(new UnitBlock(unitBlock.getX(),unitBlock.getY(),unitBlock.getColor()));
+        try {
+            for (int i = 0; i < tetrisCoord.size(); i++) {
+                unitBlocksTest.add(tetrisCoord.get(i).clone());
+            }
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
         }
         // 旋转实验变量
         for (UnitBlock unitBlock: unitBlocksTest) {
@@ -283,7 +286,7 @@ public class tetrisControllerUtils {
      */
     public static void removeLine(List<UnitBlock> allUnitBlock, int y ){
         for (int i = allUnitBlock.size() - 1; i >= 0; i--) {
-            if ((allUnitBlock.get(i).getY() - TetrisView.BEGIN_LEN_Y) / 50 == y){
+            if ((allUnitBlock.get(i).getY() - TetrisView.BEGIN_LEN_Y) / UnitBlock.BLOCK_SIZE == y){
                 allUnitBlock.remove(i);
             }
         }

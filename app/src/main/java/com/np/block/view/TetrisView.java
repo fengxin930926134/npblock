@@ -314,12 +314,7 @@ public class TetrisView extends View {
                 // 再次判断是否满足一行
                 if (blockRowNum[row - 1] == COLUMN_NUM) {
                     // 循环移除要消掉的行
-                    for (int j = allUnitBlock.size() - 1; j >= 0; j--) {
-                        int y = (allUnitBlock.get(j).getY() - BEGIN_LEN_Y) / UnitBlock.BLOCK_SIZE;
-                        if (y == row) {
-                            allUnitBlock.remove(j);
-                        }
-                    }
+                    tetrisControllerUtils.removeLine(allUnitBlock, row);
                     // 将标记变量还原
                     blockRowNum[row - 1] = 0;
                     // 消除的一行的上方的方块整体下移

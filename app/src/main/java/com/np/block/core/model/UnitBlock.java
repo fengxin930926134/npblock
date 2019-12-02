@@ -1,5 +1,6 @@
 package com.np.block.core.model;
 
+import androidx.annotation.NonNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class UnitBlock {
+public class UnitBlock implements Cloneable {
     /**单元块的边长*/
     public static final int BLOCK_SIZE = 50;
     /**单元块的角度*/
@@ -25,5 +26,11 @@ public class UnitBlock {
         this.x = x;
         this.y = y;
         this.color = color;
+    }
+
+    @NonNull
+    @Override
+    public UnitBlock clone() throws CloneNotSupportedException {
+        return (UnitBlock) super.clone();
     }
 }
