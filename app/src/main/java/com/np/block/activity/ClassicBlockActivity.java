@@ -215,6 +215,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
                                 refreshGame();
                             }
                         });
@@ -242,6 +243,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
                         refreshGame();
                     }
                 },
@@ -308,9 +310,12 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
 
     /**
      * 刷新游戏
+     * 调用recreate方法重新创建Activity会比正常启动Activity多调用了onSaveInstanceState()和
+     * onRestoreInstanceState()两个方法，onSaveInstanceState()会在onCreate方法之前调用。
+     * 所以可以在onCreate()方法中获取onSaveInstanceState()保存的Theme数据
      */
     private void refreshGame() {
-        Toast.makeText(ClassicBlockActivity.this, "尚未实现", Toast.LENGTH_SHORT).show();
+        recreate();
     }
 
     /**
