@@ -135,7 +135,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             LogUtils.e(TAG,"[token登陆]" + e.getMessage());
                         }finally {
                             if (alertDialog != null) {
-                                alertDialog.cancel();
+                                alertDialog.dismiss();
+                                alertDialog = null;
                             }
                         }
                     }
@@ -197,7 +198,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 qqLogin.setVisibility(View.INVISIBLE);
                 phoneLogin.setVisibility(View.INVISIBLE);
                 if (alertDialog != null) {
-                    alertDialog.cancel();
+                    alertDialog.dismiss();
+                    alertDialog = null;
                 }
             }
         });
@@ -347,15 +349,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 }
                             }catch (Exception e){
                                 LogUtils.e(TAG, e.getMessage());
-                                if (alertDialog != null) {
-                                    alertDialog.cancel();
-                                }
                                 Looper.prepare();
                                 Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
                                 Looper.loop();
                             }finally {
                                 if (alertDialog != null) {
-                                    alertDialog.cancel();
+                                    alertDialog.dismiss();
+                                    alertDialog = null;
                                 }
                             }
                         }
@@ -549,13 +549,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 LogUtils.e(TAG, e.getMessage());
                             }finally {
                                 if (alertDialog != null) {
-                                    alertDialog.cancel();
+                                    alertDialog.dismiss();
+                                    alertDialog = null;
                                 }
                             }
                         }else {
                             Looper.prepare();
                             if (alertDialog != null) {
-                                alertDialog.cancel();
+                                alertDialog.dismiss();
+                                alertDialog = null;
                             }
                             Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
                             Looper.loop();
@@ -567,6 +569,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             Toast.makeText(context, "授权失败", Toast.LENGTH_SHORT).show();
             if (alertDialog != null) {
                 alertDialog.cancel();
+                alertDialog = null;
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -619,20 +622,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                         data = data.getJSONObject("body");
                                         if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                             Looper.prepare();
-                                            alertDialog.cancel();
                                             Toast.makeText(activity, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                             Looper.loop();
                                         }else {
                                             //正确结果
                                             Looper.prepare();
-                                            alertDialog.cancel();
-                                            registerDialog.cancel();
+                                            registerDialog.dismiss();
                                             Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
                                             Looper.loop();
                                         }
                                     }else {
                                         Looper.prepare();
-                                        alertDialog.cancel();
                                         Toast.makeText(activity, "请检查网络后重试", Toast.LENGTH_SHORT).show();
                                         Looper.loop();
                                     }
@@ -640,10 +640,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     LogUtils.e(TAG, e.getMessage());
                                     Looper.prepare();
                                     Toast.makeText(activity, "网络异常", Toast.LENGTH_SHORT).show();
-                                    if (alertDialog != null) {
-                                        alertDialog.cancel();
-                                    }
                                     Looper.loop();
+                                }finally {
+                                    if (alertDialog != null) {
+                                        alertDialog.dismiss();
+                                    }
                                 }
                             }
                         });
