@@ -94,6 +94,22 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         return R.layout.activity_classic_block;
     }
 
+    @Override
+    protected void onPause() {
+        // 暂停线程
+        runningStatus = false;
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        // 继续线程
+        if (pauseDialog == null) {
+            runningStatus = true;
+        }
+        super.onResume();
+    }
+
     /**
      * 主界面的单击事件
      * @param view 被单击对象
@@ -170,7 +186,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**
      * 创建游戏结束的弹窗
      */
-    private void startGameOverDialog() {
+    private void startGameOverDialog()  {
         beginGame = false;
         int maxScoreNew = Integer.parseInt(score.getText().toString());
         final String textContent;
