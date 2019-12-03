@@ -69,6 +69,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/classic_block_text"
+                android:background="@mipmap/lou_ti"
                 tools:ignore="ButtonStyle" />
 
             <Button
@@ -77,6 +78,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/barrier_block_text"
+                android:background="@mipmap/tai_yang"
                 tools:ignore="ButtonStyle" />
 
             <Button
@@ -84,6 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:background="@mipmap/hai_zei_wang"
                 tools:ignore="ButtonStyle"
                 android:text="@string/rank_block_text"/>
         </LinearLayout>
