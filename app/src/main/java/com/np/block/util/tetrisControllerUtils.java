@@ -19,7 +19,7 @@ public class tetrisControllerUtils {
      * @param y 单位方块y坐标
      * @return false不能移动; true能移动
      */
-    private  static boolean isOverlap(List<UnitBlock> allBlock, int x, int y){
+    private static boolean isOverlap(List<UnitBlock> allBlock, int x, int y){
         for (UnitBlock unitBlock : allBlock ) {
             if (Math.abs(x - unitBlock.getX()) < UnitBlock.BLOCK_SIZE && Math.abs(y - unitBlock.getY()) < UnitBlock.BLOCK_SIZE ){
                 return true;
@@ -156,8 +156,10 @@ public class tetrisControllerUtils {
         // 把实验变量丢进去判断是否能解决bug  可以则返回true
         if (!routeTran(unitBlocksTest,all)){
             // 不可以则不旋转了
+            unitBlocksTest.clear();
             return;
         }
+        unitBlocksTest.clear();
         // 旋转真实方块
         for (UnitBlock unitBlock: tetrisCoord) {
             int tx = unitBlock.getX();
@@ -180,25 +182,23 @@ public class tetrisControllerUtils {
         boolean overlapAllBlock = false;
         // 左边超出
         boolean needLeftTran = false;
-        //右边超出
+        // 右边超出
         boolean needRightTran = false;
         // 循环判断是否超出边界
         for (UnitBlock u : unitBlocks) {
-            if (u.getX() < TetrisView.BEGIN_LEN_X ) {
+            if (!needLeftTran && u.getX() < TetrisView.BEGIN_LEN_X) {
                 needLeftTran = true;
-                break;
             }
-            if (u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
+            if (!needRightTran && u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
                 needRightTran = true;
-                break;
             }
-            for (UnitBlock allU : all) {
-                // 满足则重叠
-                if (allU.getX() == u.getX() && allU.getY() == u.getY()) {
-                    overlapAllBlock = true;
-                    break;
-                }
+            if (!overlapAllBlock && isOverlap(all, u.getX(), u.getY())){
+                overlapAllBlock = true;
             }
+            //超出下边界
+//            if (u.getY() > TetrisView.end_y_len - UnitBlock.BLOCK_SIZE) {
+//                return false;
+//            }
         }
         // 重叠 又超出边界
         if (overlapAllBlock && (needLeftTran || needRightTran)) {
@@ -236,44 +236,81 @@ public class tetrisControllerUtils {
         }
         // 解决重叠
         if (overlapAllBlock){
-            for (int i = 0; i < Tetris.TETRIS_NUMBER -1; i++) {
-                toLeft(unitBlocks);
-                overlapAllBlock = false;
-                for (UnitBlock u : unitBlocks) {
-                    for (UnitBlock allU : all) {
-                        // 满足则重叠
-                        if (allU.getX() == u.getX() && allU.getY() == u.getY()) {
+            //判断漏出来的方块是左边还是右边
+            int leftOrRight = isLeftOrRight(unitBlocks, all);
+            if (leftOrRight < 0) {
+                for (int i = 0; i < Tetris.TETRIS_NUMBER -1; i++) {
+                    toLeft(unitBlocks);
+                    overlapAllBlock = false;
+                    for (UnitBlock u : unitBlocks) {
+                        if (isOverlap(all, u.getX(), u.getY())){
                             overlapAllBlock = true;
                             break;
                         }
                     }
-                    if (overlapAllBlock) {
-                        break;
+                    if (!overlapAllBlock) {
+                        //验证是否超出边界
+                        return isNotExceed(unitBlocks);
                     }
                 }
-                if (!overlapAllBlock) {
-                    return true;
+            }else if (leftOrRight > 0) {
+                for (int i = 0; i < Tetris.TETRIS_NUMBER -1; i++) {
+                    toRight(unitBlocks);
+                    overlapAllBlock = false;
+                    for (UnitBlock u : unitBlocks) {
+                        if (isOverlap(all, u.getX(), u.getY())){
+                            overlapAllBlock = true;
+                            break;
+                        }
+                    }
+                    if (!overlapAllBlock) {
+                        //验证是否超出边界
+                        return isNotExceed(unitBlocks);
+                    }
                 }
+            }else {
+                return false;
             }
+        }
+        return !overlapAllBlock;
+    }
 
-            for (int i = 0; i < 2*(Tetris.TETRIS_NUMBER -1); i++) {
-                toRight(unitBlocks);
-                overlapAllBlock = false;
-                for (UnitBlock u : unitBlocks) {
-                    for (UnitBlock allU : all) {
-                        // 满足则重叠
-                        if (allU.getX() == u.getX() && allU.getY() == u.getY()) {
-                            overlapAllBlock = true;
-                            break;
-                        }
-                    }
-                    if (overlapAllBlock) {
-                        break;
-                    }
-                }
-                if (!overlapAllBlock) {
-                    return true;
-                }
+    /**
+     * 判断重叠时漏出来的方块是左边还是右边
+     * @param unitBlocks 俄罗斯方块的单位方块
+     * @param all 所有的单位方块
+     * @return 0无法解决， >0右，<0左
+     */
+    private static int isLeftOrRight(List<UnitBlock> unitBlocks, List<UnitBlock> all) {
+        UnitBlock unitBlockOverLap = null;
+        UnitBlock unitBlockNoOverLap = null;
+        for (UnitBlock unitBlock: unitBlocks) {
+            if (isOverlap(all, unitBlock.getX(), unitBlock.getY())) {
+                unitBlockOverLap = unitBlock;
+            } else {
+                unitBlockNoOverLap = unitBlock;
+            }
+            if (unitBlockNoOverLap != null && unitBlockOverLap != null) {
+                return unitBlockNoOverLap.getX() - unitBlockOverLap.getX();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * 判断是否没有超出左右边界
+     *
+     * @param unitBlocks 俄罗斯方块的单位方块
+     * @return boolean
+     */
+    private static boolean isNotExceed(List<UnitBlock> unitBlocks) {
+        // 循环判断是否超出边界
+        for (UnitBlock u : unitBlocks) {
+            if (u.getX() < TetrisView.BEGIN_LEN_X) {
+                return false;
+            }
+            if (u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
+                return false;
             }
         }
         return true;

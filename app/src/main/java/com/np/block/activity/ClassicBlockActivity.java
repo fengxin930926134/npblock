@@ -186,10 +186,11 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**
      * 创建游戏结束的弹窗
      */
-    private void startGameOverDialog()  {
+    private void startGameOverDialog() {
         beginGame = false;
         int maxScoreNew = Integer.parseInt(score.getText().toString());
         final String textContent;
+        // 判断成绩是否需要保存
         if (maxScoreNew > maxScore) {
             textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
             //保存和上传游戏分数
@@ -199,6 +200,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         } else {
             textContent = "别灰心，再来一次就突破！";
         }
+        // 弹出弹窗
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -229,7 +231,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     private void startPauseDialog() {
         // 暂停下落
         runningStatus = false;
-        pauseDialog = DialogUtils.showDialog(context, "游戏暂停", "客官，继续来呗！",
+        pauseDialog = DialogUtils.showDialog(context, "游戏暂停", "客官，继续玩呗~！",
                 "回到主页", "重来", "继续", false, true,
                 //回到主页
                 new DialogInterface.OnClickListener() {
