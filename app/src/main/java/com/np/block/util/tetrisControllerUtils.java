@@ -104,12 +104,22 @@ public class tetrisControllerUtils {
     }
 
     /**
-     * 把当前方块向右下移动一格
+     * 把当前方块向下移动一格
      * @param tetris 俄罗斯方块坐标
      */
     public static void toDown(List<UnitBlock> tetris){
         for (UnitBlock unitBlock : tetris) {
             unitBlock.setY( unitBlock.getY() + UnitBlock.BLOCK_SIZE);
+        }
+    }
+
+    /**
+     * 把当前方块向上移动一格
+     * @param tetris 俄罗斯方块坐标
+     */
+    private static void toUp(List<UnitBlock> tetris){
+        for (UnitBlock unitBlock : tetris) {
+            unitBlock.setY( unitBlock.getY() - UnitBlock.BLOCK_SIZE);
         }
     }
 
@@ -184,7 +194,9 @@ public class tetrisControllerUtils {
         boolean needLeftTran = false;
         // 右边超出
         boolean needRightTran = false;
-        // 循环判断是否超出边界
+        // 下边超出
+        boolean needUpTran = false;
+        // 循环判断是否超出边界以及重叠
         for (UnitBlock u : unitBlocks) {
             if (!needLeftTran && u.getX() < TetrisView.BEGIN_LEN_X) {
                 needLeftTran = true;
@@ -192,13 +204,13 @@ public class tetrisControllerUtils {
             if (!needRightTran && u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
                 needRightTran = true;
             }
+            //超出下边界
+            if (!needUpTran && u.getY() > TetrisView.end_y_len - UnitBlock.BLOCK_SIZE) {
+                needUpTran = true;
+            }
             if (!overlapAllBlock && isOverlap(all, u.getX(), u.getY())){
                 overlapAllBlock = true;
             }
-            //超出下边界
-//            if (u.getY() > TetrisView.end_y_len - UnitBlock.BLOCK_SIZE) {
-//                return false;
-//            }
         }
         // 重叠 又超出边界
         if (overlapAllBlock && (needLeftTran || needRightTran)) {
@@ -272,7 +284,37 @@ public class tetrisControllerUtils {
                 return false;
             }
         }
-        return !overlapAllBlock;
+        // 如果不重叠 尝试解决下边界超出问题
+        if (!overlapAllBlock) {
+            if (needUpTran) {
+                // 赋值一个实验变量
+                for (int i = 0; true; i++) {
+                    if (i >= Tetris.TETRIS_NUMBER) {
+                        //已经上移3次 还是超出，则不能旋转
+                        return false;
+                    }
+                    //向上移动一格
+                    toUp(unitBlocks);
+                    needUpTran = false;
+                    for (UnitBlock u : unitBlocks) {
+                        //超出下边界
+                        if (u.getY() > TetrisView.end_y_len - UnitBlock.BLOCK_SIZE) {
+                            needUpTran = true;
+                            break;
+                        }
+                    }
+                    if (!needUpTran) {
+                        //不超出了
+                        return true;
+                    }
+                }
+            } else {
+                return true;
+            }
+        } else {
+            // 重叠false
+            return false;
+        }
     }
 
     /**
