@@ -1,35 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@drawable/bg_1">
 
-    <LinearLayout
+    <!--头部开始-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.6"
+        android:background="@color/colorBlack">
+
+        <ImageView
+            android:id="@+id/head_img"
+            android:layout_width="65dp"
+            android:layout_height="match_parent"
+            android:src="@mipmap/head"
+            android:contentDescription="@string/app_name"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:text="@string/app_name"
+            android:textSize="18sp"
+            android:layout_toEndOf="@+id/head_img"
+            android:layout_marginTop="5dp"/>
+    </RelativeLayout>
+    <!--头部结尾-->
+
+    <!--中间开始-->
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        tools:ignore="UselessParent">
+        android:layout_height="0dp"
+        android:layout_weight="6.6"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
-        <Button
-            android:id="@+id/classic_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/classic_block_text"/>
+        <!--内容左开始-->
+        <LinearLayout
+            android:id="@+id/left_linear"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/barrier_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/barrier_block_text"/>
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name" />
+        </LinearLayout>
+        <!--内容左结束-->
 
-        <Button
-            android:id="@+id/rank_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rank_block_text"/>
-    </LinearLayout>
+        <!--内容开始-->
+        <LinearLayout
+            android:id="@+id/content_linear"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/left_linear"
+            android:layout_toStartOf="@+id/right_linear"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/classic_block"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/classic_block_text"
+                tools:ignore="ButtonStyle" />
 
-</RelativeLayout>
+            <Button
+                android:id="@+id/barrier_block"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/barrier_block_text"
+                tools:ignore="ButtonStyle" />
+
+            <Button
+                android:id="@+id/rank_block"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                tools:ignore="ButtonStyle"
+                android:text="@string/rank_block_text"/>
+        </LinearLayout>
+        <!--内容结束-->
+
+        <!--内容右开始-->
+        <LinearLayout
+            android:id="@+id/right_linear"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_alignParentEnd="true">
+            <ImageButton
+                android:layout_width="40dp"
+                android:layout_height="0dp"
+                android:background="@mipmap/ic_launcher"
+                android:layout_weight="1"
+                android:layout_gravity="end"
+                android:contentDescription="@string/app_name" />
+            <ImageButton
+                android:layout_width="40dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@mipmap/ic_launcher"
+                android:layout_gravity="end"
+                android:contentDescription="@string/app_name" />
+            <ImageButton
+                android:layout_width="40dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@mipmap/ic_launcher"
+                android:layout_gravity="end"
+                android:contentDescription="@string/app_name" />
+        </LinearLayout>
+        <!--内容右结束-->
+
+    </RelativeLayout>
+    <!--中间结束-->
+
+    <!--尾部开始-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.8">
+
+        <EditText
+            android:id="@+id/edit_query"
+            android:layout_width="250dp"
+            android:layout_height="30dp"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/edit_background"
+            android:hint="@string/app_name"
+            android:textColor="@color/colorGrey"
+            android:autofillHints="@string/app_name"
+            tools:ignore="UnusedAttribute"
+            android:inputType="text" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/edit_query"
+            android:background="@color/colorDarkBlue">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/app_name"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/app_name"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/app_name"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/app_name"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/app_name"
+                tools:ignore="ButtonStyle" />
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name"/>
+        </LinearLayout>
+    </RelativeLayout>
+    <!--尾部结尾-->
+</LinearLayout>
