@@ -152,10 +152,17 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
             public void run() {
                 if (gradeUsed != gradeNew) {
                     Toast.makeText(ClassicBlockActivity.this, "等级提升", Toast.LENGTH_SHORT).show();
-                    //设置下落速度
+                    // 设置下落速度
                     int newSpeed = speed - 200;
-                    if (newSpeed != 0) {
+                    if (newSpeed > 0) {
                         speed = newSpeed;
+                    } else {
+                        // 改变加速规则 -50
+                        int newSpeed_2 = speed - 50;
+                        // 最快速度维持100
+                        if (newSpeed_2 > 50) {
+                            speed = newSpeed_2;
+                        }
                     }
                     grade.setText(String.valueOf(gradeNew));
                 }
