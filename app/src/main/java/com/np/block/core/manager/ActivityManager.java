@@ -11,7 +11,7 @@ import java.util.List;
 public class ActivityManager {
 
     /**全部activity*/
-    private static List<Activity> activities = new ArrayList<>();
+    private static List<Activity> activities;
     /**私有化内部类 第一次加载类时初始化ActivityManager*/
     private static class Inner {
         private static ActivityManager instance = new ActivityManager();
@@ -19,6 +19,7 @@ public class ActivityManager {
 
     /**私有化构造方法*/
     private ActivityManager(){
+        activities = new ArrayList<>();
     }
 
     /**提供一个共有的可以返回类对象的方法*/

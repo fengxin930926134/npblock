@@ -4,6 +4,7 @@ import android.graphics.Color;
 
 /**
  * 常量工具类
+ * 如果特别多了再考虑分类
  * @author fengxin
  */
 public class ConstUtils {
@@ -67,6 +68,11 @@ public class ConstUtils {
      * 再次发送短信的秒数
      */
     public static final int SHORT_MESSAGE_TIME = 30;
+
+    /**
+     * 缓存用户信息数据的KEY
+     */
+    public static final String USER_INFO = "userInfo";
 
     /**
      * 请求url
