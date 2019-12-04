@@ -158,10 +158,11 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                         speed = newSpeed;
                     } else {
                         // 改变加速规则 -50
-                        int newSpeed_2 = speed - 50;
+                        int newSpeedTwo = speed - 50;
                         // 最快速度维持100
-                        if (newSpeed_2 > 50) {
-                            speed = newSpeed_2;
+                        int maxSpeed = 100;
+                        if (newSpeedTwo >= maxSpeed) {
+                            speed = newSpeedTwo;
                         }
                     }
                     grade.setText(String.valueOf(gradeNew));
