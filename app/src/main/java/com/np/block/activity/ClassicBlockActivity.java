@@ -49,7 +49,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     @Override
     public void init() {
         // 获取对应的视图对象
-        tetris = findViewById(R.id.tetrisView);
+        tetris = findViewById(R.id.tetris_view);
         nextTetris = findViewById(R.id.nextTetrisView);
         score = findViewById(R.id.score);
         grade = findViewById(R.id.grade);
