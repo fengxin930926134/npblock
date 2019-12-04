@@ -20,9 +20,9 @@ public class OkHttpUtils {
 
     private static OkHttpClient client  = new OkHttpClient();
 
-    public static String post(String url, JSONObject json) throws IOException {
+    public static String post(String url, String json) throws IOException {
         JSONObject params = new JSONObject();
-        params.put("params", json);
+        params.put("params", JSONObject.parse(json));
         RequestBody body = RequestBody.create(params.toJSONString(), JSON);
         Request request = new Request.Builder()
                 .url(ConstUtils.URL + url)

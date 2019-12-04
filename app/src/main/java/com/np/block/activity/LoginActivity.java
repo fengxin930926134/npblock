@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
@@ -109,11 +110,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 ThreadPoolManager.getInstance().execute(new Runnable() {
                     @Override
                     public void run() {
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("token", token);
-                        jsonObject.put("tokenTime", o);
+                        Users users = new Users();
+                        users.setToken((String) token);
+                        users.setTokenTime((Long) o);
                         try {
-                            String response = OkHttpUtils.post("/user/login", jsonObject);
+                            String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                             JSONObject data = JSONObject.parseObject(response);
                             //解析返回数据
                             if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
@@ -313,21 +314,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void onClick(View v) {
                 EditText password = view.findViewById(R.id.password);
                 EditText phone = view.findViewById(R.id.phone_number);
+                final String phoneText = phone.getText().toString();
                 //验证手机号和密码
-                if (VerificationUtils.validatePhone(phone.getText().toString())){
+                if (VerificationUtils.validatePhone(phoneText)){
                     //关闭弹窗
                     loginDialog.cancel();
                     //打开小圆圈 请求服务器
                     alertDialog = DialogUtils.showDialog(context);
-                    final JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("phone",phone.getText().toString());
-                    jsonObject.put("password",password.getText().toString());
+                    final String passwordText = password.getText().toString();
                     ThreadPoolManager.getInstance().execute(new Runnable() {
                         @Override
                         public void run() {
+                            Users users = new Users();
+                            users.setPhone(phoneText);
+                            users.setPassword(passwordText);
                             try {
                                 //请求服务器
-                                String response = OkHttpUtils.post("/user/login",jsonObject);
+                                String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                                 JSONObject data = JSONObject.parseObject(response);
                                 //解析返回数据
                                 if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
@@ -512,7 +515,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         while (name == null) {
                             number --;
                             try {
-                                Thread.sleep(100);
+                                Thread.sleep(200);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -521,12 +524,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             }
                         }
                         if (number > 0){
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("openId", openId);
-                            jsonObject.put("name", name);
-                            jsonObject.put("headSculpture", figureUrl);
+                            Users users = new Users();
+                            users.setOpenId(openId);
+                            users.setName(name);
+                            users.setHeadSculpture(figureUrl);
                             try {
-                                String response = OkHttpUtils.post("/user/login", jsonObject);
+                                String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                                 JSONObject data = JSONObject.parseObject(response);
                                 //解析返回数据
                                 if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
@@ -613,12 +616,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         ThreadPoolManager.getInstance().execute(new Runnable() {
                             @Override
                             public void run() {
-                                JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name", name);
-                                jsonObject.put("phone", phone);
-                                jsonObject.put("password", password);
+                                Users users = new Users();
+                                users.setName(name);
+                                users.setPhone(phone);
+                                users.setPassword(password);
                                 try {
-                                    String response = OkHttpUtils.post("/user/register", jsonObject);
+                                    String response = OkHttpUtils.post("/user/register", JSONObject.toJSONString(users));
                                     JSONObject data = JSONObject.parseObject(response);
                                     //解析返回数据
                                     if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {

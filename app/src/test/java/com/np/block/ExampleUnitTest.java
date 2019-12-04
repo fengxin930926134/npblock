@@ -2,6 +2,7 @@ package com.np.block;
 
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.core.model.UnitBlock;
+import com.np.block.core.model.Users;
 import com.np.block.util.OkHttpUtils;
 
 import org.junit.Test;
@@ -56,13 +57,32 @@ public class ExampleUnitTest {
 
 //        System.out.println(cmpGrade(2, 300));
 
-        List<UnitBlock> list = new ArrayList<>();
-        list.add(new UnitBlock(1,2,3));
-        List<UnitBlock> test = new ArrayList<>();
-        test.add(list.get(0).clone());
-        test.get(0).setX(777);
-        System.out.println(list.get(0));
-        System.out.println(test.get(0));
+//        List<UnitBlock> list = new ArrayList<>();
+//        list.add(new UnitBlock(1,2,3));
+//        List<UnitBlock> test = new ArrayList<>();
+//        test.add(list.get(0).clone());
+//        test.get(0).setX(777);
+//        System.out.println(list.get(0));
+//        System.out.println(test.get(0));
+
+        Users users = new Users();
+        users.setName("dawdd");
+        users.setPhone("18785517851");
+        String jsonObject = JSONObject.toJSONString(users);
+        System.out.println(jsonObject);
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("params", JSONObject.parse(jsonObject));
+        System.out.println(jsonObject1.toJSONString());
+
+
+
+        JSONObject jsonObject2 = new JSONObject();
+        jsonObject2.put("name", "dawdd");
+        jsonObject2.put("phone","18785517851");
+        JSONObject jsonObject3 = new JSONObject();
+        jsonObject3.put("params2", jsonObject2);
+        System.out.println(jsonObject3.toJSONString());
+
     }
 
     private int cmpGrade(int grade, int score) {
