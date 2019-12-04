@@ -21,6 +21,7 @@ import cn.smssdk.SMSSDK;
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
@@ -82,7 +83,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     /**注册弹窗*/
     private static AlertDialog registerDialog;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void init() {
         //初始化控件
@@ -122,14 +122,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                     Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                 }else {
-                                    //正确结果
-                                    JSONObject rest = JSONObject.parseObject(data.getString("result"));
-                                    //保存token
-                                    if (SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
-                                        LogUtils.i(TAG, "[SP] token保存失败");
-                                    }
-                                    //更新ui
-                                    updateUiAfterLogin(rest.getString("name"));
+                                    loginSuccess(data);
                                 }
                             }else {
                                 Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
@@ -340,12 +333,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                         Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                         Looper.loop();
                                     }else {
-                                        JSONObject rest = JSONObject.parseObject(data.getString("result"));
-                                        updateUiAfterLogin(rest.getString("name"));
-                                        //保存token
-                                        if (SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
-                                            LogUtils.i(TAG, "[SP] token保存失败");
-                                        }
+                                        loginSuccess(data);
                                     }
                                 }else {
                                     Looper.prepare();
@@ -539,12 +527,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                         Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                         Looper.loop();
                                     }else {
-                                        JSONObject rest = JSONObject.parseObject(data.getString("result"));
-                                        //保存token
-                                        if (SharedPreferencesUtils.saveToken(context, rest.getString("token"), rest.getLongValue("tokenTime"))){
-                                            LogUtils.i(TAG, "[SP] token保存失败");
-                                        }
-                                        updateUiAfterLogin(name);
+                                        loginSuccess(data);
                                     }
                                 }else {
                                     Looper.prepare();
@@ -726,5 +709,21 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             flag = false;
             LogUtils.i(TAG, "[QQ]取消登录");
         }
+    }
+
+    /**
+     * 登录成功处理数据
+     * @param data 数据
+     */
+    private void loginSuccess(JSONObject data) {
+        Users usersResult = data.getObject("result", Users.class);
+        // 保存token
+        if (SharedPreferencesUtils.saveToken(context, usersResult.getToken(), usersResult.getTokenTime())){
+            LogUtils.i(TAG, "[SP] token保存失败");
+        }
+        // 更新ui
+        updateUiAfterLogin(usersResult.getName());
+        // 缓存用户数据
+        CacheManager.getInstance().put(ConstUtils.USER_INFO, usersResult);
     }
 }
