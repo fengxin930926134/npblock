@@ -72,6 +72,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static String password;
     /**获取QQ登录的name || 手机注册name暂存*/
     private static String name = null;
+    /**获取QQ头像*/
+    private static String figureUrl;
     /**获取QQ登录的openId*/
     private static String openId;
     /**是否取消登录 false取消*/
@@ -522,6 +524,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("openId", openId);
                             jsonObject.put("name", name);
+                            jsonObject.put("headSculpture", figureUrl);
                             try {
                                 String response = OkHttpUtils.post("/user/login", jsonObject);
                                 JSONObject data = JSONObject.parseObject(response);
@@ -684,6 +687,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         //获取用户信息
                         JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
                         name = jsonObject.getString("nickname");
+                        figureUrl = jsonObject.getString("figureurl_qq_2");
                     }
 
                     @Override

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_2">
+    android:background="@drawable/bg_1">
 
     <!--系统提供的水平进度条-->
     <ProgressBar
@@ -35,7 +36,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
         android:layout_alignParentStart="true"
-        android:textColor="@color/colorWhite"/>
+        android:textColor="@color/colorWhite"
+        tools:ignore="RtlHardcoded" />
 
     <!--右下text-->
     <TextView
@@ -47,7 +49,8 @@
         android:layout_marginRight="10dp"
         android:layout_marginEnd="10dp"
         android:layout_alignParentEnd="true"
-        android:textColor="@color/colorWhite"/>
+        android:textColor="@color/colorWhite"
+        tools:ignore="RtlHardcoded" />
 
     <!-- 用来设置底部空间-->
     <TextView

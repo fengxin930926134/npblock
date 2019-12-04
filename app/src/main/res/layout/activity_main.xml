@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_1">
+    android:background="@drawable/bg_2">
 
     <!--头部开始-->
     <RelativeLayout
@@ -38,20 +38,30 @@
         android:layout_height="0dp"
         android:layout_weight="6.6"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="10dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp">
 
         <!--内容左开始-->
         <LinearLayout
             android:id="@+id/left_linear"
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:layout_marginEnd="20dp">
 
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="match_parent"
-                android:src="@mipmap/ic_launcher"
-                android:contentDescription="@string/app_name" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ranking"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <Button
+                android:id="@+id/ranking_extended"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ranking_extended_text" />
         </LinearLayout>
         <!--内容左结束-->
 
@@ -95,7 +105,7 @@
         <!--内容右开始-->
         <LinearLayout
             android:id="@+id/right_linear"
-            android:layout_width="100dp"
+            android:layout_width="70dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_alignParentEnd="true">
