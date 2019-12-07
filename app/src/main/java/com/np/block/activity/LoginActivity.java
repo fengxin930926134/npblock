@@ -19,6 +19,7 @@ import androidx.annotation.RequiresApi;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 import com.alibaba.fastjson.JSONObject;
+import com.np.block.NpBlockApplication;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.CacheManager;
@@ -90,7 +91,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //初始化背景
         initVideo();
         //Tencent类是SDK的主要实现类，开发者可通过Tencent类访问腾讯开放的OpenAPI。
-        mTencent = Tencent.createInstance(ConstUtils.APP_ID, this.getApplicationContext());
+        mTencent = Tencent.createInstance(ConstUtils.APP_ID, NpBlockApplication.getInstance().getApplicationContext());
         qqLoginListener = new BaseUiListener();
         tokenLogin();
     }
