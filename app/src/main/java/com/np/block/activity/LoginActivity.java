@@ -100,7 +100,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     private void tokenLogin() {
         //检查本地token
-        Map<String, Object> map = SharedPreferencesUtils.readToken(context);
+        Map<String, Object> map = SharedPreferencesUtils.readToken();
         if (map != null) {
             final Object o = map.get(ConstUtils.SP_TOKEN_TIME);
             if (o instanceof Long){
@@ -173,7 +173,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         beginGame.setVisibility(View.INVISIBLE);
         districtService.setVisibility(View.INVISIBLE);
         //清除token
-        if (!SharedPreferencesUtils.clearToken(context)){
+        if (!SharedPreferencesUtils.clearToken()){
             LogUtils.i(TAG, "[SP] token清理失败");
         }
     }
@@ -717,7 +717,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private void loginSuccess(JSONObject data) {
         Users usersResult = data.getObject("result", Users.class);
         // 保存token
-        if (SharedPreferencesUtils.saveToken(context, usersResult.getToken(), usersResult.getTokenTime())){
+        if (SharedPreferencesUtils.saveToken(usersResult.getToken(), usersResult.getTokenTime())){
             LogUtils.i(TAG, "[SP] token保存失败");
         }
         // 更新ui

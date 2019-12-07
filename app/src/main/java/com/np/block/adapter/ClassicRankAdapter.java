@@ -1,8 +1,8 @@
 package com.np.block.adapter;
 
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,7 +11,10 @@ import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.np.block.R;
+import com.np.block.core.manager.CacheManager;
 import com.np.block.core.model.Users;
+import com.np.block.util.ConstUtils;
+
 import java.util.List;
 
 /**
@@ -20,6 +23,8 @@ import java.util.List;
  */
 public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> {
 
+    /**读取当前用户信息*/
+    private Users users;
     /**头像属性配置*/
     private RequestOptions options =new RequestOptions()
             //加载成功之前占位图
@@ -37,17 +42,22 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
 
     public ClassicRankAdapter(int layoutResId, @Nullable List<Users> data) {
         super(layoutResId, data);
+        Object o = CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+        if (o instanceof Users){
+            users = (Users) o;
+        }
     }
 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, Users item) {
-        ImageView rankItemImg = helper.getView(R.id.rank_item_img);
-        TextView rankItemName = helper.getView(R.id.rank_item_name);
-        TextView rankItemScore = helper.getView(R.id.rank_item_score);
+        if (users.getToken().equals(item.getToken())) {
+            helper.setBackgroundColor(R.id.rank_item_background, Color.WHITE);
+        }
         //设置成绩
-        rankItemName.setText(item.getName() != null ? item.getName() : "");
-        rankItemScore.setText(item.getClassicScore() != null ? item.getClassicScore()+"": "0");
+        helper.setText(R.id.rank_item_name, item.getName() != null ? item.getName() : "");
+        helper.setText(R.id.rank_item_score, item.getClassicScore() != null ? item.getClassicScore()+"": "0");
         //加载头像
+        ImageView rankItemImg = helper.getView(R.id.rank_item_img);
         Glide.with(mContext)
                 .load(item.getHeadSculpture())
                 .apply(options)

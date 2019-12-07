@@ -14,10 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
-        tools:replace="android:allowBackup">
-        <!--要继续使用 Apache HTTP 客户端，以 Android 9 及更高版本为目标的应用
-        可以向其 AndroidManifest.xml的application节点下 添加以下内容：-->
-        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+        tools:replace="android:allowBackup"
+        android:name=".NpBlockApplication">
         <!-- 基类activity注册 -->
         <activity android:name="com.np.block.base.BaseActivity"
             android:screenOrientation="sensorLandscape"/>

@@ -10,7 +10,7 @@ import java.util.List;
  * 控制俄罗斯方块的工具类
  * @author fengxin
  */
-public class tetrisControllerUtils {
+public class TetrisControllerUtils {
 
     /**
      * 判断方块单元和所有方块是否有重叠

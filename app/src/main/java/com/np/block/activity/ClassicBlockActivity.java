@@ -61,7 +61,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         score.setText("0");
         grade.setText("1");
         rowNum.setText("0");
-        this.maxScore = SharedPreferencesUtils.readScore(context);
+        this.maxScore = SharedPreferencesUtils.readScore();
         maxScore.setText(String.valueOf(this.maxScore));
         // 左移按钮
         Button left = findViewById(R.id.left);
@@ -204,7 +204,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         if (maxScoreNew > maxScore) {
             textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
             // 保存本地
-            if (SharedPreferencesUtils.saveScore(context, maxScoreNew)) {
+            if (SharedPreferencesUtils.saveScore(maxScoreNew)) {
                 LogUtils.i(TAG, "[SP] 保存成绩失败");
             }
             // 上传游戏分数

@@ -11,7 +11,7 @@ import com.np.block.activity.ClassicBlockActivity;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
-import com.np.block.util.tetrisControllerUtils;
+import com.np.block.util.TetrisControllerUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -201,8 +201,8 @@ public class TetrisView extends View {
      * 俄罗斯方块左移
      */
     public void toLeft() {
-        if (tetrisControllerUtils.canMoveLeft(tetrisUnits, allUnitBlock)) {
-            tetrisControllerUtils.toLeft(tetrisUnits);
+        if (TetrisControllerUtils.canMoveLeft(tetrisUnits, allUnitBlock)) {
+            TetrisControllerUtils.toLeft(tetrisUnits);
             tetris.setX(tetris.getX() - UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
         }
@@ -213,8 +213,8 @@ public class TetrisView extends View {
      * 俄罗斯方块右移
      */
     public void toRight() {
-        if (tetrisControllerUtils.canMoveRight(tetrisUnits, allUnitBlock)) {
-            tetrisControllerUtils.toRight(tetrisUnits);
+        if (TetrisControllerUtils.canMoveRight(tetrisUnits, allUnitBlock)) {
+            TetrisControllerUtils.toRight(tetrisUnits);
             tetris.setX(tetris.getX() + UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
         }
@@ -227,8 +227,8 @@ public class TetrisView extends View {
      * @return boolean true表示游戏结束了
      */
     public boolean toDown() {
-        if (tetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock)) {
-            tetrisControllerUtils.toDown(tetrisUnits);
+        if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock)) {
+            TetrisControllerUtils.toDown(tetrisUnits);
             tetris.setY(tetris.getY() + UnitBlock.BLOCK_SIZE);
             generateTetrisRectf();
             generateAllBlockRectf();
@@ -273,7 +273,7 @@ public class TetrisView extends View {
      * 俄罗斯方块旋转
      */
     public void toRotate() {
-        tetrisControllerUtils.toRotate(tetris, allUnitBlock);
+        TetrisControllerUtils.toRotate(tetris, allUnitBlock);
         generateTetrisRectf();
         invalidate();
     }
@@ -307,11 +307,11 @@ public class TetrisView extends View {
                 // 再次判断是否满足一行
                 if (blockRowNum[row - 1] == COLUMN_NUM) {
                     // 循环移除要消掉的行
-                    tetrisControllerUtils.removeLine(allUnitBlock, row);
+                    TetrisControllerUtils.removeLine(allUnitBlock, row);
                     // 将标记变量还原
                     blockRowNum[row - 1] = 0;
                     // 消除的一行的上方的方块整体下移
-                    tetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
+                    TetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
                 }
             }
             // 对模具刷新
