@@ -13,6 +13,7 @@ import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
+import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
@@ -61,7 +62,17 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         score.setText("0");
         grade.setText("1");
         rowNum.setText("0");
-        this.maxScore = SharedPreferencesUtils.readScore();
+        // 当本地数据没有的时候读取缓存数据
+        if ((this.maxScore = SharedPreferencesUtils.readScore()) == 0) {
+            Users user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+            if (user != null && user.getClassicScore() > 0) {
+                this.maxScore = user.getClassicScore();
+                // 保存本地
+                if (SharedPreferencesUtils.saveScore(this.maxScore)) {
+                    LogUtils.i(TAG, "[SP] 保存成绩失败");
+                }
+            }
+        }
         maxScore.setText(String.valueOf(this.maxScore));
         // 左移按钮
         Button left = findViewById(R.id.left);
