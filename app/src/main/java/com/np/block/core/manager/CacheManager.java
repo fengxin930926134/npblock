@@ -31,6 +31,14 @@ public class CacheManager {
         return mMap.get(key);  
     }
 
+    public void remove(String key) {
+        mMap.remove(key);
+    }
+
+    public boolean containsKey(String key) {
+        return mMap.containsKey(key);
+    }
+
     /**私有化构造方法*/
     private CacheManager() {
         mMap = new HashMap<>();

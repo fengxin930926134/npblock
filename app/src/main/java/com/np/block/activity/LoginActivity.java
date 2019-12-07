@@ -246,6 +246,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.begin_game:
+                videoview.stopPlayback();
                 //开始游戏
                 startActivity(new Intent(context, MainActivity.class));
                 break;
@@ -366,6 +367,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     private void phoneRegister() {
         registerDialog = DialogUtils.showDialogDefault(context);
+        // 注册mod回调监听接口
+        SMSSDK.registerEventHandler(new EventHandler() {
+            @Override
+            public void afterEvent(int event, int result, Object data) {
+                // afterEvent会在子线程被调用，因此如果后续有UI相关操作，需要将数据发送到UI线程
+                Message msg = new Message();
+                msg.arg1 = event;
+                msg.arg2 = result;
+                msg.obj = data;
+                mHandler.sendMessage(msg);
+            }
+        });
         //初始化注册布局
         View view = initSendCode();
         //finish按钮
@@ -388,18 +401,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      */
     private View initSendCode() {
         View view = View.inflate(context, R.layout.alert_dialog_register, null);
-        // 注册mod回调监听接口
-        SMSSDK.registerEventHandler(new EventHandler() {
-            @Override
-            public void afterEvent(int event, int result, Object data) {
-                // afterEvent会在子线程被调用，因此如果后续有UI相关操作，需要将数据发送到UI线程
-                Message msg = new Message();
-                msg.arg1 = event;
-                msg.arg2 = result;
-                msg.obj = data;
-                mHandler.sendMessage(msg);
-            }
-        });
         //发送验证码按钮
         requestCodeBtn = view.findViewById(R.id.register_request_code_btn);
         final EditText registerInputName = view.findViewById(R.id.register_input_name);
@@ -434,13 +435,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 }
             }
         });
-
         //发送验证码
         requestCodeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String phoneNum = registerInputPhone.getText().toString().trim();
-                LogUtils.i(TAG, phoneNum);
                 // 1. 通过规则判断手机号
                 if (!VerificationUtils.validatePhone(phoneNum)) {
                     Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
@@ -724,6 +723,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         // 更新ui
         updateUiAfterLogin(usersResult.getName());
         // 缓存用户数据
-        CacheManager.getInstance().put(ConstUtils.USER_INFO, usersResult);
+        CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, usersResult);
     }
 }

@@ -10,8 +10,10 @@ import android.widget.Toast;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ActivityManager;
+import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
+import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LogUtils;
 import com.np.block.util.SharedPreferencesUtils;
@@ -201,10 +203,12 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         // 判断成绩是否需要保存
         if (maxScoreNew > maxScore) {
             textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
-            //保存和上传游戏分数
+            // 保存本地
             if (SharedPreferencesUtils.saveScore(context, maxScoreNew)) {
                 LogUtils.i(TAG, "[SP] 保存成绩失败");
             }
+            // 上传游戏分数
+            CacheManager.getInstance().put(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE, maxScoreNew);
         } else {
             textContent = "别灰心，再来一次就突破！";
         }
@@ -212,7 +216,6 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 DialogUtils.showDialog(context, "游戏结束", textContent,
                         "回到主页", "重来", false, false,
                         new DialogInterface.OnClickListener() {

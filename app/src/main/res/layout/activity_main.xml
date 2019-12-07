@@ -22,6 +22,7 @@
             android:layout_marginEnd="10dp"/>
 
         <TextView
+            android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorWhite"
@@ -52,7 +53,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/ranking"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1">
             </androidx.recyclerview.widget.RecyclerView>
@@ -61,6 +62,7 @@
                 android:id="@+id/ranking_extended"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="15sp"
                 android:text="@string/ranking_extended_text" />
         </LinearLayout>
         <!--内容左结束-->

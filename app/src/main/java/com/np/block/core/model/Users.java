@@ -3,8 +3,11 @@ package com.np.block.core.model;
 import lombok.Data;
 import java.util.Date;
 
+/**
+ * 对应后台users表
+ * @author fengxin
+ */
 @Data
-
 public class Users {
     private Integer id;
     private String name;

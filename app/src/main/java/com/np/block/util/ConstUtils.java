@@ -42,7 +42,7 @@ public class ConstUtils {
     /**
      * 字符编码
      */
-    public static final String CHARSET = "UTF-8";
+    static final String CHARSET = "UTF-8";
 
     /**
      * sp 保存token的key值
@@ -57,7 +57,7 @@ public class ConstUtils {
     /**
      * sp 保存经典模式分数的key值
      */
-    public static final String SP_SCORE = "spScore";
+    static final String SP_SCORE = "spScore";
 
     /**
      * 需要用到的颜色的数组
@@ -72,7 +72,12 @@ public class ConstUtils {
     /**
      * 缓存用户信息数据的KEY
      */
-    public static final String USER_INFO = "userInfo";
+    public static final String CACHE_USER_INFO = "userInfo";
+
+    /**
+     * 缓存用户等待上传的经典模式分数的KEY
+     */
+    public static final String CACHE_WAIT_UPLOAD_CLASSIC_SCORE = "waitUploadClassicScore";
 
     /**
      * 请求url
