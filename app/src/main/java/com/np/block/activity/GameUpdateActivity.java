@@ -26,44 +26,38 @@ public class GameUpdateActivity extends BaseActivity {
         left.setText("正在检查更新...");
         right = findViewById(R.id.bottom_right_text);
         //开启线程更新
-        ThreadPoolManager.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                updateUi("开始更新游戏...", "0%", 0);
-                do {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    progress = progress + 10;
-                    String barProgress = progress + "%";
-                    updateUi("正在更新游戏...", barProgress, progress);
-                } while (progress != 100);
-                updateUi("游戏更新完成", "100%", progress);
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                startActivity(new Intent(GameUpdateActivity.this, LoginActivity.class));
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            updateUi("开始更新游戏...", "0%", 0);
+            do {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                progress = progress + 10;
+                String barProgress = progress + "%";
+                updateUi("正在更新游戏...", barProgress, progress);
+            } while (progress != 100);
+            updateUi("游戏更新完成", "100%", progress);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            startActivity(new Intent(GameUpdateActivity.this, LoginActivity.class));
         });
     }
 
     private void updateUi(final String text1, final String text2, final int progress){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                left.setText(text1);
-                right.setText(text2);
-                bar.setProgress(progress);
-            }
+        runOnUiThread(() -> {
+            left.setText(text1);
+            right.setText(text2);
+            bar.setProgress(progress);
         });
     }
 

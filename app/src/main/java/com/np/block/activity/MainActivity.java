@@ -78,25 +78,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // 判断是否存在未上传成绩
         if (CacheManager.getInstance().containsKey(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE)) {
             final int score = (int) CacheManager.getInstance().get(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
-            ThreadPoolManager.getInstance().execute(new Runnable() {
-                @Override
-                public void run() {
-                    users.setClassicScore(score);
-                    try {
-                        String response = OkHttpUtils.post("/rank/uploadClassic", JSONObject.toJSONString(users));
-                        JSONObject data = JSONObject.parseObject(response);
-                        //解析返回数据
-                        if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                            data = data.getJSONObject("body");
-                            if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                                refreshRankData(false);
-                                // 清缓存
-                                CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
-                            }
+            ThreadPoolManager.getInstance().execute(() -> {
+                users.setClassicScore(score);
+                try {
+                    String response = OkHttpUtils.post("/rank/uploadClassic", JSONObject.toJSONString(users));
+                    JSONObject data = JSONObject.parseObject(response);
+                    //解析返回数据
+                    if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                        data = data.getJSONObject("body");
+                        if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                            refreshRankData(false);
+                            // 清缓存
+                            CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
                         }
-                    } catch (IOException e) {
-                        LogUtils.e(TAG, e.getMessage());
                     }
+                } catch (IOException e) {
+                    LogUtils.e(TAG, e.getMessage());
                 }
             });
         }
@@ -107,12 +104,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化排行榜adapter的数据
      */
     private void initRankData(){
-        ThreadPoolManager.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                // 获取最新排行榜数据
-                refreshRankData(true);
-            }
+        ThreadPoolManager.getInstance().execute(() -> {
+            // 获取最新排行榜数据
+            refreshRankData(true);
         });
     }
 
@@ -134,12 +128,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         adapterDate.clear();
                         adapterDate.addAll(JSONObject.parseArray(data.getString("result"), Users.class));
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // 刷新数据
-                            classicRankAdapter.notifyDataSetChanged();
-                        }
+                    runOnUiThread(() -> {
+                        // 刷新数据
+                        classicRankAdapter.notifyDataSetChanged();
                     });
                 }else {
                     //获取失败

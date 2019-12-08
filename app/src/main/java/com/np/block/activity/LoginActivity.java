@@ -2,8 +2,6 @@ package com.np.block.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 import com.alibaba.fastjson.JSONObject;
@@ -108,33 +105,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 final Object token = map.get(ConstUtils.SP_TOKEN);
                 //执行token登陆
                 alertDialog = DialogUtils.showDialog(context);
-                ThreadPoolManager.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Users users = new Users();
-                        users.setToken((String) token);
-                        users.setTokenTime((Long) o);
-                        try {
-                            String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
-                            JSONObject data = JSONObject.parseObject(response);
-                            //解析返回数据
-                            if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                data = data.getJSONObject("body");
-                                if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                    Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                                }else {
-                                    loginSuccess(data);
-                                }
+                ThreadPoolManager.getInstance().execute(() -> {
+                    Users users = new Users();
+                    users.setToken((String) token);
+                    users.setTokenTime((Long) o);
+                    try {
+                        String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
+                        JSONObject data = JSONObject.parseObject(response);
+                        //解析返回数据
+                        if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                            data = data.getJSONObject("body");
+                            if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
+                                Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                             }else {
-                                Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                loginSuccess(data);
                             }
-                        }catch (Exception e){
-                            LogUtils.e(TAG,"[token登陆]" + e.getMessage());
-                        }finally {
-                            if (alertDialog != null) {
-                                alertDialog.dismiss();
-                                alertDialog = null;
-                            }
+                        }else {
+                            Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                        }
+                    }catch (Exception e){
+                        LogUtils.e(TAG,"[token登陆]" + e.getMessage());
+                    }finally {
+                        if (alertDialog != null) {
+                            alertDialog.dismiss();
+                            alertDialog = null;
                         }
                     }
                 });
@@ -184,20 +178,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * @param name 用户名
      */
     private void updateUiAfterLogin(final String name){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                userName.setText(name);
-                userName.setVisibility(View.VISIBLE);
-                cancellation.setVisibility(View.VISIBLE);
-                beginGame.setVisibility(View.VISIBLE);
-                districtService.setVisibility(View.VISIBLE);
-                qqLogin.setVisibility(View.INVISIBLE);
-                phoneLogin.setVisibility(View.INVISIBLE);
-                if (alertDialog != null) {
-                    alertDialog.dismiss();
-                    alertDialog = null;
-                }
+        runOnUiThread(() -> {
+            userName.setText(name);
+            userName.setVisibility(View.VISIBLE);
+            cancellation.setVisibility(View.VISIBLE);
+            beginGame.setVisibility(View.VISIBLE);
+            districtService.setVisibility(View.VISIBLE);
+            qqLogin.setVisibility(View.INVISIBLE);
+            phoneLogin.setVisibility(View.INVISIBLE);
+            if (alertDialog != null) {
+                alertDialog.dismiss();
+                alertDialog = null;
             }
         });
     }
@@ -211,12 +202,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //播放
         videoview.start();
         //循环播放
-        videoview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                videoview.start();
-            }
-        });
+        videoview.setOnCompletionListener(mediaPlayer -> videoview.start());
     }
 
     @Override
@@ -288,76 +274,61 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         final AlertDialog loginDialog = DialogUtils.showDialogDefault(context);
         final View view = View.inflate(context, R.layout.alert_dialog_login, null);
         //finish按钮
-        view.findViewById(R.id.alert_login_finish).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginDialog.cancel();
-            }
-        });
+        view.findViewById(R.id.alert_login_finish).setOnClickListener(v -> loginDialog.cancel());
         //注册按钮
-        view.findViewById(R.id.alert_login_register).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginDialog.cancel();
-                phoneRegister();
-            }
+        view.findViewById(R.id.alert_login_register).setOnClickListener(v -> {
+            loginDialog.cancel();
+            phoneRegister();
         });
         //登陆按钮
-        view.findViewById(R.id.alert_login_btn).setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onClick(View v) {
-                EditText password = view.findViewById(R.id.password);
-                EditText phone = view.findViewById(R.id.phone_number);
-                final String phoneText = phone.getText().toString();
-                //验证手机号和密码
-                if (VerificationUtils.validatePhone(phoneText)){
-                    //关闭弹窗
-                    loginDialog.cancel();
-                    //打开小圆圈 请求服务器
-                    alertDialog = DialogUtils.showDialog(context);
-                    final String passwordText = password.getText().toString();
-                    ThreadPoolManager.getInstance().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            Users users = new Users();
-                            users.setPhone(phoneText);
-                            users.setPassword(passwordText);
-                            try {
-                                //请求服务器
-                                String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
-                                JSONObject data = JSONObject.parseObject(response);
-                                //解析返回数据
-                                if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                    data = data.getJSONObject("body");
-                                    if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                        Looper.prepare();
-                                        Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                                        Looper.loop();
-                                    }else {
-                                        loginSuccess(data);
-                                    }
-                                }else {
-                                    Looper.prepare();
-                                    Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
-                                    Looper.loop();
-                                }
-                            }catch (Exception e){
-                                LogUtils.e(TAG, e.getMessage());
+        view.findViewById(R.id.alert_login_btn).setOnClickListener(v -> {
+            EditText password = view.findViewById(R.id.password);
+            EditText phone = view.findViewById(R.id.phone_number);
+            final String phoneText = phone.getText().toString();
+            //验证手机号和密码
+            if (VerificationUtils.validatePhone(phoneText)){
+                //关闭弹窗
+                loginDialog.cancel();
+                //打开小圆圈 请求服务器
+                alertDialog = DialogUtils.showDialog(context);
+                final String passwordText = password.getText().toString();
+                ThreadPoolManager.getInstance().execute(() -> {
+                    Users users = new Users();
+                    users.setPhone(phoneText);
+                    users.setPassword(passwordText);
+                    try {
+                        //请求服务器
+                        String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
+                        JSONObject data = JSONObject.parseObject(response);
+                        //解析返回数据
+                        if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                            data = data.getJSONObject("body");
+                            if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                 Looper.prepare();
-                                Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                 Looper.loop();
-                            }finally {
-                                if (alertDialog != null) {
-                                    alertDialog.dismiss();
-                                    alertDialog = null;
-                                }
+                            }else {
+                                loginSuccess(data);
                             }
+                        }else {
+                            Looper.prepare();
+                            Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                            Looper.loop();
                         }
-                    });
-                } else {
-                    Toast.makeText(context, "请输入正确手机号", Toast.LENGTH_SHORT).show();
-                }
+                    }catch (Exception e){
+                        LogUtils.e(TAG, e.getMessage());
+                        Looper.prepare();
+                        Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                        Looper.loop();
+                    }finally {
+                        if (alertDialog != null) {
+                            alertDialog.dismiss();
+                            alertDialog = null;
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(context, "请输入正确手机号", Toast.LENGTH_SHORT).show();
             }
         });
         loginDialog.setContentView(view);
@@ -383,13 +354,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         //初始化注册布局
         View view = initSendCode();
         //finish按钮
-        view.findViewById(R.id.alert_register_finish).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerDialog.cancel();
-                //注销SMSSDK
-                SMSSDK.unregisterAllEventHandler();
-            }
+        view.findViewById(R.id.alert_register_finish).setOnClickListener(v -> {
+            registerDialog.cancel();
+            //注销SMSSDK
+            SMSSDK.unregisterAllEventHandler();
         });
         //设置弹窗视图
         registerDialog.setContentView(view);
@@ -409,75 +377,58 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         final EditText inputCode = view.findViewById(R.id.register_input_code);
         final EditText registerInputPassword = view.findViewById(R.id.register_input_password);
         //提交验证码
-        view.findViewById(R.id.register_commit_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String phoneNum = registerInputPhone.getText().toString().trim();
-                String passWord = registerInputPassword.getText().toString().trim();
-                String nameText = registerInputName.getText().toString();
-                if (!VerificationUtils.validateName(nameText)){
-                    Toast.makeText(context, "昵称格式不正确", Toast.LENGTH_SHORT).show();
-                }else if (!VerificationUtils.validatePhone(phoneNum)) {
-                    Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
-                } else if (!VerificationUtils.validatePwd(passWord)) {
-                    // 判断密码正确性
-                    Toast.makeText(context, "密码格式错误（6-16位字母或数字）", Toast.LENGTH_SHORT).show();
-                } else if (TextUtils.isEmpty(inputCode.getText().toString())){
-                    Toast.makeText(context, "验证码不能为空", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    //将收到的验证码和手机号提交再次核对
-                    SMSSDK.submitVerificationCode("86", phoneNum, inputCode
-                            .getText().toString());
-                    //暂存
-                    name =  nameText;
-                    phone = phoneNum;
-                    password = passWord;
-                }
+        view.findViewById(R.id.register_commit_btn).setOnClickListener(v -> {
+            String phoneNum = registerInputPhone.getText().toString().trim();
+            String passWord = registerInputPassword.getText().toString().trim();
+            String nameText = registerInputName.getText().toString();
+            if (!VerificationUtils.validateName(nameText)){
+                Toast.makeText(context, "昵称格式不正确", Toast.LENGTH_SHORT).show();
+            }else if (!VerificationUtils.validatePhone(phoneNum)) {
+                Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
+            } else if (!VerificationUtils.validatePwd(passWord)) {
+                // 判断密码正确性
+                Toast.makeText(context, "密码格式错误（6-16位字母或数字）", Toast.LENGTH_SHORT).show();
+            } else if (TextUtils.isEmpty(inputCode.getText().toString())){
+                Toast.makeText(context, "验证码不能为空", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                //将收到的验证码和手机号提交再次核对
+                SMSSDK.submitVerificationCode("86", phoneNum, inputCode
+                        .getText().toString());
+                //暂存
+                name =  nameText;
+                phone = phoneNum;
+                password = passWord;
             }
         });
         //发送验证码
-        requestCodeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String phoneNum = registerInputPhone.getText().toString().trim();
-                // 1. 通过规则判断手机号
-                if (!VerificationUtils.validatePhone(phoneNum)) {
-                    Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
-                } else {
-                    // 2. 通过sdk请求验证码
-                    SMSSDK.getVerificationCode("86", phoneNum);
-                    requestCodeBtn.setEnabled(false);
-                    //30秒后再请求发送验证码
-                    ThreadPoolManager.getInstance().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            //第一次设置
-                            for (int i = ConstUtils.SHORT_MESSAGE_TIME; i > 0; i--) {
-                                final String text =  "重新发送("+i+")";
-                                mHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        requestCodeBtn.setText(text);
-                                    }
-                                });
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            final String text =  "获取验证码";
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    requestCodeBtn.setText(text);
-                                    requestCodeBtn.setEnabled(true);
-                                }
-                            });
+        requestCodeBtn.setOnClickListener(v -> {
+            String phoneNum = registerInputPhone.getText().toString().trim();
+            // 1. 通过规则判断手机号
+            if (!VerificationUtils.validatePhone(phoneNum)) {
+                Toast.makeText(context, "手机号错误, 请重新输入", Toast.LENGTH_SHORT).show();
+            } else {
+                // 2. 通过sdk请求验证码
+                SMSSDK.getVerificationCode("86", phoneNum);
+                requestCodeBtn.setEnabled(false);
+                //30秒后再请求发送验证码
+                ThreadPoolManager.getInstance().execute(() -> {
+                    //第一次设置
+                    for (int i = ConstUtils.SHORT_MESSAGE_TIME; i > 0; i--) {
+                        final String text =  "重新发送("+i+")";
+                        mHandler.post(() -> requestCodeBtn.setText(text));
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
+                    }
+                    final String text =  "获取验证码";
+                    mHandler.post(() -> {
+                        requestCodeBtn.setText(text);
+                        requestCodeBtn.setEnabled(true);
                     });
-                }
+                });
             }
         });
         return view;
@@ -496,61 +447,58 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             if (flag){
                 alertDialog = DialogUtils.showDialog(context);
                 //请求login接口  通过线程休眠来保证能获取到name 但并不是一个好的解决办法
-                ThreadPoolManager.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        int number = 40;
-                        while (name == null) {
-                            number --;
-                            try {
-                                Thread.sleep(200);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            if (number <= 0){
-                                break;
-                            }
+                ThreadPoolManager.getInstance().execute(() -> {
+                    int number = 40;
+                    while (name == null) {
+                        number --;
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-                        if (number > 0){
-                            Users users = new Users();
-                            users.setOpenId(openId);
-                            users.setName(name);
-                            users.setHeadSculpture(figureUrl);
-                            try {
-                                String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
-                                JSONObject data = JSONObject.parseObject(response);
-                                //解析返回数据
-                                if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                    data = data.getJSONObject("body");
-                                    if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                        Looper.prepare();
-                                        Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                                        Looper.loop();
-                                    }else {
-                                        loginSuccess(data);
-                                    }
-                                }else {
+                        if (number <= 0){
+                            break;
+                        }
+                    }
+                    if (number > 0){
+                        Users users = new Users();
+                        users.setOpenId(openId);
+                        users.setName(name);
+                        users.setHeadSculpture(figureUrl);
+                        try {
+                            String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
+                            JSONObject data1 = JSONObject.parseObject(response);
+                            //解析返回数据
+                            if (data1.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                                data1 = data1.getJSONObject("body");
+                                if (data1.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                     Looper.prepare();
-                                    Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, data1.getString("msg"), Toast.LENGTH_SHORT).show();
                                     Looper.loop();
+                                }else {
+                                    loginSuccess(data1);
                                 }
-                            }catch (Exception e){
-                                LogUtils.e(TAG, e.getMessage());
-                            }finally {
-                                if (alertDialog != null) {
-                                    alertDialog.dismiss();
-                                    alertDialog = null;
-                                }
+                            }else {
+                                Looper.prepare();
+                                Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                Looper.loop();
                             }
-                        }else {
-                            Looper.prepare();
+                        }catch (Exception e){
+                            LogUtils.e(TAG, e.getMessage());
+                        }finally {
                             if (alertDialog != null) {
                                 alertDialog.dismiss();
                                 alertDialog = null;
                             }
-                            Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
-                            Looper.loop();
                         }
+                    }else {
+                        Looper.prepare();
+                        if (alertDialog != null) {
+                            alertDialog.dismiss();
+                            alertDialog = null;
+                        }
+                        Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
+                        Looper.loop();
                     }
                 });
             }
@@ -596,44 +544,41 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         // 处理验证码验证通过的结果  此时手机号正确 密码格式正确 验证码正确 弹出请求小圆圈
                         final AlertDialog alertDialog = DialogUtils.showDialog(activity);
                         //请求注册的接口
-                        ThreadPoolManager.getInstance().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                Users users = new Users();
-                                users.setName(name);
-                                users.setPhone(phone);
-                                users.setPassword(password);
-                                try {
-                                    String response = OkHttpUtils.post("/user/register", JSONObject.toJSONString(users));
-                                    JSONObject data = JSONObject.parseObject(response);
-                                    //解析返回数据
-                                    if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                        data = data.getJSONObject("body");
-                                        if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                            Looper.prepare();
-                                            Toast.makeText(activity, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                                            Looper.loop();
-                                        }else {
-                                            //正确结果
-                                            Looper.prepare();
-                                            registerDialog.dismiss();
-                                            Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
-                                            Looper.loop();
-                                        }
-                                    }else {
+                        ThreadPoolManager.getInstance().execute(() -> {
+                            Users users = new Users();
+                            users.setName(name);
+                            users.setPhone(phone);
+                            users.setPassword(password);
+                            try {
+                                String response = OkHttpUtils.post("/user/register", JSONObject.toJSONString(users));
+                                JSONObject data1 = JSONObject.parseObject(response);
+                                //解析返回数据
+                                if (data1.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                                    data1 = data1.getJSONObject("body");
+                                    if (data1.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                         Looper.prepare();
-                                        Toast.makeText(activity, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(activity, data1.getString("msg"), Toast.LENGTH_SHORT).show();
+                                        Looper.loop();
+                                    }else {
+                                        //正确结果
+                                        Looper.prepare();
+                                        registerDialog.dismiss();
+                                        Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
                                         Looper.loop();
                                     }
-                                }catch (Exception e){
-                                    LogUtils.e(TAG, e.getMessage());
+                                }else {
                                     Looper.prepare();
-                                    Toast.makeText(activity, "网络异常", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "请检查网络后重试", Toast.LENGTH_SHORT).show();
                                     Looper.loop();
-                                }finally {
-                                    if (alertDialog != null) {
-                                        alertDialog.dismiss();
-                                    }
+                                }
+                            }catch (Exception e){
+                                LogUtils.e(TAG, e.getMessage());
+                                Looper.prepare();
+                                Toast.makeText(activity, "网络异常", Toast.LENGTH_SHORT).show();
+                                Looper.loop();
+                            }finally {
+                                if (alertDialog != null) {
+                                    alertDialog.dismiss();
                                 }
                             }
                         });

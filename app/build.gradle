@@ -19,6 +19,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    //use legacy for android 6.0
+    useLibrary 'org.apache.http.legacy'
+
+    //自3.6.0开始需要java8的支持
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -37,7 +45,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     implementation 'com.github.bumptech.glide:glide:4.4.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.4.0'
-    implementation 'jp.wasabeef:glide-transformations:2.0.2'//图形变换依赖库
+    implementation 'jp.wasabeef:glide-transformations:2.0.2'
+    //图形变换依赖库
+    implementation files('libs/hyphenatechat_3.6.2.jar')
 }
 
 MobSDK {
