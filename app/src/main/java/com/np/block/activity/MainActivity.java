@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // 加载头像
         loadHeadImg();
         // 初始化适配器数据
-        initRankData();
+        refreshRankData();
         // 构建适配器
         classicRankAdapter = new ClassicRankAdapter(R.layout.rank_item, adapterDate);
         // 设置布局管理器
@@ -87,7 +87,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
                         data = data.getJSONObject("body");
                         if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                            refreshRankData(false);
+                            refreshRankData();
                             // 清缓存
                             CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
                         }
@@ -101,45 +101,32 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * 初始化排行榜adapter的数据
+     * 刷新排行榜adapter的数据
      */
-    private void initRankData(){
+    private void refreshRankData(){
         ThreadPoolManager.getInstance().execute(() -> {
             // 获取最新排行榜数据
-            refreshRankData(true);
-        });
-    }
-
-    /**
-     * 获取最新排行榜数据
-     *
-     * @param isNotUpdate 是否不是更新
-     */
-    private void refreshRankData(boolean isNotUpdate) {
-        try {
-            String response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
-            JSONObject data = JSONObject.parseObject(response);
-            if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                data = data.getJSONObject("body");
-                if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                    if (isNotUpdate){
-                        adapterDate.addAll(JSONObject.parseArray(data.getString("result"), Users.class));
-                    } else {
+            try {
+                String response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
+                JSONObject data = JSONObject.parseObject(response);
+                if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
+                    data = data.getJSONObject("body");
+                    if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                         adapterDate.clear();
                         adapterDate.addAll(JSONObject.parseArray(data.getString("result"), Users.class));
+                        runOnUiThread(() -> {
+                            // 刷新数据
+                            classicRankAdapter.notifyDataSetChanged();
+                        });
+                    }else {
+                        //获取失败
+                        LogUtils.i(TAG, data.getString("msg"));
                     }
-                    runOnUiThread(() -> {
-                        // 刷新数据
-                        classicRankAdapter.notifyDataSetChanged();
-                    });
-                }else {
-                    //获取失败
-                    LogUtils.i(TAG, data.getString("msg"));
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     /**
