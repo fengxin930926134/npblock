@@ -65,24 +65,27 @@ public class ExampleUnitTest {
 //        System.out.println(list.get(0));
 //        System.out.println(test.get(0));
 
-        Users users = new Users();
-        users.setName("dawdd");
-        users.setPhone("18785517851");
-        String jsonObject = JSONObject.toJSONString(users);
-        System.out.println(jsonObject);
-        JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.put("params", JSONObject.parse(jsonObject));
-        System.out.println(jsonObject1.toJSONString());
+//        Users users = new Users();
+//        users.setName("dawdd");
+//        users.setPhone("18785517851");
+//        String jsonObject = JSONObject.toJSONString(users);
+//        System.out.println(jsonObject);
+//        JSONObject jsonObject1 = new JSONObject();
+//        jsonObject1.put("params", JSONObject.parse(jsonObject));
+//        System.out.println(jsonObject1.toJSONString());
+//
+//
+//
+//        JSONObject jsonObject2 = new JSONObject();
+//        jsonObject2.put("name", "dawdd");
+//        jsonObject2.put("phone","18785517851");
+//        JSONObject jsonObject3 = new JSONObject();
+//        jsonObject3.put("params2", jsonObject2);
+//        System.out.println(jsonObject3.toJSONString());
 
-
-
-        JSONObject jsonObject2 = new JSONObject();
-        jsonObject2.put("name", "dawdd");
-        jsonObject2.put("phone","18785517851");
-        JSONObject jsonObject3 = new JSONObject();
-        jsonObject3.put("params2", jsonObject2);
-        System.out.println(jsonObject3.toJSONString());
-
+        String s = "[{\"classicScore\":12314,\"id\":3,\"createDate\":1575697962000},{\"classicScore\":123,\"openId\":\"12412dawd\",\"sex\":1,\"tokenTime\":1241254,\"token\":\"1241512512\",\"gameName\":\"124124\",\"phone\":\"14124\",\"name\":\"13123\",\"id\":1,\"createDate\":1575697957000}]";
+        List<Users> users = JSONObject.parseArray(s, Users.class);
+        System.out.println(users);
     }
 
     private int cmpGrade(int grade, int score) {

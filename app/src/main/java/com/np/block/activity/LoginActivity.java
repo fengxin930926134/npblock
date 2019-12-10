@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 import com.alibaba.fastjson.JSONObject;
+import com.hyphenate.EMCallBack;
+import com.hyphenate.chat.EMClient;
 import com.np.block.NpBlockApplication;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
@@ -118,7 +120,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
                                 Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                             }else {
-                                loginSuccess(data);
+                                loginSuccess(data, true);
                             }
                         }else {
                             Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
@@ -171,6 +173,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         if (!SharedPreferencesUtils.clearToken()){
             LogUtils.i(TAG, "[SP] token清理失败");
         }
+        //退出环信
+        EMClient.getInstance().logout(true);
     }
 
     /**
@@ -308,7 +312,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
                                 Looper.loop();
                             }else {
-                                loginSuccess(data);
+                                loginSuccess(data, false);
                             }
                         }else {
                             Looper.prepare();
@@ -476,7 +480,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     Toast.makeText(context, data1.getString("msg"), Toast.LENGTH_SHORT).show();
                                     Looper.loop();
                                 }else {
-                                    loginSuccess(data1);
+                                    loginSuccess(data1, false);
                                 }
                             }else {
                                 Looper.prepare();
@@ -660,8 +664,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 登录成功处理数据
      * @param data 数据
      */
-    private void loginSuccess(JSONObject data) {
+    private void loginSuccess(JSONObject data, boolean isTokenLogin) {
         Users usersResult = data.getObject("result", Users.class);
+        if (!isTokenLogin) {
+            //登陆环信
+            loginEmClient(usersResult.getId(), usersResult.getToken());
+        }
         // 保存token
         if (SharedPreferencesUtils.saveToken(usersResult.getToken(), usersResult.getTokenTime())){
             LogUtils.i(TAG, "[SP] token保存失败");
@@ -670,5 +678,29 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         updateUiAfterLogin(usersResult.getName());
         // 缓存用户数据
         CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, usersResult);
+    }
+
+    /**
+     * 登陆环信
+     */
+    private void loginEmClient(Integer id, String token) {
+        EMClient.getInstance().login(id.toString(), token, new EMCallBack() {
+            @Override
+            public void onSuccess() {
+                EMClient.getInstance().groupManager().loadAllGroups();
+                EMClient.getInstance().chatManager().loadAllConversations();
+                LogUtils.d("main", "登录聊天服务器成功！");
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+
+            }
+
+            @Override
+            public void onError(int code, String message) {
+                LogUtils.d("main", "登录聊天服务器失败！");
+            }
+        });
     }
 }

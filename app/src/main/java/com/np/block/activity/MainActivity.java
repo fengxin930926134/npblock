@@ -5,12 +5,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.hyphenate.EMConnectionListener;
+import com.hyphenate.EMError;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.util.NetUtils;
 import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
@@ -59,6 +63,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         // 设置适配器
         recyclerView.setAdapter(classicRankAdapter);
+        // 可以在主页面的 oncreate 里也加上这两句代码
+        EMClient.getInstance().groupManager().loadAllGroups();
+        EMClient.getInstance().chatManager().loadAllConversations();
+        //注册一个监听连接状态的listener
+        EMClient.getInstance().addConnectionListener(new EmClientConnectionListener());
     }
 
     @Override
@@ -149,5 +158,34 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 .load(users.getHeadSculpture())
                 .apply(options)
                 .into(headImg);
+    }
+
+    /**
+     * 实现ConnectionListener接口
+     */
+    private class EmClientConnectionListener implements EMConnectionListener {
+        @Override
+        public void onConnected() {
+        }
+        @Override
+        public void onDisconnected(final int error) {
+            runOnUiThread( ()-> {
+                if(error == EMError.USER_REMOVED){
+                    // 显示帐号已经被移除
+                    Toast.makeText(context, "垃圾东西，滚", Toast.LENGTH_SHORT).show();
+                }else if (error == EMError.USER_LOGIN_ANOTHER_DEVICE) {
+                    // 显示帐号在其他设备登录 做弹窗强制下线
+                    Toast.makeText(context, "其他地方登陆，马上给我滚", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (NetUtils.hasNetwork(MainActivity.this)){
+                        //连接不到聊天服务器
+                        Toast.makeText(context, "正在连接聊天服务器", Toast.LENGTH_SHORT).show();
+                    }else {
+                        //当前网络不可用，请检查网络设置
+                        Toast.makeText(context, "当前网络不可用，请检查网络设置", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 }
