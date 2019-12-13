@@ -64,7 +64,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         // 当本地数据没有的时候读取缓存数据
         if ((this.maxScore = SharedPreferencesUtils.readScore()) == 0) {
             Users user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
-            if (user != null && user.getClassicScore() > 0) {
+            if (user != null && user.getClassicScore() != null && user.getClassicScore() > 0) {
                 this.maxScore = user.getClassicScore();
                 // 保存本地
                 if (SharedPreferencesUtils.saveScore(this.maxScore)) {
