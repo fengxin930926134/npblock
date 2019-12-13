@@ -46,7 +46,7 @@
         <!--内容左开始-->
         <LinearLayout
             android:id="@+id/left_linear"
-            android:layout_width="120dp"
+            android:layout_width="160dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_marginEnd="15dp">
@@ -68,40 +68,48 @@
         <!--内容左结束-->
 
         <!--内容开始-->
-        <LinearLayout
-            android:id="@+id/content_linear"
+        <RelativeLayout
+            android:id="@+id/middle_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toEndOf="@+id/left_linear"
-            android:layout_toStartOf="@+id/right_linear"
-            android:orientation="horizontal">
-            <Button
-                android:id="@+id/classic_block"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="@string/classic_block_text"
-                android:background="@mipmap/lou_ti"
-                tools:ignore="ButtonStyle" />
-
-            <Button
-                android:id="@+id/barrier_block"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="@string/barrier_block_text"
-                android:background="@mipmap/tai_yang"
-                tools:ignore="ButtonStyle" />
+            android:layout_toStartOf="@+id/right_linear">
 
             <Button
                 android:id="@+id/rank_block"
-                android:layout_width="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_toStartOf="@id/middle_content_middle"
                 android:background="@mipmap/hai_zei_wang"
-                tools:ignore="ButtonStyle"
                 android:text="@string/rank_block_text"/>
-        </LinearLayout>
+
+            <!--中间分割点-->
+            <TextView
+                android:id="@+id/middle_content_middle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_centerInParent="true"/>
+
+            <Button
+                android:id="@+id/classic_block"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/classic_block_text"
+                android:layout_toEndOf="@+id/middle_content_middle"
+                android:layout_alignBottom="@+id/middle_content_middle"
+                android:background="@mipmap/lou_ti"/>
+
+            <Button
+                android:id="@+id/barrier_block"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/barrier_block_text"
+                android:layout_toEndOf="@+id/middle_content_middle"
+                android:layout_alignTop="@+id/middle_content_middle"
+                android:background="@mipmap/tai_yang"/>
+
+
+        </RelativeLayout>
         <!--内容结束-->
 
         <!--内容右开始-->

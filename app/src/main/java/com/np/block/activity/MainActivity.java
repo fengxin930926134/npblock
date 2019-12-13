@@ -63,9 +63,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         // 设置适配器
         recyclerView.setAdapter(classicRankAdapter);
-        // 可以在主页面的 oncreate 里也加上这两句代码
-        EMClient.getInstance().groupManager().loadAllGroups();
-        EMClient.getInstance().chatManager().loadAllConversations();
         //注册一个监听连接状态的listener
         EMClient.getInstance().addConnectionListener(new EmClientConnectionListener());
     }
@@ -153,7 +150,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 .fitCenter()
                 //指定图片的缩放类型为centerCrop （等比例缩放图片，直到图片的狂高都大于等于ImageView的宽度，然后截取中间的显示。）
                 .centerCrop();
-        // android10无法加载 大概是由于http请求被拦截
         Glide.with(this)
                 .load(users.getHeadSculpture())
                 .apply(options)
@@ -179,7 +175,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 } else {
                     if (NetUtils.hasNetwork(MainActivity.this)){
                         //连接不到聊天服务器
-                        Toast.makeText(context, "正在连接聊天服务器", Toast.LENGTH_SHORT).show();
+                        LogUtils.i(TAG, "正在连接聊天服务器");
                     }else {
                         //当前网络不可用，请检查网络设置
                         Toast.makeText(context, "当前网络不可用，请检查网络设置", Toast.LENGTH_SHORT).show();
