@@ -1,6 +1,7 @@
 //noinspection GradleCompatible
 apply plugin: 'com.android.application'
 apply plugin: 'com.mob.sdk'
+apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion 29
@@ -54,6 +55,9 @@ dependencies {
     implementation 'com.github.lfkdsk:JustWeEngine:v1.13'
     //持久化
     implementation 'org.litepal.android:java:3.0.0'
+    //依赖注入
+    implementation 'com.jakewharton:butterknife:10.2.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
 }
 
 MobSDK {

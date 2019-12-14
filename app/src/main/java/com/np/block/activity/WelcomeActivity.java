@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ActivityManager;
+import butterknife.BindView;
 
 /**
  * 首页
@@ -15,11 +16,11 @@ import com.np.block.core.manager.ActivityManager;
  */
 public class WelcomeActivity extends BaseActivity implements Animation.AnimationListener {
 
+    @BindView(R.id.welcome_image_view)
     ImageView welcomeImage;
 
     @Override
     public void init() {
-        welcomeImage = findViewById(R.id.welcome_image_view);
         // 配置动画
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.welcome_anim);
         // 启动Fill保持

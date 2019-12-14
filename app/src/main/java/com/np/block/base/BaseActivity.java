@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
+import butterknife.ButterKnife;
 
 /**
  * 基类activity
@@ -41,6 +42,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(layoutId);
         setOverridePendingTransition();
         ActivityManager.getInstance().addActivity(this);
+        // Butter Knife 初始化
+        ButterKnife.bind(this);
         init();
     }
 

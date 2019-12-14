@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.ThreadPoolManager;
+import butterknife.BindView;
 
 /**
  * 用作游戏更新
@@ -15,16 +16,16 @@ import com.np.block.core.manager.ThreadPoolManager;
 public class GameUpdateActivity extends BaseActivity {
 
     int progress = 0;
+    @BindView(R.id.bottom_left_text)
     TextView left;
+    @BindView(R.id.bottom_right_text)
     TextView right;
+    @BindView(R.id.update_bar)
     ProgressBar bar;
 
     @Override
     public void init() {
-        bar = findViewById(R.id.update_bar);
-        left = findViewById(R.id.bottom_left_text);
         left.setText("正在检查更新...");
-        right = findViewById(R.id.bottom_right_text);
         //开启线程更新
         ThreadPoolManager.getInstance().execute(() -> {
             try {
