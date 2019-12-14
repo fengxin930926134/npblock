@@ -22,7 +22,7 @@ import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
-import com.np.block.util.LogUtils;
+import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -99,7 +99,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         }
                     }
                 } catch (IOException e) {
-                    LogUtils.e(TAG, e.getMessage());
+                    LoggerUtils.e(e.getMessage());
                 }
             });
         }
@@ -126,7 +126,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         });
                     }else {
                         //获取失败
-                        LogUtils.i(TAG, data.getString("msg"));
+                        LoggerUtils.i(data.getString("msg"));
                     }
                 }
             } catch (IOException e) {
@@ -175,7 +175,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 } else {
                     if (NetUtils.hasNetwork(MainActivity.this)){
                         //连接不到聊天服务器
-                        LogUtils.i(TAG, "正在连接聊天服务器");
+                        LoggerUtils.i("正在连接聊天服务器");
                     }else {
                         //当前网络不可用，请检查网络设置
                         Toast.makeText(context, "当前网络不可用，请检查网络设置", Toast.LENGTH_SHORT).show();

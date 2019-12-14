@@ -48,6 +48,10 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:2.0.2'
     //图形变换依赖库
     implementation files('libs/hyphenatechat_3.6.2.jar')
+    //日志
+    implementation 'com.orhanobut:logger:2.2.0'
+    //游戏引擎
+    implementation 'com.github.lfkdsk:JustWeEngine:v1.13'
 }
 
 MobSDK {

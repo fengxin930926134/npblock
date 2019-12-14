@@ -26,7 +26,7 @@ import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
-import com.np.block.util.LogUtils;
+import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.util.VerificationUtils;
@@ -126,7 +126,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
                         }
                     }catch (Exception e){
-                        LogUtils.e(TAG,"[token登陆]" + e.getMessage());
+                        LoggerUtils.e("[token登陆]" + e.getMessage());
                     }finally {
                         if (alertDialog != null) {
                             alertDialog.dismiss();
@@ -171,7 +171,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         districtService.setVisibility(View.INVISIBLE);
         //清除token
         if (!SharedPreferencesUtils.clearToken()){
-            LogUtils.i(TAG, "[SP] token清理失败");
+            LoggerUtils.i("[SP] token清理失败");
         }
         //退出环信
         EMClient.getInstance().logout(true);
@@ -320,7 +320,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             Looper.loop();
                         }
                     }catch (Exception e){
-                        LogUtils.e(TAG, e.getMessage());
+                        LoggerUtils.e(e.getMessage());
                         Looper.prepare();
                         Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
                         Looper.loop();
@@ -488,7 +488,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 Looper.loop();
                             }
                         }catch (Exception e){
-                            LogUtils.e(TAG, e.getMessage());
+                            LoggerUtils.e(e.getMessage());
                         }finally {
                             if (alertDialog != null) {
                                 alertDialog.dismiss();
@@ -537,11 +537,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
                     if (result == SMSSDK.RESULT_COMPLETE) {
                         // 处理成功得到验证码的结果
-                        LogUtils.i(TAG, "验证码发送成功");
+                        LoggerUtils.i("验证码发送成功");
                     } else {
                         //  处理错误的结果
                         Toast.makeText(activity, "验证码发送失败", Toast.LENGTH_SHORT).show();
-                        LogUtils.i(TAG, ((Throwable) data).getMessage());
+                        LoggerUtils.i(((Throwable) data).getMessage());
                     }
                 } else if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {
                     if (result == SMSSDK.RESULT_COMPLETE) {
@@ -576,7 +576,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     Looper.loop();
                                 }
                             }catch (Exception e){
-                                LogUtils.e(TAG, e.getMessage());
+                                LoggerUtils.e(e.getMessage());
                                 Looper.prepare();
                                 Toast.makeText(activity, "网络异常", Toast.LENGTH_SHORT).show();
                                 Looper.loop();
@@ -589,11 +589,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     } else {
                         // 处理错误的结果
                         Toast.makeText(activity, "验证码错误", Toast.LENGTH_SHORT).show();
-                        LogUtils.i(TAG, ((Throwable) data).getMessage());
+                        LoggerUtils.i(((Throwable) data).getMessage());
                     }
                 }
             } else {
-                LogUtils.i(TAG, "LoginActivity已经被回收...");
+                LoggerUtils.i("LoginActivity已经被回收...");
             }
         }
     }
@@ -629,18 +629,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     public void onError(UiError uiError) {
                         //失败
                         flag = false;
-                        LogUtils.i(TAG, "[QQ]"+uiError.toString());
+                        LoggerUtils.i("[QQ]"+uiError.toString());
                     }
 
                     @Override
                     public void onCancel() {
                         //失败
                         flag = false;
-                        LogUtils.i(TAG, "[QQ]取消");
+                        LoggerUtils.i("[QQ]取消");
                     }
                 });
             }catch (Exception e){
-                LogUtils.i(TAG, "[QQ]"+e.getMessage());
+                LoggerUtils.i("[QQ]"+e.getMessage());
             }finally {
                 mTencent.logout(context);
             }
@@ -650,13 +650,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         public void onError(UiError e) {
             flag = false;
             Toast.makeText(context, "登录错误", Toast.LENGTH_SHORT).show();
-            LogUtils.i(TAG, "[QQ] 登录出错 onError:"+ "code:" + e.errorCode + ", msg:"
+            LoggerUtils.i("[QQ] 登录出错 onError:"+ "code:" + e.errorCode + ", msg:"
                     + e.errorMessage + ", detail:" + e.errorDetail);
         }
         @Override
         public void onCancel() {
             flag = false;
-            LogUtils.i(TAG, "[QQ]取消登录");
+            LoggerUtils.i("[QQ]取消登录");
         }
     }
 
@@ -672,7 +672,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
         // 保存token
         if (SharedPreferencesUtils.saveToken(usersResult.getToken(), usersResult.getTokenTime())){
-            LogUtils.i(TAG, "[SP] token保存失败");
+            LoggerUtils.i("[SP] token保存失败");
         }
         // 更新ui
         updateUiAfterLogin(usersResult.getName());
@@ -689,7 +689,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void onSuccess() {
                 EMClient.getInstance().groupManager().loadAllGroups();
                 EMClient.getInstance().chatManager().loadAllConversations();
-                LogUtils.d("main", "登录聊天服务器成功！");
+                LoggerUtils.d("登录聊天服务器成功！");
             }
 
             @Override
@@ -699,7 +699,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
             @Override
             public void onError(int code, String message) {
-                LogUtils.d("main", "登录聊天服务器失败！");
+                LoggerUtils.d("登录聊天服务器失败！");
             }
         });
     }

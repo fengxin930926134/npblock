@@ -15,7 +15,7 @@ import com.np.block.core.model.Tetris;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
-import com.np.block.util.LogUtils;
+import com.np.block.util.LoggerUtils;
 import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.TetrisView;
@@ -68,7 +68,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                 this.maxScore = user.getClassicScore();
                 // 保存本地
                 if (SharedPreferencesUtils.saveScore(this.maxScore)) {
-                    LogUtils.i(TAG, "[SP] 保存成绩失败");
+                    LoggerUtils.i("[SP] 保存成绩失败");
                 }
             }
         }
@@ -209,7 +209,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
             textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
             // 保存本地
             if (SharedPreferencesUtils.saveScore(maxScoreNew)) {
-                LogUtils.i(TAG, "[SP] 保存成绩失败");
+                LoggerUtils.i("[SP] 保存成绩失败");
             }
             // 上传游戏分数
             CacheManager.getInstance().put(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE, maxScoreNew);
