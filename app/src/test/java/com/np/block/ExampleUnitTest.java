@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Example local unit test, which will execute on the development machine (host).
+ * Example local unit litepal.xml, which will execute on the development machine (host).
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
@@ -57,13 +57,7 @@ public class ExampleUnitTest {
 
 //        System.out.println(cmpGrade(2, 300));
 
-//        List<UnitBlock> list = new ArrayList<>();
-//        list.add(new UnitBlock(1,2,3));
-//        List<UnitBlock> test = new ArrayList<>();
-//        test.add(list.get(0).clone());
-//        test.get(0).setX(777);
-//        System.out.println(list.get(0));
-//        System.out.println(test.get(0));
+
 
 //        Users users = new Users();
 //        users.setName("dawdd");

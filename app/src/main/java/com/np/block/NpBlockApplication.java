@@ -3,6 +3,7 @@ package com.np.block;
 import android.app.Application;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
+import org.litepal.LitePal;
 
 /**
  * 主Application
@@ -33,6 +34,8 @@ public class NpBlockApplication extends Application {
         // 初始化
         EMClient.getInstance().init(app.getApplicationContext(), options);
         // 在做打包混淆时，关闭debug模式，避免消耗不必要的资源
-        EMClient.getInstance().setDebugMode(true);
+        EMClient.getInstance().setDebugMode(false);
+        //初始化LitePal 不用一直传递Context参数，简化API
+        LitePal.initialize(this);
     }
 }

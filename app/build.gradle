@@ -11,7 +11,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.litepal.xml.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -44,7 +44,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     implementation 'com.github.bumptech.glide:glide:4.4.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.4.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
     implementation 'jp.wasabeef:glide-transformations:2.0.2'
     //图形变换依赖库
     implementation files('libs/hyphenatechat_3.6.2.jar')
@@ -52,6 +52,8 @@ dependencies {
     implementation 'com.orhanobut:logger:2.2.0'
     //游戏引擎
     implementation 'com.github.lfkdsk:JustWeEngine:v1.13'
+    //持久化
+    implementation 'org.litepal.android:java:3.0.0'
 }
 
 MobSDK {

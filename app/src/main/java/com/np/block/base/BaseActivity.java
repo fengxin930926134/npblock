@@ -1,7 +1,6 @@
 package com.np.block.base;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -19,10 +18,6 @@ import com.np.block.util.DialogUtils;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
-    /**
-     * log TAG
-     */
-    public static String TAG;
     /**退出时间*/
     private long tempTime = 0;
     public Context context;
@@ -31,7 +26,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
-        TAG = this.getClass().getName();
         // 隐藏状态栏
         if (getSupportActionBar() != null){
             getSupportActionBar().hide();
@@ -97,19 +91,11 @@ public abstract class BaseActivity extends AppCompatActivity {
                         "确定",
                         false,
                         false,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        },
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                exitApp();
-                            }
-                        });
+                         (dialog, which) -> dialog.cancel(),
+                         (dialog, which) -> {
+                             dialog.cancel();
+                             exitApp();
+                         });
             }else {
                 // 2s内再次选择back键有效
                 if(System.currentTimeMillis() - tempTime > ConstUtils.BACK_TIME)
