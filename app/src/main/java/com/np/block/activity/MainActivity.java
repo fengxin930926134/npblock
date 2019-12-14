@@ -24,7 +24,6 @@ import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,18 +86,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             ThreadPoolManager.getInstance().execute(() -> {
                 users.setClassicScore(score);
                 try {
-                    String response = OkHttpUtils.post("/rank/uploadClassic", JSONObject.toJSONString(users));
-                    JSONObject data = JSONObject.parseObject(response);
+                    JSONObject response = OkHttpUtils.post("/rank/uploadClassic", JSONObject.toJSONString(users));
                     //解析返回数据
-                    if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                        data = data.getJSONObject("body");
-                        if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                            refreshRankData();
-                            // 清缓存
-                            CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
-                        }
+                    if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                        refreshRankData();
+                        // 清缓存
+                        CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LoggerUtils.e(e.getMessage());
                 }
             });
@@ -113,24 +108,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         ThreadPoolManager.getInstance().execute(() -> {
             // 获取最新排行榜数据
             try {
-                String response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
-                JSONObject data = JSONObject.parseObject(response);
-                if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                    data = data.getJSONObject("body");
-                    if (data.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                        adapterDate.clear();
-                        adapterDate.addAll(JSONObject.parseArray(data.getString("result"), Users.class));
-                        runOnUiThread(() -> {
-                            // 刷新数据
-                            classicRankAdapter.notifyDataSetChanged();
-                        });
-                    }else {
-                        //获取失败
-                        LoggerUtils.i(data.getString("msg"));
-                    }
+                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                    adapterDate.clear();
+                    adapterDate.addAll(JSONObject.parseArray(response.getString("result"), Users.class));
+                    runOnUiThread(() -> {
+                        // 刷新数据
+                        classicRankAdapter.notifyDataSetChanged();
+                    });
+                }else {
+                    //获取失败
+                    LoggerUtils.toJson(response.toJSONString());
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                LoggerUtils.e(e.getMessage());
             }
         });
     }

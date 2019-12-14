@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import com.hyphenate.chat.EMClient;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
@@ -119,6 +120,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      * 退出app需要做的事
      */
     private void exitApp() {
+        //退出环信
+        EMClient.getInstance().logout(true);
         ActivityManager.getInstance().finishAll();
     }
 }

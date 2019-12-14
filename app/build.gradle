@@ -52,7 +52,7 @@ dependencies {
     //日志
     implementation 'com.orhanobut:logger:2.2.0'
     //游戏引擎
-    implementation 'com.github.lfkdsk:JustWeEngine:v1.13'
+//    implementation 'com.github.lfkdsk:JustWeEngine:v1.13'
     //持久化
     implementation 'org.litepal.android:java:3.0.0'
     //依赖注入

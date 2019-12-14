@@ -27,12 +27,7 @@ public class ConstUtils {
     /**
      * 状态码 成功
      */
-    public static final int STATUS_SUCCESS = 200;
-
-    /**
-     * 请求服务器返回的状态码
-     */
-    public static final String STATUS = "status";
+    static final int STATUS_SUCCESS = 200;
 
     /**
      * 接口返回的状态

@@ -20,7 +20,15 @@ public class OkHttpUtils {
 
     private static OkHttpClient client  = new OkHttpClient();
 
-    public static String post(String url, String json) throws IOException {
+    /**
+     * Post请求
+     *
+     * @param url url
+     * @param json 请求数据
+     * @return json
+     * @throws IOException IOException
+     */
+    public static JSONObject post(String url, String json) throws Exception {
         JSONObject params = new JSONObject();
         params.put("params", JSONObject.parse(json));
         RequestBody body = RequestBody.create(params.toJSONString(), JSON);
@@ -29,7 +37,10 @@ public class OkHttpUtils {
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            return "{'status':"+response.code()+",'body':"+ Objects.requireNonNull(response.body()).string()+"}";
+            if (response.code() != ConstUtils.STATUS_SUCCESS) {
+                throw new Exception("请求服务器失败");
+            }
+            return JSONObject.parseObject(Objects.requireNonNull(response.body()).string());
         }
     }
 

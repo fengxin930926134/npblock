@@ -112,18 +112,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     users.setToken((String) token);
                     users.setTokenTime((Long) o);
                     try {
-                        String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
-                        JSONObject data = JSONObject.parseObject(response);
+                        JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                         //解析返回数据
-                        if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                            data = data.getJSONObject("body");
-                            if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }else {
-                                loginSuccess(data, true);
-                            }
+                        if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                            loginSuccess(response, true);
                         }else {
-                            Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                            Looper.prepare();
+                            Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            Looper.loop();
                         }
                     }catch (Exception e){
                         LoggerUtils.e("[token登陆]" + e.getMessage());
@@ -302,28 +298,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     users.setPassword(passwordText);
                     try {
                         //请求服务器
-                        String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
-                        JSONObject data = JSONObject.parseObject(response);
+                        JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                         //解析返回数据
-                        if (data.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                            data = data.getJSONObject("body");
-                            if (data.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                Looper.prepare();
-                                Toast.makeText(context, data.getString("msg"), Toast.LENGTH_SHORT).show();
-                                Looper.loop();
-                            }else {
-                                loginSuccess(data, false);
-                            }
+                        if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                            loginSuccess(response, false);
                         }else {
                             Looper.prepare();
-                            Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
                             Looper.loop();
                         }
                     }catch (Exception e){
                         LoggerUtils.e(e.getMessage());
-                        Looper.prepare();
-                        Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show();
-                        Looper.loop();
                     }finally {
                         if (alertDialog != null) {
                             alertDialog.dismiss();
@@ -470,21 +455,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         users.setName(name);
                         users.setHeadSculpture(figureUrl);
                         try {
-                            String response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
-                            JSONObject data1 = JSONObject.parseObject(response);
+                            JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                             //解析返回数据
-                            if (data1.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                data1 = data1.getJSONObject("body");
-                                if (data1.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                    Looper.prepare();
-                                    Toast.makeText(context, data1.getString("msg"), Toast.LENGTH_SHORT).show();
-                                    Looper.loop();
-                                }else {
-                                    loginSuccess(data1, false);
-                                }
+                            if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                                loginSuccess(response, false);
                             }else {
                                 Looper.prepare();
-                                Toast.makeText(context, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
                                 Looper.loop();
                             }
                         }catch (Exception e){
@@ -508,10 +485,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             }
         }else {
             Toast.makeText(context, "授权失败", Toast.LENGTH_SHORT).show();
-            if (alertDialog != null) {
-                alertDialog.cancel();
-                alertDialog = null;
-            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -554,36 +527,26 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             users.setPhone(phone);
                             users.setPassword(password);
                             try {
-                                String response = OkHttpUtils.post("/user/register", JSONObject.toJSONString(users));
-                                JSONObject data1 = JSONObject.parseObject(response);
+                                JSONObject response = OkHttpUtils.post("/user/register", JSONObject.toJSONString(users));
                                 //解析返回数据
-                                if (data1.getIntValue(ConstUtils.STATUS) == ConstUtils.STATUS_SUCCESS) {
-                                    data1 = data1.getJSONObject("body");
-                                    if (data1.getIntValue(ConstUtils.CODE) > ConstUtils.CODE_SUCCESS){
-                                        Looper.prepare();
-                                        Toast.makeText(activity, data1.getString("msg"), Toast.LENGTH_SHORT).show();
-                                        Looper.loop();
-                                    }else {
-                                        //正确结果
-                                        Looper.prepare();
-                                        registerDialog.dismiss();
-                                        Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
-                                        Looper.loop();
-                                    }
+                                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                                    //正确结果
+                                    Looper.prepare();
+                                    registerDialog.dismiss();
+                                    Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
+                                    Looper.loop();
                                 }else {
                                     Looper.prepare();
-                                    Toast.makeText(activity, "请检查网络后重试", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, response.getString("msg"), Toast.LENGTH_SHORT).show();
                                     Looper.loop();
                                 }
+                                alertDialog.dismiss();
                             }catch (Exception e){
                                 LoggerUtils.e(e.getMessage());
                                 Looper.prepare();
+                                alertDialog.dismiss();
                                 Toast.makeText(activity, "网络异常", Toast.LENGTH_SHORT).show();
                                 Looper.loop();
-                            }finally {
-                                if (alertDialog != null) {
-                                    alertDialog.dismiss();
-                                }
                             }
                         });
                     } else {
