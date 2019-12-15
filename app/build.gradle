@@ -28,6 +28,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
 }
 
 dependencies {
@@ -41,6 +46,7 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.62'
     implementation files('libs/open_sdk_r53890096d0e731f134f448c1286e48c2043b484b_lite.jar')
     compileOnly 'org.projectlombok:lombok:1.18.10'
+    // RecyclerView适配器框架
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.50'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
@@ -58,6 +64,9 @@ dependencies {
     //依赖注入
     implementation 'com.jakewharton:butterknife:10.2.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
+    //tabLayout框架
+    implementation(name:'library-2.0.0', ext:'aar')
+    implementation(name:'utils-v4-2.0.0', ext:'aar')
 }
 
 MobSDK {

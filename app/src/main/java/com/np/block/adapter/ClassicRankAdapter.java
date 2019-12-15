@@ -1,11 +1,9 @@
 package com.np.block.adapter;
 
 import android.graphics.Color;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -15,10 +13,9 @@ import com.np.block.core.manager.CacheManager;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 
-import java.util.List;
-
 /**
- * 测试适配器
+ * 排行榜适配器
+ *
  * @author fengxin
  */
 public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> {
@@ -40,8 +37,8 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
             //指定图片的缩放类型为centerCrop （圆形）
             .circleCrop();
 
-    public ClassicRankAdapter(int layoutResId, @Nullable List<Users> data) {
-        super(layoutResId, data);
+    public ClassicRankAdapter(int layoutResId) {
+        super(layoutResId);
         Object o = CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         if (o instanceof Users){
             users = (Users) o;
@@ -51,7 +48,7 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, Users item) {
         if (users.getToken().equals(item.getToken())) {
-            helper.setBackgroundColor(R.id.rank_item_background, Color.WHITE);
+            helper.setBackgroundColor(R.id.rank_item_background, Color.GRAY);
         }
         //设置成绩
         helper.setText(R.id.rank_item_name, item.getName() != null ? item.getName() : "");
@@ -64,11 +61,7 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
                 .into(rankItemImg);
         //设置事件
         final int position = helper.getLayoutPosition();
-        rankItemImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext, "不要点第" + position + "头像了啊！！还没实现！！", Toast.LENGTH_SHORT).show();
-            }
-        });
+        rankItemImg.setOnClickListener(v -> Toast.makeText(mContext, "亚麻跌, 不要，不要点_"
+                + position, Toast.LENGTH_SHORT).show());
     }
 }

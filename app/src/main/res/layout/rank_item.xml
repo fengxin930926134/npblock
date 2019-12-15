@@ -5,14 +5,14 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="#cac3c3"
+    android:background="@color/black_20"
     android:padding="4dp">
     <ImageView
         android:id="@+id/rank_item_img"
         android:layout_width="50dp"
         android:layout_height="match_parent"
         android:src="@mipmap/head"
-        android:contentDescription="@string/ranking_extended_text" />
+        android:contentDescription="@string/app_name" />
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -23,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:textColor="@color/colorWhite"
             android:gravity="center"
             android:textSize="15sp"
             tools:ignore="NestedWeights" />
@@ -30,6 +31,7 @@
             android:id="@+id/rank_item_score"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:textColor="@color/colorWhite"
             android:layout_weight="1"
             android:gravity="center"
             android:textSize="15sp"/>

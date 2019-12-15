@@ -12,4 +12,6 @@
     <color name="colorDarkBlue">#03314D</color>
     <!--  半透明灰底  -->
     <color name="colorGrayTransparent">#403D3B3B</color>
+    <color name="black_20">#33000000</color>
+    <color name="primary">#3C515C</color>
 </resources>

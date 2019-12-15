@@ -1,13 +1,14 @@
 package com.np.block.activity;
 
 import android.content.Intent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -21,11 +22,19 @@ import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
+import com.np.block.fragment.RankFragment;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
+import com.ogaclejapan.smarttablayout.SmartTabLayout;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
 
 /**
  * 主界面
@@ -36,9 +45,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**登陆的用户基本信息*/
     private static Users users = null;
     /**头像*/
-    private ImageView headImg;
+    @BindView(R.id.head_img)
+    ImageView headImg;
     /**排行榜适配器*/
-    private ClassicRankAdapter classicRankAdapter;
+    public List<ClassicRankAdapter> adapterList = new ArrayList<>();
     /**适配器数据*/
     private static List<Users> adapterDate = new ArrayList<>();
 
@@ -46,22 +56,48 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void init() {
         users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         Button button = findViewById(R.id.classic_block);
-        headImg = findViewById(R.id.head_img);
         TextView userName = findViewById(R.id.user_name);
         // 初始化用户名
         userName.setText(users.getName() != null ? users.getName(): getResources().getString(R.string.app_name));
-        RecyclerView recyclerView = findViewById(R.id.ranking);
         button.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
-        // 初始化适配器数据
+
+        //-----排行榜相关
+        //创建标签组
+        ViewGroup tab = findViewById(R.id.tab);
+        //添加标签组的子视图
+        tab.addView(LayoutInflater.from(this).inflate(R.layout.rank_title_effect, tab, false));
+
+        //设置页
+        ViewPager viewPager = findViewById(R.id.viewpager);
+        SmartTabLayout viewPagerTab = findViewById(R.id.viewpagertab);
+
         refreshRankData();
-        // 构建适配器
-        classicRankAdapter = new ClassicRankAdapter(R.layout.rank_item, adapterDate);
-        // 设置布局管理器
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // 设置适配器
-        recyclerView.setAdapter(classicRankAdapter);
+
+        //循环生成每一个Fragment
+        FragmentPagerItems pages = new FragmentPagerItems(this);
+        int[] tabs =  new int[] {
+                R.string.rank_block_text,
+                R.string.classic_block_text,
+                R.string.barrier_block_text
+        };
+        for (int tabName : tabs) {
+            pages.add(FragmentPagerItem.of(getString(tabName), RankFragment.class));
+        }
+
+        //创建页面切换组件的适配器（pages类似于list，类似页面的集合）
+        FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
+                getSupportFragmentManager(), pages);
+
+        //设置页面切换组件的适配器
+        viewPager.setAdapter(adapter);
+        //设置tab组件关联的viewPage
+        viewPagerTab.setViewPager(viewPager);
+
+
+        //-----排行榜相关
+
         //注册一个监听连接状态的listener
         EMClient.getInstance().addConnectionListener(new EmClientConnectionListener());
     }
@@ -114,7 +150,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     adapterDate.addAll(JSONObject.parseArray(response.getString("result"), Users.class));
                     runOnUiThread(() -> {
                         // 刷新数据
-                        classicRankAdapter.notifyDataSetChanged();
+//                        classicRankAdapter.notifyDataSetChanged();
+                        for (int i = 0; i < adapterList.size(); i++) {
+                            adapterList.get(i).setNewData(adapterDate);
+                            adapterList.get(i).notifyDataSetChanged();
+                        }
                     });
                 }else {
                     //获取失败

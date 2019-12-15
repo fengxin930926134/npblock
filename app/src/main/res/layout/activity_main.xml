@@ -44,21 +44,26 @@
         android:layout_marginEnd="15dp">
 
         <!--内容左开始-->
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/left_linear"
             android:layout_width="200dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:layout_marginEnd="15dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/ranking"
+            <FrameLayout
+                android:id="@+id/tab"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
-            </androidx.recyclerview.widget.RecyclerView>
+                android:layout_height="wrap_content"
+                android:background="@color/primary"/>
 
-        </LinearLayout>
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/tab"
+                />
+
+        </RelativeLayout>
         <!--内容左结束-->
 
         <!--内容右开始-->
