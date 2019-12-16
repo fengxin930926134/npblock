@@ -13,14 +13,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.np.block.R;
 import com.np.block.activity.MainActivity;
 import com.np.block.adapter.ClassicRankAdapter;
+import com.np.block.core.manager.CacheManager;
+import com.np.block.core.model.Users;
+import com.np.block.util.ConstUtils;
 import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 排行榜Fragment
  *
  * @author fengxin
  */
-public class RankFragment extends Fragment {
+public class ClassicRankFragment extends Fragment {
 
     /**
      * 父activity
@@ -39,9 +44,16 @@ public class RankFragment extends Fragment {
         RecyclerView mRecyclerView = view.findViewById(R.id.ranking);
         // 设置布局管理器
         mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        // 设置adapter
-        ClassicRankAdapter mAdapter = new ClassicRankAdapter(R.layout.rank_item);
-        parentActivity.adapterList.add(mAdapter);
+        //适配器数据
+        List<Users> usersList;
+        if (CacheManager.getInstance().containsUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE)) {
+            usersList = CacheManager.getInstance().getUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE);
+        } else {
+            usersList = new ArrayList<>();
+        }
+        // 设置adapter适配器
+        ClassicRankAdapter mAdapter = new ClassicRankAdapter(R.layout.rank_item, usersList);
+        parentActivity.classicRankAdapter = mAdapter;
         mRecyclerView.setAdapter(mAdapter);
     }
 

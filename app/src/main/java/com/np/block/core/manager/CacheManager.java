@@ -1,6 +1,10 @@
 package com.np.block.core.manager;
 
+import com.np.block.core.model.Users;
+
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 缓存管理类
@@ -20,7 +24,7 @@ public class CacheManager {
     }
 
     /**缓存map*/
-    private static HashMap<String, Object> mMap;
+    private static Map<String, Object> mMap;
       
     public void put(String key, Object value){
         mMap.put(key, value);
@@ -39,8 +43,25 @@ public class CacheManager {
         return mMap.containsKey(key);
     }
 
+    /**缓存usersList**/
+    private static Map<String, List<Users>> usersMap;
+
+    public void putUsers(String key, List<Users> value){
+        usersMap.put(key, value);
+    }
+
+    public List<Users> getUsers(String key)
+    {
+        return usersMap.get(key);
+    }
+
+    public boolean containsUsers(String key) {
+        return usersMap.containsKey(key);
+    }
+
     /**私有化构造方法*/
     private CacheManager() {
         mMap = new HashMap<>();
+        usersMap = new HashMap<>();
     }
 } 

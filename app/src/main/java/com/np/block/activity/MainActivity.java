@@ -16,13 +16,15 @@ import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.util.NetUtils;
-import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.R;
+import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
-import com.np.block.fragment.RankFragment;
+import com.np.block.fragment.ClassicRankFragment;
+import com.np.block.fragment.RankingRankFragment;
+import com.np.block.fragment.RushRankFragment;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
@@ -30,10 +32,7 @@ import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
-
-import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.BindView;
 
 /**
@@ -47,10 +46,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**头像*/
     @BindView(R.id.head_img)
     ImageView headImg;
-    /**排行榜适配器*/
-    public List<ClassicRankAdapter> adapterList = new ArrayList<>();
-    /**适配器数据*/
-    private static List<Users> adapterDate = new ArrayList<>();
+    /**经典模式排行榜适配器*/
+    public ClassicRankAdapter classicRankAdapter = null;
 
     @Override
     public void init() {
@@ -71,20 +68,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         //设置页
         ViewPager viewPager = findViewById(R.id.viewpager);
-        SmartTabLayout viewPagerTab = findViewById(R.id.viewpagertab);
-
-        refreshRankData();
+        SmartTabLayout viewPagerTab = findViewById(R.id.viewPagerTab);
 
         //循环生成每一个Fragment
         FragmentPagerItems pages = new FragmentPagerItems(this);
-        int[] tabs =  new int[] {
-                R.string.rank_block_text,
-                R.string.classic_block_text,
-                R.string.barrier_block_text
-        };
-        for (int tabName : tabs) {
-            pages.add(FragmentPagerItem.of(getString(tabName), RankFragment.class));
-        }
+        pages.add(FragmentPagerItem.of(getString(R.string.classic_block_text), ClassicRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.rank_block_text), RankingRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.barrier_block_text), RushRankFragment.class));
 
         //创建页面切换组件的适配器（pages类似于list，类似页面的集合）
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
@@ -94,7 +84,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         viewPager.setAdapter(adapter);
         //设置tab组件关联的viewPage
         viewPagerTab.setViewPager(viewPager);
-
 
         //-----排行榜相关
 
@@ -138,7 +127,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * 刷新排行榜adapter的数据
+     * 刷新排行榜数据 TODO 存在bug
      */
     private void refreshRankData(){
         ThreadPoolManager.getInstance().execute(() -> {
@@ -146,14 +135,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             try {
                 JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
                 if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                    adapterDate.clear();
-                    adapterDate.addAll(JSONObject.parseArray(response.getString("result"), Users.class));
+                    List<Users> usersList = JSONObject.parseArray(response.getString("result"), Users.class);
+                    CacheManager.getInstance().put(ConstUtils.CACHE_RANK_CLASSICAL_MODE, usersList);
                     runOnUiThread(() -> {
                         // 刷新数据
-//                        classicRankAdapter.notifyDataSetChanged();
-                        for (int i = 0; i < adapterList.size(); i++) {
-                            adapterList.get(i).setNewData(adapterDate);
-                            adapterList.get(i).notifyDataSetChanged();
+                        if (classicRankAdapter != null) {
+                            classicRankAdapter.notifyDataSetChanged();
+                            LoggerUtils.i("执行刷新了");
                         }
                     });
                 }else {
@@ -185,6 +173,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 .load(users.getHeadSculpture())
                 .apply(options)
                 .into(headImg);
+
+        headImg.setOnClickListener(v -> {
+            //测试
+            LoggerUtils.i(String.valueOf(classicRankAdapter == null));
+        });
     }
 
     /**

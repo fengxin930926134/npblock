@@ -37,6 +37,7 @@ import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
 import org.jetbrains.annotations.NotNull;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -233,9 +234,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.begin_game:
-                videoview.stopPlayback();
-                //开始游戏
-                startActivity(new Intent(context, MainActivity.class));
+                //进入游戏
+                enterGame();
                 break;
             case R.id.phone_login:
                 //手机登陆
@@ -252,6 +252,40 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 default:
                     Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 加载进入游戏前需要加载的数据之类的
+     */
+    private void enterGame(){
+        alertDialog = DialogUtils.showDialog(context);
+        ThreadPoolManager.getInstance().execute(() -> {
+            // 获取最新排行榜数据
+            try {
+                Users users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                    //TODO 暂时为一个排行榜 后面在这个地方获取3个排行榜数据
+                    List<Users> result = JSONObject.parseArray(response.getString("result"), Users.class);
+                    //保存进缓存中
+                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE, result);
+                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_RANKING_MODE, result);
+                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE, result);
+                    videoview.stopPlayback();
+                    startActivity(new Intent(context, MainActivity.class));
+                }else {
+                    //获取失败
+                    LoggerUtils.toJson(response.toJSONString());
+                }
+            } catch (Exception e) {
+                LoggerUtils.e(e.getMessage());
+            }finally {
+                if (alertDialog != null) {
+                    alertDialog.dismiss();
+                    alertDialog = null;
+                }
+            }
+        });
     }
 
     /**

@@ -3,7 +3,6 @@ package com.np.block.adapter;
 import android.graphics.Color;
 import android.widget.ImageView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -13,13 +12,14 @@ import com.np.block.core.manager.CacheManager;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import java.util.List;
+import androidx.annotation.NonNull;
 
 /**
  * 排行榜适配器
  *
  * @author fengxin
  */
-public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> {
+public class RankingRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> {
 
     /**读取当前用户信息*/
     private Users users;
@@ -38,7 +38,7 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
             //指定图片的缩放类型为centerCrop （圆形）
             .circleCrop();
 
-    public ClassicRankAdapter(int layoutResId, List<Users> data) {
+    public RankingRankAdapter(int layoutResId, List<Users> data) {
         super(layoutResId, data);
         Object o = CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         if (o instanceof Users){
@@ -49,7 +49,7 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, Users item) {
         if (users.getToken().equals(item.getToken())) {
-            helper.setBackgroundColor(R.id.rank_item_background, Color.GREEN);
+            helper.setBackgroundColor(R.id.rank_item_background, Color.GRAY);
         }
         //设置成绩
         helper.setText(R.id.rank_item_name, item.getName() != null ? item.getName() : "");

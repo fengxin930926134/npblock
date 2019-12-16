@@ -65,14 +65,29 @@ public class ConstUtils {
     public static final int SHORT_MESSAGE_TIME = 30;
 
     /**
-     * 缓存用户信息数据的KEY
+     * 缓存 用户信息数据的KEY
      */
     public static final String CACHE_USER_INFO = "userInfo";
 
     /**
-     * 缓存用户等待上传的经典模式分数的KEY
+     * 缓存 用户等待上传的经典模式分数的KEY
      */
     public static final String CACHE_WAIT_UPLOAD_CLASSIC_SCORE = "waitUploadClassicScore";
+
+    /**
+     * 缓存 经典模式排行榜的key
+     */
+    public static final String CACHE_RANK_CLASSICAL_MODE = "cache_rank_classical_mode";
+
+    /**
+     * 缓存 排位模式排行榜的key
+     */
+    public static final String CACHE_RANK_RANKING_MODE = "cache_rank_ranking_mode";
+
+    /**
+     * 缓存 闯关模式排行榜的key
+     */
+    public static final String CACHE_RANK_BREAKTHROUGH_MODE = "cache_rank_breakthrough_mode";
 
     /**
      * 请求url
