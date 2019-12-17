@@ -48,12 +48,15 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, Users item) {
-        if (users.getToken().equals(item.getToken())) {
-            helper.setBackgroundColor(R.id.rank_item_background, Color.GREEN);
-        }
         //设置成绩
         helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
         helper.setText(R.id.rank_item_score, item.getClassicScore() != null ? item.getClassicScore()+"": "0");
+        //如果token是登陆用户
+        if (users.getToken().equals(item.getToken())) {
+            helper.setBackgroundColor(R.id.rank_item_background, Color.GRAY);
+            //防止刚更新名字时 排行榜不存在名字
+            helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
+        }
         //加载头像
         ImageView rankItemImg = helper.getView(R.id.rank_item_img);
         Glide.with(mContext)
