@@ -83,6 +83,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static boolean flag = true;
     /**注册弹窗*/
     private static AlertDialog registerDialog;
+    /**用户信息*/
+    private Users users;
 
     @Override
     public void init() {
@@ -258,11 +260,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 加载进入游戏前需要加载的数据之类的
      */
     private void enterGame(){
-        alertDialog = DialogUtils.showDialog(context);
         ThreadPoolManager.getInstance().execute(() -> {
             // 获取最新排行榜数据
             try {
-                Users users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
                 JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
                 if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                     //TODO 暂时为一个排行榜 后面在这个地方获取3个排行榜数据
@@ -272,18 +272,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_RANKING_MODE, result);
                     CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE, result);
                     videoview.stopPlayback();
-                    startActivity(new Intent(context, MainActivity.class));
+                    //判断是新用户还是老用户
+                    if (!TextUtils.isEmpty(users.getGameName())) {
+                        startActivity(new Intent(context, MainActivity.class));
+                    } else {
+                        startActivity(new Intent(context, InputNameActivity.class));
+                    }
                 }else {
                     //获取失败
                     LoggerUtils.toJson(response.toJSONString());
                 }
             } catch (Exception e) {
                 LoggerUtils.e(e.getMessage());
-            }finally {
-                if (alertDialog != null) {
-                    alertDialog.dismiss();
-                    alertDialog = null;
-                }
             }
         });
     }
@@ -674,6 +674,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         // 更新ui
         updateUiAfterLogin(usersResult.getName());
         // 缓存用户数据
+        users = usersResult;
         CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, usersResult);
     }
 

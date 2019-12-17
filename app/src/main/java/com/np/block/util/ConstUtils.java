@@ -25,6 +25,11 @@ public class ConstUtils {
     public static final int CODE_SUCCESS = 80000;
 
     /**
+     * 执行接口成功 但是要达成的条件失败
+     */
+    public static final int CODE_ERROR = 80007;
+
+    /**
      * 状态码 成功
      */
     static final int STATUS_SUCCESS = 200;

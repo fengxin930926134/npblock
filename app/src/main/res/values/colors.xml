@@ -8,6 +8,7 @@
     <color name="colorRed">#FE6072</color>
     <color name="colorGrey">#CFD3DE</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="colorWhiteTransparent">#75FFFFFF</color>
     <color name="colorBlack">#000000</color>
     <color name="colorDarkBlue">#03314D</color>
     <!--  半透明灰底  -->

@@ -52,7 +52,7 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
             helper.setBackgroundColor(R.id.rank_item_background, Color.GREEN);
         }
         //设置成绩
-        helper.setText(R.id.rank_item_name, item.getName() != null ? item.getName() : "");
+        helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
         helper.setText(R.id.rank_item_score, item.getClassicScore() != null ? item.getClassicScore()+"": "0");
         //加载头像
         ImageView rankItemImg = helper.getView(R.id.rank_item_img);

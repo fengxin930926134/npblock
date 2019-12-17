@@ -24,6 +24,7 @@
         android:roundIcon="@mipmap/head"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:largeHeap="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup"
         android:name=".NpBlockApplication">
@@ -57,6 +58,9 @@
         <activity android:name=".activity.TestActivity">
 
         </activity>
+        <!-- 输入名字界面activity注册 -->
+        <activity android:name=".activity.InputNameActivity"
+            android:screenOrientation="sensorLandscape"/>
         <!-- 腾讯 -->
         <activity
             android:name="com.tencent.tauth.AuthActivity"

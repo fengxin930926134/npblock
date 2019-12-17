@@ -63,5 +63,17 @@ public class VerificationUtils {
         }else return !name.contains(" ");
     }
 
+    /**
+     * 验证游戏名字 TODO 暂时不加限制
+     *
+     * @param gameName 游戏名字
+     * @return boolean
+     */
+    public static boolean validateGameName(String gameName) {
+        if (TextUtils.isEmpty(gameName)){
+            return false;
+        }else return !gameName.contains(" ");
+    }
+
     private VerificationUtils() {}
 }

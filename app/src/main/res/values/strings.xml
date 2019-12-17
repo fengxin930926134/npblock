@@ -30,4 +30,6 @@
     <string name="grade_text">等级：</string>
     <string name="row_num_text">消除行数：</string>
     <string name="max_score_text">最高分：</string>
+    <string name="input_name_hint_text">请输入你的名字</string>
+    <string name="input_name_true_text">创建角色</string>
 </resources>

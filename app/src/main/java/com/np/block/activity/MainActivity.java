@@ -46,17 +46,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**头像*/
     @BindView(R.id.head_img)
     ImageView headImg;
+    /**主页的用户游戏名字*/
+    @BindView(R.id.user_name)
+    TextView userName;
+    /**经典模式按钮*/
+    @BindView(R.id.classic_block)
+    Button classic;
     /**经典模式排行榜适配器*/
     public ClassicRankAdapter classicRankAdapter = null;
 
     @Override
     public void init() {
         users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
-        Button button = findViewById(R.id.classic_block);
-        TextView userName = findViewById(R.id.user_name);
         // 初始化用户名
-        userName.setText(users.getName() != null ? users.getName(): getResources().getString(R.string.app_name));
-        button.setOnClickListener(this);
+        userName.setText(users.getGameName() != null ? users.getGameName(): getResources().getString(R.string.app_name));
+        classic.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
 
