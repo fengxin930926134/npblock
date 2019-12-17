@@ -20,8 +20,8 @@
     <string name="register_request_code_btn_text">获取验证码</string>
     <string name="register_commit_btn_text">注册</string>
     <string name="register_input_name_text">请输入昵称</string>
-    <string name="barrier_block_text">闯关模式</string>
-    <string name="rank_block_text">排位模式</string>
+    <string name="interest_block_text">趣味模式</string>
+    <string name="battle_block_text">对战模式</string>
     <string name="left_text">左移</string>
     <string name="right_text">右移</string>
     <string name="rotate_text">旋转</string>

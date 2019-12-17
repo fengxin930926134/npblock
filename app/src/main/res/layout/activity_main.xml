@@ -60,8 +60,7 @@
                 android:id="@+id/viewpager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/tab"
-                />
+                android:layout_below="@id/tab"/>
 
         </RelativeLayout>
         <!--内容左结束-->
@@ -74,12 +73,12 @@
             android:layout_toEndOf="@+id/left_linear">
 
             <Button
-                android:id="@+id/rank_block"
+                android:id="@+id/battle_block"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_toStartOf="@id/middle_content_middle"
                 android:background="@mipmap/hai_zei_wang"
-                android:text="@string/rank_block_text"/>
+                android:text="@string/battle_block_text"/>
 
             <!--中间分割点-->
             <TextView
@@ -98,10 +97,10 @@
                 android:background="@mipmap/lou_ti"/>
 
             <Button
-                android:id="@+id/barrier_block"
+                android:id="@+id/interest_block"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/barrier_block_text"
+                android:text="@string/interest_block_text"
                 android:layout_toEndOf="@+id/middle_content_middle"
                 android:layout_alignTop="@+id/middle_content_middle"
                 android:background="@mipmap/tai_yang"/>

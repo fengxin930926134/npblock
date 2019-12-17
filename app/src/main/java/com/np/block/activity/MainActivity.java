@@ -1,5 +1,6 @@
 package com.np.block.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ import com.np.block.fragment.ClassicRankFragment;
 import com.np.block.fragment.RankingRankFragment;
 import com.np.block.fragment.RushRankFragment;
 import com.np.block.util.ConstUtils;
+import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
@@ -52,6 +54,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**经典模式按钮*/
     @BindView(R.id.classic_block)
     Button classic;
+    /**对战模式按钮*/
+    @BindView(R.id.battle_block)
+    Button battle;
+    /**趣味模式按钮*/
+    @BindView(R.id.interest_block)
+    Button interest;
     /**经典模式排行榜适配器*/
     public ClassicRankAdapter classicRankAdapter = null;
 
@@ -60,7 +68,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         // 初始化用户名
         userName.setText(users.getGameName() != null ? users.getGameName(): getResources().getString(R.string.app_name));
+        // 初始化点击事件
         classic.setOnClickListener(this);
+        battle.setOnClickListener(this);
+        interest.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
 
@@ -77,8 +88,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //循环生成每一个Fragment
         FragmentPagerItems pages = new FragmentPagerItems(this);
         pages.add(FragmentPagerItem.of(getString(R.string.classic_block_text), ClassicRankFragment.class));
-        pages.add(FragmentPagerItem.of(getString(R.string.rank_block_text), RankingRankFragment.class));
-        pages.add(FragmentPagerItem.of(getString(R.string.barrier_block_text), RushRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.battle_block_text), RankingRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.interest_block_text), RushRankFragment.class));
 
         //创建页面切换组件的适配器（pages类似于list，类似页面的集合）
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
@@ -102,9 +113,38 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.classic_block) {
-            startActivity(new Intent(MainActivity.this, ClassicBlockActivity.class));
+        switch (v.getId()) {
+            case R.id.classic_block:
+                startActivity(new Intent(MainActivity.this, ClassicBlockActivity.class));
+                break;
+            case R.id.battle_block:
+                battleDialog();
+                break;
+            case R.id.interest_block:
+                interestDialog();
+                break;
+            default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 趣味模式弹窗
+     */
+    private void interestDialog() {
+        AlertDialog dialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_interest, null);
+        view.findViewById(R.id.alert_interest_finish).setOnClickListener(v -> dialog.cancel());
+        dialog.setContentView(view);
+    }
+
+    /**
+     * 对战模式弹窗
+     */
+    private void battleDialog() {
+        final AlertDialog dialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_battle, null);
+        view.findViewById(R.id.alert_battle_finish).setOnClickListener(v -> dialog.cancel());
+        dialog.setContentView(view);
     }
 
     @Override
