@@ -32,4 +32,6 @@
     <string name="max_score_text">最高分：</string>
     <string name="input_name_hint_text">请输入你的名字</string>
     <string name="input_name_true_text">创建角色</string>
+    <string name="rush_mode_text">闯关模式</string>
+    <string name="_2048_mode_text">2048模式</string>
 </resources>

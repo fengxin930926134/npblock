@@ -1,23 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:layout_width="wrap_content"
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@color/colorGrayTransparent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ImageView
-        android:id="@+id/alert_interest_finish"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
-        android:background="@mipmap/ic_calculator_close"
-        android:padding="3dp"
-        android:contentDescription="@string/alert_login_finish_text" />
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/alert_interest_finish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@mipmap/ic_calculator_close"
+            android:padding="3dp"
+            android:contentDescription="@string/alert_login_finish_text" />
+    </RelativeLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="400dp"
+        android:layout_height="200dp"
+        android:orientation="horizontal"
+        android:layout_below="@+id/relativeLayout"
         android:background="@color/colorGrayTransparent">
 
+        <Button
+            android:id="@+id/rush_mode_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/rush_mode_text"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/_2048_mode_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/_2048_mode_text"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 </RelativeLayout>
