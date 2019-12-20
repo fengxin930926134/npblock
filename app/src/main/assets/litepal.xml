@@ -33,6 +33,7 @@
     -->
     <list>
         <mapping class="com.np.block.core.model.Test" />
+        <mapping class="com.np.block.core.model.Stage"/>
     </list>
 
     <!--
