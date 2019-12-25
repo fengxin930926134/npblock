@@ -120,17 +120,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                             loginSuccess(response, true);
                         }else {
-                            Looper.prepare();
-                            Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            Looper.loop();
+                            runOnUiThread(() -> Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show());
                         }
                     }catch (Exception e){
                         LoggerUtils.e("[token登陆]" + e.getMessage());
                     }finally {
-                        if (alertDialog != null) {
-                            alertDialog.dismiss();
-                            alertDialog = null;
-                        }
+                        runOnUiThread(() -> {
+                            if (alertDialog != null) {
+                                alertDialog.dismiss();
+                                alertDialog = null;
+                            }
+                        });
                     }
                 });
             }
@@ -337,17 +337,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                             loginSuccess(response, false);
                         }else {
-                            Looper.prepare();
-                            Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            Looper.loop();
+                            runOnUiThread(() -> Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show());
                         }
                     }catch (Exception e){
                         LoggerUtils.e(e.getMessage());
                     }finally {
-                        if (alertDialog != null) {
-                            alertDialog.dismiss();
-                            alertDialog = null;
-                        }
+                        runOnUiThread(() -> {
+                            if (alertDialog != null) {
+                                alertDialog.dismiss();
+                                alertDialog = null;
+                            }
+                        });
                     }
                 });
             } else {

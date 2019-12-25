@@ -1,12 +1,16 @@
 package com.np.block.activity;
 
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.viewpager.widget.ViewPager;
@@ -30,6 +34,7 @@ import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
+import com.np.block.util.ResolutionUtils;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
@@ -60,6 +65,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**趣味模式按钮*/
     @BindView(R.id.interest_block)
     Button interest;
+    /**查看排行榜按钮*/
+    @BindView(R.id.view_leaderboards)
+    Button viewLeaderboards;
+    /**左边的排行榜整体*/
+    @BindView(R.id.left_linear_rank)
+    RelativeLayout leftLinearRank;
     /**经典模式排行榜适配器*/
     public ClassicRankAdapter classicRankAdapter = null;
 
@@ -72,6 +83,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         classic.setOnClickListener(this);
         battle.setOnClickListener(this);
         interest.setOnClickListener(this);
+        viewLeaderboards.setText(">");
+        viewLeaderboards.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
 
@@ -123,7 +136,43 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.interest_block:
                 interestDialog();
                 break;
+            case R.id.view_leaderboards:
+                rankAnimEvent();
+                break;
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * 排行榜动画事件
+     */
+    private void rankAnimEvent() {
+        if (viewLeaderboards.getText().toString().equals(">")) {
+            final int left = leftLinearRank.getLeft();
+            final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
+            rankAnimator.setDuration(250);
+            rankAnimator.setInterpolator(new DecelerateInterpolator());
+            rankAnimator.addUpdateListener(animation -> {
+                int current = (int) rankAnimator.getAnimatedValue();
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) leftLinearRank.getLayoutParams();
+                layoutParams.leftMargin = left + current;
+                leftLinearRank.setLayoutParams(layoutParams);
+            });
+            rankAnimator.start();
+            viewLeaderboards.setText("<");
+        } else {
+            final int left = leftLinearRank.getLeft();
+            final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
+            rankAnimator.setDuration(250);
+            rankAnimator.setInterpolator(new LinearInterpolator());
+            rankAnimator.addUpdateListener(animation -> {
+                int current = (int) rankAnimator.getAnimatedValue();
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) leftLinearRank.getLayoutParams();
+                layoutParams.leftMargin = left - current;
+                leftLinearRank.setLayoutParams(layoutParams);
+            });
+            rankAnimator.start();
+            viewLeaderboards.setText(">");
         }
     }
 
@@ -202,7 +251,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 加载头像图片
      */
     private void loadHeadImg() {
-        RequestOptions options =new RequestOptions()
+        RequestOptions options = new RequestOptions()
                 //加载成功之前占位图
                 .placeholder(R.mipmap.head)
                 //加载错误之后的错误图

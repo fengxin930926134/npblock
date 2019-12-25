@@ -45,10 +45,10 @@
 
         <!--内容左开始-->
         <RelativeLayout
-            android:id="@+id/left_linear"
+            android:id="@+id/left_linear_rank"
+            android:layout_marginStart="-200dp"
             android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="15dp">
+            android:layout_height="match_parent">
 
             <FrameLayout
                 android:id="@+id/tab"
@@ -63,6 +63,14 @@
                 android:layout_below="@id/tab"/>
 
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/view_leaderboards"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/left_linear_rank"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="15dp"/>
         <!--内容左结束-->
 
         <!--内容右开始-->
@@ -70,7 +78,7 @@
             android:id="@+id/middle_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_toEndOf="@+id/left_linear">
+            android:layout_toEndOf="@+id/view_leaderboards">
 
             <Button
                 android:id="@+id/battle_block"
