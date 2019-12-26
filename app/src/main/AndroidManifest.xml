@@ -61,6 +61,9 @@
         <!-- 输入名字界面activity注册 -->
         <activity android:name=".activity.InputNameActivity"
             android:screenOrientation="sensorLandscape"/>
+        <!-- 闯关界面activity注册 -->
+        <activity android:name=".activity.RushBlockActivity"
+            android:screenOrientation="sensorLandscape"/>
         <!-- 腾讯 -->
         <activity
             android:name="com.tencent.tauth.AuthActivity"

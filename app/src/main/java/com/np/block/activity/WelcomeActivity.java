@@ -7,6 +7,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.db.DefaultDataBase;
 import com.np.block.core.manager.ActivityManager;
 import butterknife.BindView;
 
@@ -41,7 +42,9 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
      */
     @Override
     public void onAnimationStart(Animation animation) {
-
+        // 事先加载需要加载的数据
+        // 初始化数据库
+        DefaultDataBase.generateBasicDatabase();
     }
 
     /**
@@ -60,7 +63,7 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
      */
     @Override
     public void onAnimationRepeat(Animation animation) {
-        // 事先加载需要加载的数据
+        // 不会重复执行，因为执行完成后直接跳转了
     }
 
     @Override

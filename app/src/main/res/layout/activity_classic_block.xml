@@ -8,7 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toStartOf="@+id/tetris_view">
+        android:layout_toStartOf="@+id/rush_tetris_view">
 
         <com.np.block.view.NextTetrisView
             android:id="@+id/nextTetrisView"
@@ -44,7 +44,7 @@
     </RelativeLayout>
 
     <com.np.block.view.TetrisView
-        android:id="@+id/tetris_view"
+        android:id="@+id/rush_tetris_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
@@ -52,7 +52,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toEndOf="@+id/tetris_view">
+        android:layout_toEndOf="@+id/rush_tetris_view">
 
         <!--分数-->
         <LinearLayout

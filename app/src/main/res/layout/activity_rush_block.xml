@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_3">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/rush_tetris_view">
+
+        <com.np.block.view.NextTetrisView
+            android:id="@+id/nextTetrisView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"/>
+
+        <Button
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/left_and_right"
+            android:layout_alignTop="@+id/left_and_right"
+            android:text="@string/left_text"
+            tools:ignore="RelativeOverlap" />
+
+        <TextView
+            android:id="@+id/left_and_right"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="80dp"
+            android:layout_centerHorizontal="true"/>
+
+        <Button
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_alignTop="@+id/left_and_right"
+            android:text="@string/right_text" />
+    </RelativeLayout>
+
+    <com.np.block.view.RushTetrisView
+        android:id="@+id/rush_tetris_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/rush_tetris_view">
+
+        <TextView
+            android:id="@+id/rush_mode_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:textColor="@color/colorWhite"
+            android:textSize="30sp"/>
+
+        <Button
+            android:id="@+id/rotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/rotate_and_down"
+            android:layout_alignTop="@+id/rotate_and_down"
+            android:text="@string/rotate_text" />
+
+        <TextView
+            android:id="@+id/rotate_and_down"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="80dp"
+            android:layout_centerHorizontal="true"/>
+
+        <Button
+            android:id="@+id/down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/rotate_and_down"
+            android:layout_alignTop="@+id/rotate_and_down"
+            android:text="@string/down_text"
+            tools:ignore="RelativeOverlap" />
+    </RelativeLayout>
+
+</RelativeLayout>

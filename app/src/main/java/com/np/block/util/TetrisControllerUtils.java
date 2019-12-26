@@ -1,5 +1,6 @@
 package com.np.block.util;
 
+import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.view.TetrisView;
@@ -54,7 +55,7 @@ public class TetrisControllerUtils {
      */
     public static boolean canMoveRight(List<UnitBlock> tetris, List<UnitBlock> allBlock){
         for (UnitBlock unitBlock : tetris) {
-            if (unitBlock.getX() + UnitBlock.BLOCK_SIZE > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE){
+            if (unitBlock.getX() + UnitBlock.BLOCK_SIZE > TetrisView.END_X_LEN - UnitBlock.BLOCK_SIZE){
                 return false;
             }
             if (isOverlap(allBlock, unitBlock.getX() + UnitBlock.BLOCK_SIZE, unitBlock.getY())){
@@ -72,7 +73,7 @@ public class TetrisControllerUtils {
      */
     public static boolean canMoveDown(List<UnitBlock> tetris, List<UnitBlock> allBlock){
         for (UnitBlock unitBlock: tetris) {
-            if (unitBlock.getY() + 2 * UnitBlock.BLOCK_SIZE > TetrisView.end_y_len) {
+            if (unitBlock.getY() + 2 * UnitBlock.BLOCK_SIZE > TetrisView.END_Y_LEN) {
                 return false;
             }
             if (isOverlap(allBlock, unitBlock.getX(), unitBlock.getY() + UnitBlock.BLOCK_SIZE)){
@@ -143,7 +144,7 @@ public class TetrisControllerUtils {
      */
     public static void toRotate(Tetris tetris, List<UnitBlock> all) {
         // 如果当前正在下落的方块为正方形,则不进行旋转
-        if (tetris.getBlockType() == 3) {
+        if (tetris.getTetrisType().equals(TetrisTypeEnum.FIELD_SHAPE.getCode())) {
             return;
         }
         List<UnitBlock> tetrisCoord = tetris.getTetris();
@@ -201,11 +202,11 @@ public class TetrisControllerUtils {
             if (!needLeftTran && u.getX() < TetrisView.BEGIN_LEN_X) {
                 needLeftTran = true;
             }
-            if (!needRightTran && u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
+            if (!needRightTran && u.getX() > TetrisView.END_X_LEN - UnitBlock.BLOCK_SIZE) {
                 needRightTran = true;
             }
             //超出下边界
-            if (!needUpTran && u.getY() > TetrisView.end_y_len - UnitBlock.BLOCK_SIZE) {
+            if (!needUpTran && u.getY() > TetrisView.END_Y_LEN - UnitBlock.BLOCK_SIZE) {
                 needUpTran = true;
             }
             if (!overlapAllBlock && isOverlap(all, u.getX(), u.getY())){
@@ -240,7 +241,7 @@ public class TetrisControllerUtils {
             }
             needRightTran = false;
             for (UnitBlock u : unitBlocks) {
-                if (u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
+                if (u.getX() > TetrisView.END_X_LEN - UnitBlock.BLOCK_SIZE) {
                     needRightTran = true;
                     break;
                 }
@@ -298,7 +299,7 @@ public class TetrisControllerUtils {
                     needUpTran = false;
                     for (UnitBlock u : unitBlocks) {
                         //超出下边界
-                        if (u.getY() > TetrisView.end_y_len - UnitBlock.BLOCK_SIZE) {
+                        if (u.getY() > TetrisView.END_Y_LEN - UnitBlock.BLOCK_SIZE) {
                             needUpTran = true;
                             break;
                         }
@@ -351,7 +352,7 @@ public class TetrisControllerUtils {
             if (u.getX() < TetrisView.BEGIN_LEN_X) {
                 return false;
             }
-            if (u.getX() > TetrisView.end_x_len - UnitBlock.BLOCK_SIZE) {
+            if (u.getX() > TetrisView.END_X_LEN - UnitBlock.BLOCK_SIZE) {
                 return false;
             }
         }

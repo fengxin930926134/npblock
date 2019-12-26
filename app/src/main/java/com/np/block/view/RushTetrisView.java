@@ -7,12 +7,19 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import com.np.block.activity.ClassicBlockActivity;
+import com.np.block.activity.RushBlockActivity;
+import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.enums.TetrisTypeEnum;
+import com.np.block.core.manager.CacheManager;
+import com.np.block.core.model.Stage;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
+import com.np.block.util.LoggerUtils;
 import com.np.block.util.TetrisControllerUtils;
+
+import org.litepal.LitePal;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +28,7 @@ import java.util.List;
  * 俄罗斯方块的视图
  * @author fengxin
  */
-public class TetrisView extends View {
+public class RushTetrisView extends View {
     /**
      * 游戏主界面开始的坐标
      */
@@ -39,7 +46,7 @@ public class TetrisView extends View {
     /**游戏主界面结束的y坐标*/
     public static final int END_Y_LEN = BEGIN_LEN_Y + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * ROW_NUM + BOUND_WIDTH_OF_WALL;
     /**调用此对象的Activity对象 父视图*/
-    private ClassicBlockActivity fatherActivity = null;
+    private RushBlockActivity fatherActivity = null;
     /**背景墙画笔*/
     private static Paint paintWall = null;
     /**单元块画笔*/
@@ -61,12 +68,24 @@ public class TetrisView extends View {
     /**视图中全部已下落单元块集合长度*/
     private int allUnitBlockLength = allUnitBlock.size();
 
-    public TetrisView(Context context) {
+    public RushTetrisView(Context context) {
         super(context, null);
     }
 
-    public TetrisView(Context context, AttributeSet attrs) {
+    public RushTetrisView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        String stageType = (String) CacheManager.getInstance().get(ConstUtils.CACHE_RUSH_STAGE_TYPE);
+        // 初始化阻碍方块
+        Stage hinderTetris = LitePal
+                .where("stageType = ?", stageType)
+                .findLast(Stage.class);
+        List<Tetris> allTetris = hinderTetris.getAllTetris();
+        for (int i = 0; i < allTetris.size(); i++) {
+            LoggerUtils.i(allTetris.toString());
+            allUnitBlock.addAll(allTetris.get(i).getAllUnitBlock());
+        }
+        // 生成所有方块模具
+        generateAllBlockRectf();
         // 初始化背景墙笔
         if (paintWall == null) {
             paintWall = new Paint();
@@ -112,8 +131,8 @@ public class TetrisView extends View {
     }
 
     /**
-     * SuppressLint ：循环new对象应该在初始化时进行
-     *
+     * SuppressLint ：循环new对象应该在初始化时进行，但是需要实时进行改变位置的重画
+     * 暂时没有更好的办法
      * @param canvas 画布
      */
     @Override
@@ -144,7 +163,7 @@ public class TetrisView extends View {
      * @param context 父类
      */
     public void setFatherActivity(Context context) {
-        this.fatherActivity = (ClassicBlockActivity)context;
+        this.fatherActivity = (RushBlockActivity)context;
     }
 
     /**
@@ -318,8 +337,8 @@ public class TetrisView extends View {
             }
             // 对模具刷新
             generateAllBlockRectf();
-            // 对主UI进行修改 计算得分等
-            fatherActivity.updateDataAndUi(rows.size());
+            // 判断是否过关
+            fatherActivity.judgePassThrough(rows.size());
         }
     }
 

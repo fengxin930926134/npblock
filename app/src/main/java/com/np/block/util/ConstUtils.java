@@ -95,6 +95,11 @@ public class ConstUtils {
     public static final String CACHE_RANK_BREAKTHROUGH_MODE = "cache_rank_breakthrough_mode";
 
     /**
+     * 缓存 关卡信息的KEY
+     */
+    public static final String CACHE_RUSH_STAGE_TYPE = "cache_rush_stage_type";
+
+    /**
      * 请求url
      */
     static final String URL = "https://npblock.cn";

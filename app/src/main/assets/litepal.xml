@@ -34,6 +34,8 @@
     <list>
         <mapping class="com.np.block.core.model.Test" />
         <mapping class="com.np.block.core.model.Stage"/>
+        <mapping class="com.np.block.core.model.UnitBlock"/>
+        <mapping class="com.np.block.core.model.Tetris"/>
     </list>
 
     <!--

@@ -24,6 +24,7 @@ import com.hyphenate.util.NetUtils;
 import com.np.block.R;
 import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
@@ -184,6 +185,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         View view = View.inflate(context, R.layout.alert_dialog_interest, null);
         view.findViewById(R.id.alert_interest_finish).setOnClickListener(v -> dialog.cancel());
         dialog.setContentView(view);
+        Button rushMode = view.findViewById(R.id.rush_mode_button);
+        rushMode.setOnClickListener(v -> {
+            dialog.cancel();
+            // 缓存选择的关卡
+            CacheManager.getInstance().put(ConstUtils.CACHE_RUSH_STAGE_TYPE, StageTypeEnum.FIRST_PASS.getCode());
+            startActivity(new Intent(MainActivity.this, RushBlockActivity.class));
+        });
     }
 
     /**

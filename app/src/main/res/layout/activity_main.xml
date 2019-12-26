@@ -40,7 +40,6 @@
         android:layout_weight="6.6"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:layout_marginStart="5dp"
         android:layout_marginEnd="15dp">
 
         <!--内容左开始-->

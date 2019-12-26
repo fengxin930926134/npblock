@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
+import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.util.ConstUtils;
@@ -53,7 +54,7 @@ public class NextTetrisView extends View {
         }
         rectf = new RectF(0, 0, WIDTH, HEIGHT);
         //初始化下一个俄罗斯方块
-        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, 0, -1);
+        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, TetrisTypeEnum.DEFAULT, -1);
         // 生成模具
         generateNextTetrisRectf();
     }
@@ -71,7 +72,7 @@ public class NextTetrisView extends View {
     public Tetris getNextTetris() {
         Tetris tetris = nextTetris;
         // 重新生成下一个俄罗斯方块
-        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, 0, -1);
+        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, TetrisTypeEnum.DEFAULT, -1);
         // 重新生成模具
         generateNextTetrisRectf();
         invalidate();

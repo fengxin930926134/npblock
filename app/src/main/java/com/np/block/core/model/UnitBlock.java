@@ -1,8 +1,11 @@
 package com.np.block.core.model;
 
+import org.litepal.crud.LitePalSupport;
+
 import androidx.annotation.NonNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 俄罗斯方块的单元块
@@ -10,11 +13,14 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class UnitBlock implements Cloneable {
+@ToString
+public class UnitBlock extends LitePalSupport implements Cloneable {
     /**单元块的边长*/
     public static final int BLOCK_SIZE = 50;
     /**单元块的角度*/
     public static final int ANGLE = 8;
+    /**保存到数据库的开关*/
+    public static boolean isSave = false;
     /**单元块的颜色*/
     private int color;
     /**单元块的x坐标*/
@@ -22,10 +28,13 @@ public class UnitBlock implements Cloneable {
     /**单元块的y坐标*/
     private int y;
 
-    public UnitBlock(int x, int y, int color) {
+    UnitBlock(int x, int y, int color) {
         this.x = x;
         this.y = y;
         this.color = color;
+        if (isSave) {
+            save();
+        }
     }
 
     @NonNull

@@ -8,79 +8,67 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Stage;
 import com.np.block.core.model.Tetris;
-import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
-import com.np.block.util.LoggerUtils;
-import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.view.NextTetrisView;
-import com.np.block.view.TetrisView;
+import com.np.block.view.RushTetrisView;
+import org.litepal.LitePal;
+import butterknife.BindView;
 
 /**
- * 经典模式
+ * 闯关模式
+ *
  * @author fengxin
  */
-public class ClassicBlockActivity extends BaseActivity implements View.OnClickListener {
+public class RushBlockActivity extends BaseActivity implements View.OnClickListener {
     /**俄罗斯方块视图*/
-    private TetrisView tetris;
+    @BindView(R.id.rush_tetris_view)
+    RushTetrisView tetris;
     /**下一个俄罗斯方块视图*/
-    private NextTetrisView nextTetris;
-    /**分数*/
-    private TextView score;
-    /**等级*/
-    private TextView grade;
-    /**消掉的行数*/
-    private TextView rowNum;
-    /**最高分*/
-    private int maxScore;
+    @BindView(R.id.nextTetrisView)
+    NextTetrisView nextTetris;
+    /**左移按钮*/
+    @BindView(R.id.left)
+    Button left;
+    /**右移按钮*/
+    @BindView(R.id.right)
+    Button right;
+    /**下落按钮*/
+    @BindView(R.id.down)
+    Button down;
+    /**旋转按钮*/
+    @BindView(R.id.rotate)
+    Button rotate;
+    @BindView(R.id.rush_mode_name)
+    TextView rushModeName;
     /**暂停对话框*/
     private AlertDialog pauseDialog = null;
     /**判断是否长点击*/
     private boolean isLongClick = false;
-    /**下落的速度*/
-    private int speed = 1000;
     /**标识游戏是暂停还是运行*/
     private boolean runningStatus = true;
     /**标识游戏是开始还是结束*/
     private boolean beginGame = true;
+    /**关卡属性*/
+    private Stage stage;
+    /**消掉的行数*/
+    private int rowNum = 0;
 
     @Override
     public void init() {
-        // 获取对应的视图对象
-        tetris = findViewById(R.id.rush_tetris_view);
-        nextTetris = findViewById(R.id.nextTetrisView);
-        score = findViewById(R.id.score);
-        grade = findViewById(R.id.grade);
-        rowNum = findViewById(R.id.row_num);
-        TextView maxScore = findViewById(R.id.max_score);
-        // 初始化数据
-        score.setText("0");
-        grade.setText("1");
-        rowNum.setText("0");
-        // 当本地数据没有的时候读取缓存数据
-        if ((this.maxScore = SharedPreferencesUtils.readScore()) == 0) {
-            Users user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
-            if (user != null && user.getClassicScore() != null && user.getClassicScore() > 0) {
-                this.maxScore = user.getClassicScore();
-                // 保存本地
-                if (SharedPreferencesUtils.saveScore(this.maxScore)) {
-                    LoggerUtils.i("[SP] 保存成绩失败");
-                }
-            }
-        }
-        maxScore.setText(String.valueOf(this.maxScore));
-        // 左移按钮
-        Button left = findViewById(R.id.left);
-        // 右移按钮
-        Button right = findViewById(R.id.right);
-        // 下落按钮
-        Button down = findViewById(R.id.down);
-        // 旋转按钮
-        Button rotate = findViewById(R.id.rotate);
+        String stageType = (String) CacheManager.getInstance().get(ConstUtils.CACHE_RUSH_STAGE_TYPE);
+        // 初始化关卡属性
+        stage = LitePal
+                .where("stageType = ?", stageType)
+                .findLast(Stage.class);
+        // 设置关卡名称
+        rushModeName.setText(stage.getName());
         // 设置按钮单击事件
         left.setOnClickListener(this);
         right.setOnClickListener(this);
@@ -94,13 +82,13 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
         });
         // 设置子视图对象的父视图
         tetris.setFatherActivity(this);
-        // 启动下落线程  咳咳  游戏启动
+        // 游戏启动
         startDownThread();
     }
 
     @Override
     public int getContentView() {
-        return R.layout.activity_classic_block;
+        return R.layout.activity_rush_block;
     }
 
     @Override
@@ -120,7 +108,8 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     }
 
     /**
-     * 主界面的单击事件
+     * 游戏界面的单击事件
+     *
      * @param view 被单击对象
      */
     @Override
@@ -143,59 +132,43 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     }
 
     /**
-     * 更新游戏数据和分数等
-     * TODO 计分标准为下落一个块10分，一次消一行100分、2行200分、3行400分、4行800分。(待实现)
+     * 判断消除行数是否达成过关条件
      *
-     * @param row 消掉的方块行数
+     * @param newSum 新消除行数
      */
-    public void updateDataAndUi(int row) {
-        // 等级
-        final int gradeUsed = Integer.parseInt(grade.getText().toString());
-        // 成绩=等级x方块数
-        final int scoreNew = Integer.parseInt(score.getText().toString()) + row * TetrisView.COLUMN_NUM * gradeUsed;
-        // 消除行数
-        final int rows = Integer.parseInt(rowNum.getText().toString()) + row;
-        // 新等级
-        final int gradeNew = computeGrade(gradeUsed, scoreNew);
-        runOnUiThread(() -> {
-            if (gradeUsed != gradeNew) {
-                Toast.makeText(ClassicBlockActivity.this, "等级提升", Toast.LENGTH_SHORT).show();
-                // 设置下落速度
-                int newSpeed = speed - 200;
-                if (newSpeed > 0) {
-                    speed = newSpeed;
-                } else {
-                    // 改变加速规则 -50
-                    int newSpeedTwo = speed - 50;
-                    // 最快速度维持100
-                    int maxSpeed = 100;
-                    if (newSpeedTwo >= maxSpeed) {
-                        speed = newSpeedTwo;
-                    }
-                }
-                grade.setText(String.valueOf(gradeNew));
-            }
-            score.setText(String.valueOf(scoreNew));
-            rowNum.setText(String.valueOf(rows));
-        });
+    public void judgePassThrough(int newSum) {
+        if (rowNum + newSum >= stage.getComplete()) {
+            //过关
+            gamePassDialog();
+        } else {
+            rowNum = rowNum + newSum;
+        }
     }
 
     /**
-     * 计算游戏等级
-     * @param grade 当前等级
-     * @param score 当前分数
-     * @return 应该处于的游戏等级
+     * 创建游戏过关的弹窗
      */
-    private int computeGrade(int grade, int score) {
-        // 计算出来的成绩
-        double computeScore = score / Math.pow(grade, 2);
-        // 满分成绩
-        int maxScore = 100;
-        if ((int)computeScore >= maxScore) {
-            return computeGrade(grade + 1, score);
-        } else {
-            return grade;
-        }
+    private void gamePassDialog() {
+        beginGame = false;
+        // 弹出弹窗
+        runOnUiThread(() -> DialogUtils.showDialog(context, "恭喜过关", "您怎么这么牛皮啊！！",
+                "回到主页", "重来","开始下一关", false, false,
+                //回到主页
+                (dialog, which) -> {
+                    dialog.cancel();
+                    exitGame();
+                },
+                //刷新重来
+                (dialog, which) -> {
+                    dialog.cancel();
+                    refreshGame();
+                },
+                //开始下一关
+                (dialog, which) -> {
+                    dialog.cancel();
+                    Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
+                },
+                null));
     }
 
     /**
@@ -203,22 +176,8 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      */
     private void startGameOverDialog() {
         beginGame = false;
-        int maxScoreNew = Integer.parseInt(score.getText().toString());
-        final String textContent;
-        // 判断成绩是否需要保存
-        if (maxScoreNew > maxScore) {
-            textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
-            // 保存本地
-            if (SharedPreferencesUtils.saveScore(maxScoreNew)) {
-                LoggerUtils.i("[SP] 保存成绩失败");
-            }
-            // 上传游戏分数
-            CacheManager.getInstance().put(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE, maxScoreNew);
-        } else {
-            textContent = "别灰心，再来一次就突破！";
-        }
         // 弹出弹窗
-        runOnUiThread(() -> DialogUtils.showDialog(context, "游戏结束", textContent,
+        runOnUiThread(() -> DialogUtils.showDialog(context, "游戏结束", "别灰心，再来一次就通关！",
                 "回到主页", "重来", false, false,
                 (dialog, which) -> {
                     dialog.cancel();
@@ -323,7 +282,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
                     //下移
                     down();
                     try {
-                        Thread.sleep(speed);
+                        Thread.sleep(stage.getSpeed());
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
