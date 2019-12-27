@@ -2,7 +2,6 @@ package com.np.block.core.model;
 
 import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.util.ConstUtils;
-import com.np.block.util.LoggerUtils;
 import com.np.block.util.RandomUtils;
 import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
@@ -50,7 +49,7 @@ public class Tetris extends LitePalSupport {
      * @param x 整体坐标点x
      * @param y 整体坐标点y
      * @param tetrisType 俄罗斯方块类型
-     * @param color 颜色下标 (-1随机生成颜色) TODO 待使用枚举
+     * @param color 颜色下标 (-1随机生成颜色)
      */
     public Tetris(int x, int y, TetrisTypeEnum tetrisType, int color) {
         this.x = x;
