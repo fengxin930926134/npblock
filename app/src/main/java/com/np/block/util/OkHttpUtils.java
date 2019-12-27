@@ -1,8 +1,6 @@
 package com.np.block.util;
 
 import com.alibaba.fastjson.JSONObject;
-
-import java.io.IOException;
 import java.util.Objects;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,7 +24,7 @@ public class OkHttpUtils {
      * @param url url
      * @param json 请求数据
      * @return json
-     * @throws IOException IOException
+     * @throws Exception Exception
      */
     public static JSONObject post(String url, String json) throws Exception {
         JSONObject params = new JSONObject();
@@ -44,13 +42,23 @@ public class OkHttpUtils {
         }
     }
 
-    public static String get(String url) throws IOException {
+    /**
+     * get请求
+     *
+     * @param url url
+     * @return json
+     * @throws Exception Exception
+     */
+    public static JSONObject get(String url) throws Exception {
         Request request = new Request.Builder()
                 .url(ConstUtils.URL + url)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            return "{'status':"+response.code()+",'body':"+ Objects.requireNonNull(response.body()).string()+"}";
+            if (response.code() != ConstUtils.STATUS_SUCCESS) {
+                throw new Exception("请求服务器失败");
+            }
+            return JSONObject.parseObject(Objects.requireNonNull(response.body()).string());
         }
     }
 }
