@@ -1,6 +1,7 @@
 package com.np.block.util;
 
 import java.util.Random;
+import java.util.UUID;
 
 /**
  *  随机数工具类
@@ -18,6 +19,14 @@ public class RandomUtils {
      */
     public static int getInt(int number){
         return random.nextInt(number) + 1;
+    }
+
+    /**
+     * 随机一个uuid
+     * @return UUID
+     */
+    public static String getUUID(){
+        return UUID.randomUUID().toString();
     }
 
     private RandomUtils(){}

@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -71,7 +72,7 @@ public class HttpRequestUtils {
                 inputStream = httpURLConnection.getErrorStream();
             }
             //获得输入
-            inputStreamReader = new InputStreamReader(inputStream, ConstUtils.CHARSET);
+            inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             bufferedReader = new BufferedReader(inputStreamReader);
             //将bufferReader的值给放到buffer里
             String str;

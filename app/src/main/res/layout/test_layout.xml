@@ -8,12 +8,22 @@
         android:id="@+id/test_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="进入队列"/>
+        android:text="进入匹配"/>
     <Button
         android:id="@+id/test_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="发送消息"/>
+    <Button
+        android:id="@+id/test_5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="退出队列"/>
+    <Button
+        android:id="@+id/test_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="退出游戏"/>
     <TextView
         android:id="@+id/test_3"
         android:layout_width="match_parent"

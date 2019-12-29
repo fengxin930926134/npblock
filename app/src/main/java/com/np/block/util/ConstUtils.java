@@ -40,11 +40,6 @@ public class ConstUtils {
     public static final String CODE = "code";
 
     /**
-     * 字符编码
-     */
-    static final String CHARSET = "UTF-8";
-
-    /**
      * sp 保存token的key值
      */
     public static final String SP_TOKEN = "spToken";
