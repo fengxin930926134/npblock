@@ -18,9 +18,13 @@ import com.np.block.util.RandomUtils;
 
 import org.litepal.util.Const;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -43,7 +47,11 @@ public class TestActivity extends BaseActivity {
     Button button3;
     @BindView(R.id.test_5)
     Button button4;
-    private QueueMessage queueMessage;
+    @BindView(R.id.test_6)
+    Button button5;
+    private QueueMessage queueMessage = new QueueMessage();
+    private static final int TIMEOUT = 3000;   // 设置超时为3秒
+    private static final int MAXTRIES = 5;     // 最大重发次数5次
     @Override
     public void init() {
 //        String s = "[{\"classicScore\":12314,\"id\":3,\"createDate\":1575697962000},{\"classicScore\":123,\"openId\":\"12412dawd\",\"sex\":1,\"tokenTime\":1241254,\"token\":\"1241512512\",\"gameName\":\"124124\",\"phone\":\"14124\",\"name\":\"13123\",\"id\":1,\"createDate\":1575697957000}]";
@@ -60,25 +68,45 @@ public class TestActivity extends BaseActivity {
 //        LoggerUtils.d("[测试] test="+ allUnitBlock.toString());
         button3.setEnabled(false);
         button4.setEnabled(false);
+        button5.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                JSONObject jsonObject = OkHttpUtils.get("/hello");
+                LoggerUtils.toJson(jsonObject.toJSONString());
+
+//                /*******************发送数据***********************/
+//                byte[] bytes = "这是测试消息".getBytes(StandardCharsets.UTF_8);
+//                InetAddress address = InetAddress.getByName("192.144.128.184");
+//                //1.构造数据包
+//                DatagramPacket packet = new DatagramPacket(bytes,
+//                        bytes.length, address, 65535);
+//                //2.创建数据报套接字并将其绑定到本地主机上的指定端口。
+//                DatagramSocket socket = new DatagramSocket();
+//                //3.从此套接字发送数据报包。
+//                socket.send(packet);
+//                /*******************接收数据***********************/
+//                //1.构造 DatagramPacket，用来接收长度为 length 的数据包。
+//                final byte[] bytes1 = new byte[1024];
+//                DatagramPacket receiverPacket = new DatagramPacket(bytes1, bytes1.length);
+//                socket.receive(receiverPacket);
+//                final String reply = new String(bytes1, 0, receiverPacket.getLength());
+//                LoggerUtils.i("服务器发来的信息是：" + reply);
+//                runOnUiThread(() -> Toast.makeText(context, "服务器发来的信息是：" + reply, Toast.LENGTH_SHORT).show());
+//                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }));
         button.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() ->{
             try {
-                int port = OkHttpUtils.getNotOccupyPort();
-                String ipAddressString = OkHttpUtils.getIpAddressString();
-                queueMessage = new QueueMessage(RandomUtils.getUUID(),ipAddressString , port);
-                JSONObject post = OkHttpUtils.post("/match/add", JSONObject.toJSONString(queueMessage));
-                LoggerUtils.toJson(post.toJSONString());
-                runOnUiThread(() -> {
-                    Toast.makeText(context, "加入成功", Toast.LENGTH_SHORT).show();
-                    button.setText("队列中");
-                    button.setEnabled(false);
-                    button4.setEnabled(true);
-                });
-
+                if (!reqSocket("test")) {
+                    return;
+                }
                 /*
-                 * 接收服务器端响应的数据
+                 * 接收服务器端响应的数据 指定端口
                  */
-                DatagramSocket socket = new DatagramSocket(port);
+                DatagramSocket socket = new DatagramSocket(9000);
                 while (true) {
+                    LoggerUtils.i("已经准备好接收数据");
                     // 1.创建数据报，用于接收服务器端响应的数据
                     byte[] data = new byte[1024];
                     DatagramPacket packet = new DatagramPacket(data, data.length);
@@ -138,7 +166,8 @@ public class TestActivity extends BaseActivity {
         });
         button3.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
             try {
-                OkHttpUtils.post("/match/remove", JSONObject.toJSONString(queueMessage));
+                JSONObject post = OkHttpUtils.post("/match/remove", JSONObject.toJSONString(queueMessage));
+                LoggerUtils.toJson(post.toJSONString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -147,7 +176,8 @@ public class TestActivity extends BaseActivity {
 
         button4.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
             try {
-                OkHttpUtils.post("/match/signOut", JSONObject.toJSONString(queueMessage));
+                JSONObject post = OkHttpUtils.post("/match/signOut", JSONObject.toJSONString(queueMessage));
+                LoggerUtils.toJson(post.toJSONString());
                 runOnUiThread(() -> {
                     button.setEnabled(true);
                     button.setText("开始匹配");
@@ -157,6 +187,48 @@ public class TestActivity extends BaseActivity {
                 e.printStackTrace();
             }
         }));
+    }
+
+    /*******************发送本机ip和端口到服务器***********************/
+    private boolean reqSocket(String gameType) throws IOException {
+        boolean receivedResponse = false;
+        int tries = 0;
+        //1.构造数据包（加入游戏类型, 消息类型，请求端口和ip）
+        byte[] bytes = gameType.getBytes(StandardCharsets.UTF_8);
+        InetAddress address = InetAddress.getByName("192.144.128.184");
+        DatagramPacket sendPacket = new DatagramPacket(bytes,
+                bytes.length, address, 65535);
+        final byte[] bytes1 = new byte[1024];
+        DatagramPacket receiverPacket = new DatagramPacket(bytes1, bytes1.length);
+        //2.创建数据报套接字并将其绑定到本地主机上的指定端口。
+        DatagramSocket socket = new DatagramSocket(9000);
+        // 设置阻塞时间
+        socket.setSoTimeout(TIMEOUT);
+        do {
+            //3.从此套接字发送数据报包。
+            socket.send(sendPacket);
+            try {
+                socket.receive(receiverPacket);
+                // 检查来源
+                if (!receiverPacket.getAddress().equals(address)) {
+                    throw new IOException("未知来源");
+                }
+                receivedResponse = true;
+                // 处理接收到的消息
+                runOnUiThread(() -> {
+                    Toast.makeText(context, "加入成功", Toast.LENGTH_SHORT).show();
+                    button.setText("队列中");
+                    button.setEnabled(false);
+                    button4.setEnabled(true);
+                });
+            } catch (InterruptedIOException e) {
+                tries += 1;
+                LoggerUtils.i("Timed out, " + (MAXTRIES - tries) + " more tries...");
+            }
+            tries++;
+        } while (!receivedResponse && tries < MAXTRIES);
+        socket.close();
+        return receivedResponse;
     }
 
     @Override

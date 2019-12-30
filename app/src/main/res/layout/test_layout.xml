@@ -24,6 +24,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="退出游戏"/>
+    <Button
+        android:id="@+id/test_6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="test网"/>
     <TextView
         android:id="@+id/test_3"
         android:layout_width="match_parent"

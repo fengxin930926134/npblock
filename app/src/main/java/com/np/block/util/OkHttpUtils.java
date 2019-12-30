@@ -1,5 +1,7 @@
 package com.np.block.util;
 
+import android.net.ConnectivityManager;
+
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
@@ -71,29 +73,6 @@ public class OkHttpUtils {
             }
             return JSONObject.parseObject(Objects.requireNonNull(response.body()).string());
         }
-    }
-
-    /**
-     * 获取本机ip地址
-     * @return ip
-     */
-    public synchronized static String getIpAddressString() {
-        try {
-            for (Enumeration<NetworkInterface> interfaces = NetworkInterface
-                    .getNetworkInterfaces(); interfaces.hasMoreElements(); ) {
-                NetworkInterface networkInterface = interfaces.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = networkInterface
-                        .getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
-                    InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {
-                        return inetAddress.getHostAddress();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        return "0.0.0.0";
     }
 
     /**

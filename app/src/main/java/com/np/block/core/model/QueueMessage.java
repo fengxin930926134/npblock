@@ -23,7 +23,11 @@ public class QueueMessage {
         this.ip = ip;
         this.port = port;
     }
-    public QueueMessage() {
+    public QueueMessage(String id, int port) {
+        this.id = id;
+        this.port = port;
+    }
+    public QueueMessage(){
 
     }
 }
