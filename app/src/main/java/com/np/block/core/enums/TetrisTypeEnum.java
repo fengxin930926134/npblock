@@ -5,9 +5,11 @@ import lombok.Getter;
 
 /**
  * 俄罗斯方块类型
+ * @author fengxin
  */
 @Getter
 public enum TetrisTypeEnum {
+    /**俄罗斯方块的类型*/
     DEFAULT("DEFAULT", "随机类型"),
     LINE_SHAPE("LINE_SHAPE", "横线类型"),
     CONVEX_SHAPE("CONVEX_SHAPE", "凸类型"),

@@ -1,25 +1,25 @@
 package com.np.block.activity;
 
+import android.text.TextUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.enums.MessageTypeEnum;
 import com.np.block.core.manager.ThreadPoolManager;
-import com.np.block.core.model.QueueMessage;
+import com.np.block.core.model.Message;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import com.np.block.util.RandomUtils;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
-
 import butterknife.BindView;
 
 /**
@@ -41,63 +41,38 @@ public class TestActivity extends BaseActivity {
     Button button4;
     @BindView(R.id.test_6)
     Button button5;
-    private QueueMessage queueMessage = new QueueMessage();
-    private static final int TIMEOUT = 3000;   // 设置超时为3秒
-    private static final int MAXTRIES = 5;     // 最大重发次数5次
+    @BindView(R.id.edit_text)
+    EditText editText;
+    private Message message = new Message();
+    /**设置超时为3秒*/
+    private static final int TIMEOUT = 3000;
+    /**最大重发次数5次*/
+    private static final int MAXTRIES = 5;
     final byte[] bytes1 = new byte[1024];
-    //2.创建数据报套接字并将其绑定到本地主机上的指定端口。
+    /**创建数据报套接字并将其绑定到本地主机上的指定端口*/
     DatagramSocket socket;
     DatagramPacket receiverPacket = new DatagramPacket(bytes1, bytes1.length);
     InetAddress sendAddress;
     private int sendPort = 65535;
     private int receiverPort;
+    private boolean isWile = false;
     @Override
     public void init() {
-//        String s = "[{\"classicScore\":12314,\"id\":3,\"createDate\":1575697962000},{\"classicScore\":123,\"openId\":\"12412dawd\",\"sex\":1,\"tokenTime\":1241254,\"token\":\"1241512512\",\"gameName\":\"124124\",\"phone\":\"14124\",\"name\":\"13123\",\"id\":1,\"createDate\":1575697957000}]";
-//        LoggerUtils.toJson(s);
-        // litePal测试
-//        DefaultDataBase.generateBasicDatabase();
-//        Stage test1 = LitePal
-//                .where("stageType = ?", StageTypeEnum.FIRST_PASS.getCode())
-//                .findLast(Stage.class);
-//        LoggerUtils.d("[测试] test="+ test1.toString());
-//        List<Tetris> allTetris = test1.getAllTetris();
-//        LoggerUtils.d("[测试] test="+ allTetris.toString());
-//        List<UnitBlock> allUnitBlock = allTetris.get(0).getAllUnitBlock();
-//        LoggerUtils.d("[测试] test="+ allUnitBlock.toString());
         receiverPort = OkHttpUtils.getNotOccupyPort();
         try {
             sendAddress = InetAddress.getByName("192.144.128.184");
         } catch (IOException e) {
             LoggerUtils.i(e.getMessage());
         }
-        queueMessage.setId(RandomUtils.getUUID());
+        message.setId(RandomUtils.getUUID());
+        button2.setEnabled(false);
         button3.setEnabled(false);
         button4.setEnabled(false);
         button5.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
             try {
                 JSONObject jsonObject = OkHttpUtils.get("/hello");
                 LoggerUtils.toJson(jsonObject.toJSONString());
-
-//                /*******************发送数据***********************/
-//                byte[] bytes = "这是测试消息".getBytes(StandardCharsets.UTF_8);
-//                InetAddress sendAddress = InetAddress.getByName("192.144.128.184");
-//                //1.构造数据包
-//                DatagramPacket packet = new DatagramPacket(bytes,
-//                        bytes.length, sendAddress, 65535);
-//                //2.创建数据报套接字并将其绑定到本地主机上的指定端口。
-//                DatagramSocket socket = new DatagramSocket();
-//                //3.从此套接字发送数据报包。
-//                socket.send(packet);
-//                /*******************接收数据***********************/
-//                //1.构造 DatagramPacket，用来接收长度为 length 的数据包。
-//                final byte[] bytes1 = new byte[1024];
-//                DatagramPacket receiverPacket = new DatagramPacket(bytes1, bytes1.length);
-//                socket.receive(receiverPacket);
-//                final String reply = new String(bytes1, 0, receiverPacket.getLength());
-//                LoggerUtils.i("服务器发来的信息是：" + reply);
-//                runOnUiThread(() -> Toast.makeText(context, "服务器发来的信息是：" + reply, Toast.LENGTH_SHORT).show());
-//                socket.close();
+                runOnUiThread(()->Toast.makeText(context, jsonObject.toJSONString(), Toast.LENGTH_SHORT).show());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -105,69 +80,96 @@ public class TestActivity extends BaseActivity {
         //进入队列
         button.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() ->{
             try {
-                if (!reqSocket("test")) {
+                if (!reqSocket()) {
                     return;
                 }
                 LoggerUtils.i("已进入队列");
                 /*
                  * 接收服务器端响应的数据 （包括匹配，和游戏中）
                  */
+                isWile = false;
                 socket = new DatagramSocket(receiverPort);
                 while (true) {
                     LoggerUtils.i("已经准备好接收数据");
                     // 1.创建数据报，用于接收服务器端响应的数据
                     // 2.接收服务器响应的数据
                     socket.receive(receiverPacket);
-                    // 3.读取数据 （2种情况）
-                    final String reply = new String(bytes1, 0, receiverPacket.getLength());
+                    if (isWile) {
+                        break;
+                    }
+                    // 3.读取数据
+                    final String reply = new String(bytes1, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
                     LoggerUtils.i("服务器发来的信息是：" + reply);
-//                    JSONObject jsonObject = JSONObject.parseObject(reply);
-//                    if (jsonObject.containsKey("key")) {
-//                        // 说明是刚加入游戏队列
-//                        runOnUiThread(() -> {
-//                            button.setText("游戏中");
-//                            button3.setEnabled(true);
-//                            button.setEnabled(false);
-//                            textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
-//                        });
-//                        queueMessage.setKey(jsonObject.getString("key"));
-//                    } else {
-//                        QueueMessage params = jsonObject.toJavaObject(QueueMessage.class);
-//                        runOnUiThread(()->textView.setText(String.valueOf(textView.getText()).concat( params.getMsg() +"\n")));
-//                    }
-                    runOnUiThread(()->textView.setText(String.valueOf(textView.getText()).concat( reply +"\n")));
+                    Message receiveMsg;
+                    try {
+                        receiveMsg = JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
+                    }catch (Exception e) {
+                        LoggerUtils.e("{接收到的数据格式有误, 转换失败！info = [" + reply + "]}");
+                        continue;
+                    }
+                    switch (receiveMsg.getMessageType()) {
+                        case GAME_MESSAGE_TYPE:{
+                            runOnUiThread(() -> textView.setText(String.valueOf(textView.getText()).concat(receiveMsg.getMsg() +"\n")));
+                            break;
+                        }
+                        case SEND_KEY_TYPE:{
+                            runOnUiThread(() -> {
+                                button.setText("游戏中");
+                                button3.setEnabled(true);
+                                button2.setEnabled(true);
+                                button4.setEnabled(false);
+                                button.setEnabled(false);
+                                textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
+                            });
+                            message.setKey(receiveMsg.getKey());
+                            break;
+                        }
+                        default:LoggerUtils.e("未实现类型");
+                    }
                 }
             } catch (Exception e) {
                 LoggerUtils.e(e.getMessage());
             }
         }));
         //发消息
-        button2.setOnClickListener(v -> {
-            ThreadPoolManager.getInstance().execute(() ->{
-                try {
-                    /*
-                     * 向服务器端发送数据
-                     */
-                    // 1.定义服务器的地址、端口号、数据
-                    queueMessage.setMsg("这是测试消息");
-                    queueMessage.setGameType("test");
-                    byte[] data = JSONObject.toJSONString(queueMessage).getBytes(StandardCharsets.UTF_8);
-                    // 2.创建数据报，包含发送的数据信息
-                    DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, sendPort);
-                    // 4.向服务器端发送数据报
-                    socket.send(packet);
-                    LoggerUtils.i("发送...");
-                } catch (Exception e) {
-                    LoggerUtils.i(e.getMessage());
+        button2.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() ->{
+            try {
+                /*
+                 * 向服务器端发送游戏数据
+                 */
+                // 1.定义服务器的地址、端口号、数据
+                String s = editText.getText().toString();
+                if (!TextUtils.isEmpty(s)) {
+                    message.setMsg(s);
+                } else {
+                    message.setMsg("这是测试消息");
                 }
-            });
-        });
+                message.setMessageType(MessageTypeEnum.GAME_MESSAGE_TYPE);
+                byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+                // 2.创建数据报，包含发送的数据信息
+                DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, sendPort);
+                // 4.向服务器端发送数据报
+                socket.send(packet);
+                LoggerUtils.i("发送...");
+            } catch (Exception e) {
+                LoggerUtils.i(e.getMessage());
+            }
+        }));
         //退出游戏
         button3.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
             try {
-                JSONObject post = OkHttpUtils.post("/match/remove", JSONObject.toJSONString(queueMessage));
+                JSONObject post = OkHttpUtils.post("/match/remove", JSONObject.toJSONString(message));
                 exitSocket();
                 LoggerUtils.toJson(post.toJSONString());
+                runOnUiThread(() -> {
+                    Toast.makeText(context, "退出成功", Toast.LENGTH_SHORT).show();
+                    runOnUiThread(()->textView.setText("退出成功"));
+                    button.setEnabled(true);
+                    button2.setEnabled(false);
+                    button3.setEnabled(false);
+                    button.setText("开始匹配");
+                    button4.setEnabled(false);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -176,12 +178,14 @@ public class TestActivity extends BaseActivity {
         //退出队列
         button4.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
             try {
-                JSONObject post = OkHttpUtils.post("/match/signOut", JSONObject.toJSONString(queueMessage));
+                JSONObject post = OkHttpUtils.post("/match/signOut", JSONObject.toJSONString(message));
                 LoggerUtils.toJson(post.toJSONString());
                 exitSocket();
                 runOnUiThread(() -> {
                     Toast.makeText(context, "退出成功", Toast.LENGTH_SHORT).show();
                     button.setEnabled(true);
+                    button2.setEnabled(false);
+                    button3.setEnabled(false);
                     button.setText("开始匹配");
                     button4.setEnabled(false);
                 });
@@ -198,17 +202,19 @@ public class TestActivity extends BaseActivity {
         if (socket != null && !socket.isClosed()) {
             socket.close();
             socket.disconnect();
+            isWile = true;
         }
     }
 
     /*******************发送本机ip和端口到服务器***********************/
-    private synchronized boolean reqSocket(String gameType)  {
+    private synchronized boolean reqSocket()  {
         boolean receivedResponse = false;
-        queueMessage.setGameType(gameType);
+        message.setMessageType(MessageTypeEnum.MATCH_MESSAGE_TYPE);
+        message.setMsg("npblock");
         int tries = 0;
         try (DatagramSocket socket = new DatagramSocket(receiverPort)){
             //1.构造数据包（加入游戏类型, 消息类型，请求端口和ip）
-            byte[] bytes = JSONObject.toJSONString(queueMessage).getBytes(StandardCharsets.UTF_8);
+            byte[] bytes = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
             DatagramPacket sendPacket = new DatagramPacket(bytes,
                     bytes.length, sendAddress, sendPort);
             // 设置阻塞时间
@@ -222,7 +228,6 @@ public class TestActivity extends BaseActivity {
                     if (!receiverPacket.getAddress().equals(sendAddress)) {
                         throw new IOException("未知来源");
                     }
-                    receivedResponse = true;
                     // 处理接收到的消息
                     runOnUiThread(() -> {
                         Toast.makeText(context, "加入成功", Toast.LENGTH_SHORT).show();
@@ -230,6 +235,7 @@ public class TestActivity extends BaseActivity {
                         button.setEnabled(false);
                         button4.setEnabled(true);
                     });
+                    receivedResponse = true;
                 } catch (InterruptedIOException e) {
                     tries += 1;
                     LoggerUtils.i("Timed out, " + (MAXTRIES - tries) + " more tries...");
