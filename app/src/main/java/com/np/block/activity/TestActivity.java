@@ -1,5 +1,7 @@
 package com.np.block.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,7 +60,7 @@ public class TestActivity extends BaseActivity {
     private int receiverPort;
     /**判断是否退出队列或游戏*/
     private boolean isExit = false;
-    /**确认收到key*/
+    /**确认收到key 防止服务器多个同样消息*/
     private boolean confirmReceiptKey = false;
     @Override
     public void init() {
@@ -130,23 +132,24 @@ public class TestActivity extends BaseActivity {
                             break;
                         }
                         case SEND_KEY_TYPE:{
-                            //1.收到之后先向服务器发TCP数据包确认收到 即匹配中的确认 (后台回向未发送tcp数据包的发送多次udp)
                             if (!confirmReceiptKey) {
                                 confirmReceiptKey = true;
-                                ThreadPoolManager.getInstance().execute(() -> {
-                                    //1.向服务器发TCP数据包确认收到
-                                    //2.不停发送udp 服务端返回匹配人数
-                                    //弹出弹窗
-                                    //3.人数足够则进入游戏
-                                    runOnUiThread(() -> {
-                                        button.setText("游戏中");
-                                        button3.setEnabled(true);
-                                        button2.setEnabled(true);
-                                        button4.setEnabled(false);
-                                        button.setEnabled(false);
-                                        textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
-                                    });
-                                    message.setKey(receiveMsg.getKey());
+                                //1.向服务器发TCP数据包确认收到
+                                Message message = new Message();
+                                message.setId(this.message.getId());
+                                JSONObject post = OkHttpUtils.post("/match/confirm", JSONObject.toJSONString(message));
+                                LoggerUtils.toJson(post.toJSONString());
+                                // 后续加不停发送udp 服务端返回匹配人数
+                                // 后续加游戏类型来获取人数
+                                //3.人数足够则进入游戏 (暂时直接加入游戏)
+                                message.setKey(receiveMsg.getKey());
+                                runOnUiThread(() -> {
+                                    button.setText("游戏中");
+                                    button3.setEnabled(true);
+                                    button2.setEnabled(true);
+                                    button4.setEnabled(false);
+                                    button.setEnabled(false);
+                                    textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
                                 });
                             }
                             break;
@@ -186,8 +189,8 @@ public class TestActivity extends BaseActivity {
         button3.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
             try {
                 JSONObject post = OkHttpUtils.post("/match/remove", JSONObject.toJSONString(message));
-                exitSocket();
                 LoggerUtils.toJson(post.toJSONString());
+                exitSocket();
                 runOnUiThread(() -> {
                     Toast.makeText(context, "退出成功", Toast.LENGTH_SHORT).show();
                     runOnUiThread(()->textView.setText("退出成功"));
