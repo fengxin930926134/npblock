@@ -214,8 +214,8 @@ public class DialogUtils {
      * @param content        内容
      */
     public synchronized static void showTextDialog(Context context,
-                                               String title,
-                                               String content) {
+                                                   String title,
+                                                   String content) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         AlertDialog dialog = builder.create();
         // 设置点击dialog的外部能否取消弹窗
@@ -245,5 +245,60 @@ public class DialogUtils {
         int dialogWidth = 290;
         dialog.getWindow().setLayout(dp2Px(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.setContentView(view);
+    }
+
+    /**
+     * 动态文本提示弹窗
+     *
+     * @param context 上下文
+     * @param title 标题
+     * @param content 内容
+     * @param buttonOkText 确认按钮文本 为空为确认
+     * @param okListener 确认按钮事件 为空为消失弹窗
+     * @return AlertDialog
+     */
+    public synchronized static AlertDialog showTextTrendsDialog(Context context,
+                                                   String title,
+                                                   String content,
+                                                   String buttonOkText,
+                                                   DialogInterface.OnClickListener okListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog dialog = builder.create();
+        // 设置点击dialog的外部能否取消弹窗
+        dialog.setCanceledOnTouchOutside(false);
+        // 设置能不能返回键取消弹窗
+        dialog.setCancelable(false);
+        View view = View.inflate(context, R.layout.alert_dialog_text, null);
+        //标题
+        TextView tvTitle = view.findViewById(R.id.tv_alert_title);
+        //内容
+        TextView tvContent = view.findViewById(R.id.tv_alert_content);
+        //确定按钮
+        Button buttonOk = view.findViewById(R.id.btn_alert_true);
+        //判断标题是否为空
+        if (TextUtils.isEmpty(title)) {
+            tvTitle.setVisibility(View.GONE);
+        } else {
+            tvTitle.setText(title);
+        }
+        tvContent.setText(TextUtils.isEmpty(content) ? "" : content);
+        buttonOk.setText(TextUtils.isEmpty(buttonOkText) ? "确定" : buttonOkText);
+        final AlertDialog dialogFinal = dialog;
+        final DialogInterface.OnClickListener finalOkListener = okListener;
+        buttonOk.setOnClickListener( v -> {
+            if (okListener != null) {
+                finalOkListener.onClick(dialogFinal, DialogInterface.BUTTON_POSITIVE);
+            } else {
+                dialogFinal.cancel();
+            }
+        });
+        dialog.show();
+        //设置背景透明,去四个角
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);
+        //设置固定宽带，高度自适应
+        int dialogWidth = 290;
+        dialog.getWindow().setLayout(dp2Px(context, dialogWidth), LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.setContentView(view);
+        return dialog;
     }
 }

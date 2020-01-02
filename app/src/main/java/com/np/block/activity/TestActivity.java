@@ -11,6 +11,7 @@ import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.MessageTypeEnum;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Message;
+import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import com.np.block.util.RandomUtils;
@@ -55,7 +56,10 @@ public class TestActivity extends BaseActivity {
     InetAddress sendAddress;
     private int sendPort = 65535;
     private int receiverPort;
-    private boolean isWile = false;
+    /**判断是否退出队列或游戏*/
+    private boolean isExit = false;
+    /**确认收到key*/
+    private boolean confirmReceiptKey = false;
     @Override
     public void init() {
         receiverPort = OkHttpUtils.getNotOccupyPort();
@@ -69,13 +73,21 @@ public class TestActivity extends BaseActivity {
         button3.setEnabled(false);
         button4.setEnabled(false);
         button5.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
-            try {
-                JSONObject jsonObject = OkHttpUtils.get("/hello");
-                LoggerUtils.toJson(jsonObject.toJSONString());
-                runOnUiThread(()->Toast.makeText(context, jsonObject.toJSONString(), Toast.LENGTH_SHORT).show());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                JSONObject jsonObject = OkHttpUtils.get("/hello");
+//                LoggerUtils.toJson(jsonObject.toJSONString());
+//                runOnUiThread(()->Toast.makeText(context, jsonObject.toJSONString(), Toast.LENGTH_SHORT).show());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+
+            runOnUiThread(() -> DialogUtils.showTextTrendsDialog(
+                    context,
+                    "确认游戏",
+                    "当前确认人数: 0",
+                    null,
+                    null
+            ));
         }));
         //进入队列
         button.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() ->{
@@ -87,15 +99,20 @@ public class TestActivity extends BaseActivity {
                 /*
                  * 接收服务器端响应的数据 （包括匹配，和游戏中）
                  */
-                isWile = false;
+                isExit = false;
+                confirmReceiptKey = false;
                 socket = new DatagramSocket(receiverPort);
                 while (true) {
                     LoggerUtils.i("已经准备好接收数据");
-                    // 1.创建数据报，用于接收服务器端响应的数据
                     // 2.接收服务器响应的数据
                     socket.receive(receiverPacket);
-                    if (isWile) {
+                    if (isExit) {
                         break;
+                    }
+                    // 检查来源
+                    if (!receiverPacket.getAddress().equals(sendAddress)) {
+                        LoggerUtils.e("收到未知来源消息");
+                        continue;
                     }
                     // 3.读取数据
                     final String reply = new String(bytes1, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
@@ -113,15 +130,25 @@ public class TestActivity extends BaseActivity {
                             break;
                         }
                         case SEND_KEY_TYPE:{
-                            runOnUiThread(() -> {
-                                button.setText("游戏中");
-                                button3.setEnabled(true);
-                                button2.setEnabled(true);
-                                button4.setEnabled(false);
-                                button.setEnabled(false);
-                                textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
-                            });
-                            message.setKey(receiveMsg.getKey());
+                            //1.收到之后先向服务器发TCP数据包确认收到 即匹配中的确认 (后台回向未发送tcp数据包的发送多次udp)
+                            if (!confirmReceiptKey) {
+                                confirmReceiptKey = true;
+                                ThreadPoolManager.getInstance().execute(() -> {
+                                    //1.向服务器发TCP数据包确认收到
+                                    //2.不停发送udp 服务端返回匹配人数
+                                    //弹出弹窗
+                                    //3.人数足够则进入游戏
+                                    runOnUiThread(() -> {
+                                        button.setText("游戏中");
+                                        button3.setEnabled(true);
+                                        button2.setEnabled(true);
+                                        button4.setEnabled(false);
+                                        button.setEnabled(false);
+                                        textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
+                                    });
+                                    message.setKey(receiveMsg.getKey());
+                                });
+                            }
                             break;
                         }
                         default:LoggerUtils.e("未实现类型");
@@ -202,7 +229,7 @@ public class TestActivity extends BaseActivity {
         if (socket != null && !socket.isClosed()) {
             socket.close();
             socket.disconnect();
-            isWile = true;
+            isExit = true;
         }
     }
 
