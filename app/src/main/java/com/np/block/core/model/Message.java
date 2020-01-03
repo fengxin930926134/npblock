@@ -18,6 +18,7 @@ public class Message {
     /**携带的信息*/
     private String msg;
     private String messageType;
+    private Integer confirmNum;
 
     public MessageTypeEnum getMessageType() {
         return MessageTypeEnum.getEnumByCode(messageType);

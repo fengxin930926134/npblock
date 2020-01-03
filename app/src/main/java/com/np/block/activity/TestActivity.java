@@ -2,7 +2,10 @@ package com.np.block.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.os.CountDownTimer;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -62,6 +65,10 @@ public class TestActivity extends BaseActivity {
     private boolean isExit = false;
     /**确认收到key 防止服务器多个同样消息*/
     private boolean confirmReceiptKey = false;
+    /**确认点击ok*/
+    private boolean confirmOk = false;
+    AlertDialog dialog = null;
+    TextView content;
     @Override
     public void init() {
         receiverPort = OkHttpUtils.getNotOccupyPort();
@@ -74,23 +81,9 @@ public class TestActivity extends BaseActivity {
         button2.setEnabled(false);
         button3.setEnabled(false);
         button4.setEnabled(false);
-        button5.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() -> {
-//            try {
-//                JSONObject jsonObject = OkHttpUtils.get("/hello");
-//                LoggerUtils.toJson(jsonObject.toJSONString());
-//                runOnUiThread(()->Toast.makeText(context, jsonObject.toJSONString(), Toast.LENGTH_SHORT).show());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-
-            runOnUiThread(() -> DialogUtils.showTextTrendsDialog(
-                    context,
-                    "确认游戏",
-                    "当前确认人数: 0",
-                    null,
-                    null
-            ));
-        }));
+        button5.setOnClickListener(v -> {
+            //countDownTimer.start();
+        });
         //进入队列
         button.setOnClickListener(v -> ThreadPoolManager.getInstance().execute(() ->{
             try {
@@ -132,25 +125,31 @@ public class TestActivity extends BaseActivity {
                             break;
                         }
                         case SEND_KEY_TYPE:{
+                            this.message.setConfirmNum(receiveMsg.getConfirmNum());
                             if (!confirmReceiptKey) {
                                 confirmReceiptKey = true;
-                                //1.向服务器发TCP数据包确认收到
-                                Message message = new Message();
-                                message.setId(this.message.getId());
-                                JSONObject post = OkHttpUtils.post("/match/confirm", JSONObject.toJSONString(message));
-                                LoggerUtils.toJson(post.toJSONString());
-                                // 后续加不停发送udp 服务端返回匹配人数
-                                // 后续加游戏类型来获取人数
-                                //3.人数足够则进入游戏 (暂时直接加入游戏)
-                                message.setKey(receiveMsg.getKey());
+                                this.message.setKey(receiveMsg.getKey());
+                                //弹起确认弹窗
                                 runOnUiThread(() -> {
-                                    button.setText("游戏中");
-                                    button3.setEnabled(true);
-                                    button2.setEnabled(true);
-                                    button4.setEnabled(false);
-                                    button.setEnabled(false);
-                                    textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
+                                    showConfirmDialog();
+                                    countDownTimer.start();
                                 });
+                            } else {
+                                if (this.message.getConfirmNum() == 2) {
+                                    //3.人数足够则进入游戏
+                                    runOnUiThread(() -> {
+                                        countDownTimer.cancel();
+                                        if (dialog != null) {
+                                            dialog.cancel();
+                                        }
+                                        button.setText("游戏中");
+                                        button3.setEnabled(true);
+                                        button2.setEnabled(true);
+                                        button4.setEnabled(false);
+                                        button.setEnabled(false);
+                                        textView.setText(String.valueOf(textView.getText()).concat("进入游戏\n"));
+                                    });
+                                }
                             }
                             break;
                         }
@@ -193,13 +192,14 @@ public class TestActivity extends BaseActivity {
                 exitSocket();
                 runOnUiThread(() -> {
                     Toast.makeText(context, "退出成功", Toast.LENGTH_SHORT).show();
-                    runOnUiThread(()->textView.setText("退出成功"));
+                    textView.setText("退出成功");
                     button.setEnabled(true);
                     button2.setEnabled(false);
                     button3.setEnabled(false);
                     button.setText("开始匹配");
                     button4.setEnabled(false);
                 });
+                confirmReceiptKey = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -224,6 +224,81 @@ public class TestActivity extends BaseActivity {
             }
         }));
     }
+
+    private void showConfirmDialog() {
+        dialog = DialogUtils.showDialogDefault(context);
+        dialog.setCancelable(false);
+        View inflate = View.inflate(context, R.layout.alert_dialog_select, null);
+        dialog.setContentView(inflate);
+        TextView title = inflate.findViewById(R.id.tv_alert_title);
+        title.setText("匹配成功");
+        content = inflate.findViewById(R.id.tv_alert_content);
+        content.setText("当前确认人数: 0 人\n倒计时: 10 秒");
+        Button alertOk = inflate.findViewById(R.id.btn_alert_ok);
+        Button alertCancel = inflate.findViewById(R.id.btn_alert_cancel);
+        alertOk.setText("确认");
+        alertOk.setOnClickListener(v1 -> {
+            //1.向服务器发TCP数据包确认收到
+            Message message = new Message();
+            message.setId(this.message.getId());
+            alertOk.setTextColor(Color.GRAY);
+            alertOk.setEnabled(false);
+            alertCancel.setEnabled(false);
+            //确定 发送http去确认
+            ThreadPoolManager.getInstance().execute(() -> {
+                try {
+                    JSONObject post = OkHttpUtils.post("/match/confirm", JSONObject.toJSONString(message));
+                    LoggerUtils.toJson(post.toJSONString());
+                    confirmOk = true;
+                } catch (Exception e) {
+                    LoggerUtils.e(e.getMessage());
+                }
+            });
+        });
+        alertCancel.setText("拒绝");
+        alertCancel.setOnClickListener(v12 -> {
+            // 使其他键变黑 等待时间结束
+            alertOk.setEnabled(false);
+            alertCancel.setEnabled(false);
+        });
+    }
+
+    /**
+     * 第一个参数表示总时间，第二个参数表示间隔时间。意思就是每隔一秒会回调一次方法onTick，然后10秒之后会回调onFinish方法
+     */
+    private CountDownTimer countDownTimer = new CountDownTimer(1000 * 10, 1000) {
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            long second = millisUntilFinished / 1000;
+            String s2 = "倒计时 " + second + " 秒";
+            String s1 = "当前确认人数: " + message.getConfirmNum() + "人\n".concat(s2);
+            content.setText(s1);
+            LoggerUtils.i("执行了onTick");
+        }
+
+        @Override
+        public void onFinish() {
+            LoggerUtils.i("执行了onFinish");
+            if (dialog != null) {
+                dialog.cancel();
+                //进入游戏失败 重置状态
+                confirmReceiptKey = false;
+                //检查是否确认
+                if (!confirmOk) {
+                    exitSocket();
+                    Toast.makeText(context, "退出成功", Toast.LENGTH_SHORT).show();
+                    button.setEnabled(true);
+                    button2.setEnabled(false);
+                    button3.setEnabled(false);
+                    button.setText("开始匹配");
+                    button4.setEnabled(false);
+                } else {
+                    confirmOk = false;
+                }
+            }
+        }
+    };
 
     /**
      * 退出队列
