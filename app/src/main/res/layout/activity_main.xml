@@ -17,7 +17,7 @@
             android:id="@+id/head_img"
             android:layout_width="65dp"
             android:layout_height="match_parent"
-            android:src="@mipmap/head"
+            android:src="@mipmap/np_block_launcher"
             android:contentDescription="@string/app_name"
             android:layout_marginEnd="10dp"/>
 
@@ -157,7 +157,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@mipmap/head"
+            android:background="@mipmap/np_block_launcher"
             android:contentDescription="@string/app_name"/>
     </LinearLayout>
     <!--尾部结尾-->

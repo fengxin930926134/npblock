@@ -11,7 +11,7 @@
         android:id="@+id/rank_item_img"
         android:layout_width="50dp"
         android:layout_height="match_parent"
-        android:src="@mipmap/head"
+        android:src="@mipmap/np_block_launcher"
         android:contentDescription="@string/app_name" />
     <LinearLayout
         android:layout_width="0dp"

@@ -26,9 +26,9 @@ public class RankingRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
     /**头像属性配置*/
     private RequestOptions options =new RequestOptions()
             //加载成功之前占位图
-            .placeholder(R.mipmap.head)
+            .placeholder(R.mipmap.np_block_launcher)
             //加载错误之后的错误图
-            .error(R.mipmap.head)
+            .error(R.mipmap.np_block_launcher)
             //指定图片的尺寸
             .override(50,50)
             //指定图片的缩放类型为fitCenter （等比例缩放图片，宽或者是高等于ImageView的宽或者是高。）
