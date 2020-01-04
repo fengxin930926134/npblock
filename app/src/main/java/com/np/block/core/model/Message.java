@@ -19,6 +19,7 @@ public class Message {
     private String msg;
     private String messageType;
     private Integer confirmNum;
+    private Long matchWaitTime;
 
     public MessageTypeEnum getMessageType() {
         return MessageTypeEnum.getEnumByCode(messageType);
