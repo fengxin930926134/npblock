@@ -11,6 +11,7 @@ import org.litepal.LitePal;
 
 /**
  * 管理数据库基础数据
+ * @author fengxin
  */
 public class DefaultDataBase {
 
@@ -38,11 +39,17 @@ public class DefaultDataBase {
         Tetris.isSave = true;
         UnitBlock.isSave = true;
         Stage stage = new Stage();
+        //设置第一关
         if (stageType == StageTypeEnum.FIRST_PASS) {
+            //设置下落速度
             stage.setSpeed(1000);
+            //设置过关消除行数
             stage.setComplete(3);
+            //关卡名字
             stage.setName(stageType.getDes());
+            //关卡类型
             stage.setStageType(stageType.getCode());
+            //设置阻碍用的方块
             stage.getHinderTetris().add(new Tetris(
                     RushTetrisView.BEGIN_LEN_X + UnitBlock.BLOCK_SIZE * 2,
                     RushTetrisView.BEGIN_LEN_Y + UnitBlock.BLOCK_SIZE * 5, TetrisTypeEnum.LINE_SHAPE, -1

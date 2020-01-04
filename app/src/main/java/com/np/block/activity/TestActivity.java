@@ -76,7 +76,7 @@ public class TestActivity extends BaseActivity {
     public void init() {
         receiverPort = OkHttpUtils.getNotOccupyPort();
         try {
-            sendAddress = InetAddress.getByName("192.144.128.184");
+            sendAddress = InetAddress.getByName(ConstUtils.HOST);
         } catch (IOException e) {
             LoggerUtils.i(e.getMessage());
         }

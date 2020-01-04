@@ -99,6 +99,11 @@ public class ConstUtils {
      */
     static final String URL = "https://npblock.cn";
 
+    /**
+     * 服务器主机地址
+     */
+    public static final String HOST = "192.144.128.184";
+
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }

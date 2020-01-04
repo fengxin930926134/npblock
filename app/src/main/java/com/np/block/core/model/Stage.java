@@ -18,15 +18,15 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Stage extends LitePalSupport {
-    // 关卡类型
+    /**关卡类型*/
     private String stageType;
-    // 关卡名
+    /**关卡名*/
     private String name;
-    // 阻碍用的俄罗斯方块
+    /**阻碍用的俄罗斯方块*/
     private List<Tetris> hinderTetris = new ArrayList<>();
-    // 消除行数（过关条件）
+    /**消除行数（过关条件）*/
     private Integer complete;
-    // 下落速度
+    /**下落速度*/
     private Integer speed;
 
     /**
