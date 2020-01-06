@@ -27,9 +27,18 @@
             android:layout_height="wrap_content"
             android:textColor="@color/colorWhite"
             android:text="@string/app_name"
-            android:textSize="18sp"
             android:layout_toEndOf="@+id/head_img"
             android:layout_marginTop="5dp"/>
+
+        <Chronometer
+            android:id="@+id/game_chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:layout_centerHorizontal="true"
+            android:textSize="12pt">
+
+        </Chronometer>
     </RelativeLayout>
     <!--头部结尾-->
 

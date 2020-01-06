@@ -34,4 +34,5 @@
     <string name="input_name_true_text">创建角色</string>
     <string name="rush_mode_text">闯关模式</string>
     <string name="_2048_mode_text">2048模式</string>
+    <string name="single_player_game_text">单人匹配</string>
 </resources>

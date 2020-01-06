@@ -2,7 +2,7 @@
 <RelativeLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@color/colorGrayTransparent"
+    android:background="@color/colorWhite"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <RelativeLayout
@@ -30,6 +30,6 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/app_name"/>
+            android:text="@string/single_player_game_text"/>
     </LinearLayout>
 </RelativeLayout>
