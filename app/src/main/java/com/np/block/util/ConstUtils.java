@@ -40,6 +40,11 @@ public class ConstUtils {
     public static final String CODE = "code";
 
     /**
+     * 接口返回的错误信息
+     */
+    public static final String MSG = "msg";
+
+    /**
      * sp 保存token的key值
      */
     public static final String SP_TOKEN = "spToken";

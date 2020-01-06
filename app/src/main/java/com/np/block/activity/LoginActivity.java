@@ -260,6 +260,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 加载进入游戏前需要加载的数据之类的
      */
     private void enterGame(){
+        alertDialog = DialogUtils.showDialog(context);
         ThreadPoolManager.getInstance().execute(() -> {
             // 获取最新排行榜数据
             try {
@@ -281,11 +282,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         startActivity(new Intent(context, InputNameActivity.class));
                     }
                 }else {
-                    //获取失败
-                    LoggerUtils.toJson(response.toJSONString());
+                    throw new Exception(response.getString(ConstUtils.MSG));
                 }
             } catch (Exception e) {
                 LoggerUtils.e(e.getMessage());
+                runOnUiThread(() -> Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show());
+            } finally {
+                runOnUiThread(() -> {
+                    if (alertDialog != null) {
+                        alertDialog.cancel();
+                        alertDialog = null;
+                    }
+                });
             }
         });
     }
