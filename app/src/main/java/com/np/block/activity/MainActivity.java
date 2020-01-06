@@ -210,9 +210,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (CacheManager.getInstance().containsKey(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE)) {
             final int score = (int) CacheManager.getInstance().get(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
             ThreadPoolManager.getInstance().execute(() -> {
-                users.setClassicScore(score);
                 try {
-                    JSONObject response = OkHttpUtils.post("/rank/uploadClassic", JSONObject.toJSONString(users));
+                    JSONObject params = new JSONObject();
+                    params.put("classicScore", score);
+                    params.put("token", users.getToken());
+                    JSONObject response = OkHttpUtils.post("/rank/uploadClassic", params.toJSONString());
                     //解析返回数据
                     if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                         refreshRankData();
@@ -234,7 +236,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         ThreadPoolManager.getInstance().execute(() -> {
             // 获取最新排行榜数据
             try {
-                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
+                Users user = new Users();
+                user.setToken(users.getToken());
+                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(user));
                 if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                     List<Users> usersList = JSONObject.parseArray(response.getString("result"), Users.class);
                     CacheManager.getInstance().put(ConstUtils.CACHE_RANK_CLASSICAL_MODE, usersList);

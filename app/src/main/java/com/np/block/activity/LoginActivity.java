@@ -263,7 +263,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         ThreadPoolManager.getInstance().execute(() -> {
             // 获取最新排行榜数据
             try {
-                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(users));
+                Users user = new Users();
+                user.setToken(users.getToken());
+                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(user));
                 if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                     //TODO 暂时为一个排行榜 后面在这个地方获取3个排行榜数据
                     List<Users> result = JSONObject.parseArray(response.getString("result"), Users.class);

@@ -1,7 +1,6 @@
 package com.np.block.core.model;
 
 import com.np.block.core.enums.MessageTypeEnum;
-
 import lombok.Data;
 
 /**
@@ -18,8 +17,12 @@ public class Message {
     /**携带的信息*/
     private String msg;
     private String messageType;
+    /**确认人数*/
     private Integer confirmNum;
+    /**等待确认时间*/
     private Long matchWaitTime;
+    /**游戏类型*/
+    private String gameType;
 
     public MessageTypeEnum getMessageType() {
         return MessageTypeEnum.getEnumByCode(messageType);
