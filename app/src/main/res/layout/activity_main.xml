@@ -30,15 +30,29 @@
             android:layout_toEndOf="@+id/head_img"
             android:layout_marginTop="5dp"/>
 
-        <Chronometer
-            android:id="@+id/game_chronometer"
+        <!--匹配计时器-->
+        <LinearLayout
+            android:id="@+id/game_chronometer_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/colorWhite"
+            android:layout_height="35dp"
             android:layout_centerHorizontal="true"
-            android:textSize="12pt">
-
-        </Chronometer>
+            android:orientation="horizontal"
+            android:background="@color/colorWhiteTransparent"
+            android:visibility="invisible">
+            <Chronometer
+                android:id="@+id/game_chronometer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorTransparent"
+                android:layout_gravity="center_vertical"
+                android:textSize="6pt"/>
+            <ImageView
+                android:id="@+id/game_chronometer_close"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/app_name"
+                android:src="@mipmap/ic_calculator_close"/>
+        </LinearLayout>
     </RelativeLayout>
     <!--头部结尾-->
 

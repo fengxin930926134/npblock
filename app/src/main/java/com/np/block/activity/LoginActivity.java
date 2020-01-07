@@ -3,7 +3,6 @@ package com.np.block.activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;

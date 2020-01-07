@@ -3,13 +3,18 @@ package com.np.block.activity;
 import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,8 +29,10 @@ import com.hyphenate.util.NetUtils;
 import com.np.block.R;
 import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
+import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
 import com.np.block.fragment.ClassicRankFragment;
@@ -72,8 +79,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**左边的排行榜整体*/
     @BindView(R.id.left_linear_rank)
     RelativeLayout leftLinearRank;
+    /**计时器整体*/
+    @BindView(R.id.game_chronometer_layout)
+    LinearLayout gameChronometerLayout;
+    /**计时器*/
+    @BindView(R.id.game_chronometer)
+    Chronometer gameChronometer;
+    /**计时器关闭按钮*/
+    @BindView(R.id.game_chronometer_close)
+    ImageView gameChronometerClose;
     /**经典模式排行榜适配器*/
     public ClassicRankAdapter classicRankAdapter = null;
+    /**是否进入匹配 防止多次点击*/
+    private boolean enterSuccess = false;
+
+    Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+
+            }
+            return false;
+        }
+    });
 
     @Override
     public void init() {
@@ -84,6 +112,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         classic.setOnClickListener(this);
         battle.setOnClickListener(this);
         interest.setOnClickListener(this);
+        gameChronometerClose.setOnClickListener(this);
         viewLeaderboards.setText(">");
         viewLeaderboards.setOnClickListener(this);
         // 加载头像
@@ -140,6 +169,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.view_leaderboards:
                 rankAnimEvent();
                 break;
+            case R.id.game_chronometer_close:{
+                if (!enterSuccess) {
+                    //防止重复点击
+                    return;
+                }
+                ThreadPoolManager.getInstance().execute(() -> {
+                    if (SocketServerManager.getInstance().signOutMatchQueue()) {
+                        runOnUiThread(() -> {
+                            gameChronometer.stop();
+                            gameChronometerLayout.setVisibility(View.INVISIBLE);
+                            Toast.makeText(context, "退出队列", Toast.LENGTH_SHORT).show();
+                        });
+                        enterSuccess = false;
+                    }
+                });
+                break;
+            }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
     }
@@ -200,8 +246,43 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void battleDialog() {
         final AlertDialog dialog = DialogUtils.showDialogDefault(context);
         View view = View.inflate(context, R.layout.alert_dialog_battle, null);
+        //设置取消按钮
         view.findViewById(R.id.alert_battle_finish).setOnClickListener(v -> dialog.cancel());
+        //设置单人匹配按钮
+        view.findViewById(R.id.alert_battle).setOnClickListener(v -> {
+            dialog.cancel();
+            if (enterSuccess) {
+                return;
+            }
+            enterSuccess = true;
+            //进入匹配
+            ThreadPoolManager.getInstance().execute(() -> {
+                if (SocketServerManager.getInstance().enterMatchQueue(GameTypeEnum.SINGLE_PLAYER_GAME)) {
+                    runOnUiThread(() -> {
+                        gameChronometer.setBase(SystemClock.elapsedRealtime());
+                        //显示计时器
+                        gameChronometerLayout.setVisibility(View.VISIBLE);
+                        //开始计时
+                        gameChronometer.start();
+                        Toast.makeText(context, "进入队列", Toast.LENGTH_SHORT).show();
+                    });
+                    //启动一个后台socket服务
+                } else {
+                    runOnUiThread(() -> Toast.makeText(context, "请检查网络连接是否正常", Toast.LENGTH_SHORT).show());
+                    enterSuccess = false;
+                }
+            });
+        });
         dialog.setContentView(view);
+    }
+
+    @Override
+    protected void onPause() {
+        if (enterSuccess && isFinishing()) {
+            //如果是队列中退出游戏则自动退出队列
+            ThreadPoolManager.getInstance().execute(() -> SocketServerManager.getInstance().signOutMatchQueue());
+        }
+        super.onPause();
     }
 
     @Override

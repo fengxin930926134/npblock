@@ -64,6 +64,9 @@
         <!-- 闯关界面activity注册 -->
         <activity android:name=".activity.RushBlockActivity"
             android:screenOrientation="sensorLandscape"/>
+        <!-- 单人对战模式activity注册 -->
+        <activity android:name=".activity.SinglePlayerActivity"
+            android:screenOrientation="sensorLandscape"/>
         <!-- 腾讯 -->
         <activity
             android:name="com.tencent.tauth.AuthActivity"

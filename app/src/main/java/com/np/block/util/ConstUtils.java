@@ -109,6 +109,16 @@ public class ConstUtils {
      */
     public static final String HOST = "192.144.128.184";
 
+    /**
+     * socket通信使用的发送端口
+     */
+    public static final int SOCKET_SEND_PORT = 65535;
+
+    /**
+     * Handler 消息类型 游戏数据类型
+     */
+    public static final int HANDLER_GAME_DATA = 0x10;
+
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }

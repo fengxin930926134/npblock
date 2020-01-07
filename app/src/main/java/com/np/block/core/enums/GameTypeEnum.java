@@ -1,9 +1,12 @@
 package com.np.block.core.enums;
 
+import lombok.Getter;
+
 /**
  * 游戏类型
  * @author fengxin
  */
+@Getter
 public enum GameTypeEnum {
     /**游戏类型*/
     DEFAULT("DEFAULT", "默认未知"),
