@@ -1,5 +1,6 @@
 package com.np.block.core.manager;
 
+import android.os.CountDownTimer;
 import android.os.Handler;
 
 import com.alibaba.fastjson.JSONObject;
@@ -17,8 +18,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 对战模式Socket服务管理类
+ * @author fengxin
+ */
 public class SocketServerManager {
-
     /**最大重发次数5次*/
     private static final int MAX_TRIES = 5;
     /**设置超时为0.5秒*/
@@ -33,36 +37,40 @@ public class SocketServerManager {
     private static byte[] receiverData;
     /**接收服务器数据包*/
     private static DatagramPacket receiverPacket;
-    /**匹配成功等待时间*/
-    private static long matchWaitTime;
     /**当前调用的activity中的handler*/
     private static Handler handler;
     /**是否停止接收消息*/
     private static boolean receiveStop = false;
+    /**接收Socket*/
+    private static DatagramSocket socket;
+    /**判断是否进入游戏*/
+    private boolean enterGame = false;
     /**确认收到key 防止服务器多个同样消息*/
     private boolean confirmReceiptKey = false;
-    private static DatagramSocket socket;
-    private boolean isGame = false;
+
     /**提供一个共有的可以返回类对象的方法*/
     public static SocketServerManager getInstance(){
         return Inner.instance;
     }
 
-    public static void setHandler(Handler handler) {
+    public void setHandler(Handler handler) {
         SocketServerManager.handler = handler;
     }
 
-    public synchronized void startSocketReceiverServer() {
+    /**
+     * 开启接收服务器匹配消息的SocketServer
+     */
+    private void startSocketReceiverServer() {
         try {
             socket = new DatagramSocket(receiverPort);
             LoggerUtils.i("SocketReceiverServer启动完成...");
             while (true) {
-                // 2.接收服务器响应的数据
+                // 1.接收服务器响应的数据
                 socket.receive(receiverPacket);
                 if (receiveStop) {
                     break;
                 }
-                // 检查来源
+                // 2.检查来源
                 if (!receiverPacket.getAddress().equals(sendAddress)) {
                     LoggerUtils.e("未知来源消息，已跳过");
                     continue;
@@ -76,12 +84,13 @@ public class SocketServerManager {
                     LoggerUtils.e("{接收到的数据格式有误, 转换失败！info = [" + reply + "]}");
                     continue;
                 }
+                // 4.处理数据
                 switch (receiveMsg.getMessageType()) {
                     case GAME_MESSAGE_TYPE:{
                         //发送游戏数据
                         android.os.Message msg = new android.os.Message();
                         msg.what = ConstUtils.HANDLER_GAME_DATA;
-                        msg.obj = receiveMsg;
+                        msg.obj = receiveMsg.getMsg();
                         handler.sendMessage(msg);
                         break;
                     }
@@ -91,11 +100,13 @@ public class SocketServerManager {
                             confirmReceiptKey = true;
                             message.setKey(receiveMsg.getKey());
                             // 发送handler消息弹起确认弹窗
-
+                            handler.sendEmptyMessage(ConstUtils.HANDLER_MATCH_SUCCESS);
                         } else {
-                            if (message.getConfirmNum() == 2 && !isGame) {
-                                isGame = true;
+                            if (message.getConfirmNum() == 2 && !enterGame) {
+                                enterGame = true;
                                 //进入游戏
+                                countDownTimer.cancel();
+                                handler.sendEmptyMessage(ConstUtils.HANDLER_ENTER_THE_GAME);
                             }
                         }
                         break;
@@ -143,8 +154,9 @@ public class SocketServerManager {
                     final String reply = new String(receiverData, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
                     Message receiveMsg = JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
                     // 获取匹配等待时间
-                    matchWaitTime = receiveMsg.getMatchWaitTime();
-                    // 进入队列
+                    message.setMatchWaitTime(receiveMsg.getMatchWaitTime());
+                    // 进入队列 开启接收服务器消息
+                    startSocketReceiverServer();
                     receivedResponse = true;
                 } catch (InterruptedIOException e) {
                     tries ++;
@@ -171,6 +183,9 @@ public class SocketServerManager {
             }
             //停止接收服务器消息
             stopSocketReceive();
+            //重置状态
+            confirmReceiptKey = false;
+            enterGame = false;
             //只要正常请求都返回true
             return true;
         } catch (Exception e) {
@@ -178,6 +193,38 @@ public class SocketServerManager {
             return false;
         }
     }
+
+    /**
+     * 第一个参数表示总时间，第二个参数表示间隔时间。意思就是每隔一秒会回调一次方法onTick，然后10秒之后会回调onFinish方法
+     */
+    private CountDownTimer countDownTimer = new CountDownTimer(message.getMatchWaitTime(), 1000) {
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            long second = millisUntilFinished / 1000;
+            String s2 = "倒计时 " + second + " 秒";
+            String s1 = "当前确认人数: " + message.getConfirmNum() + "人\n".concat(s2);
+            //发送s1
+            android.os.Message msg = new android.os.Message();
+            msg.what = ConstUtils.HANDLER_TIME_STRING;
+            msg.obj = s1;
+            handler.sendMessage(msg);
+        }
+
+        @Override
+        public void onFinish() {
+            //发送有人未确认的消息
+            ThreadPoolManager.getInstance().execute(() -> {
+                //延迟重置状态 防止服务器重复消息
+                try {
+                    Thread.sleep(1000);
+                    handler.sendEmptyMessage(ConstUtils.HANDLER_MATCH_FAILURE);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    };
 
     /**
      * 停止Socket接收消息

@@ -115,9 +115,29 @@ public class ConstUtils {
     public static final int SOCKET_SEND_PORT = 65535;
 
     /**
-     * Handler 消息类型 游戏数据类型
+     * Handler 消息类型 游戏数据消息
      */
     public static final int HANDLER_GAME_DATA = 0x10;
+
+    /**
+     * Handler 消息类型 计时消息
+     */
+    public static final int HANDLER_TIME_STRING = 0x11;
+
+    /**
+     * Handler 消息类型 匹配成功消息
+     */
+    public static final int HANDLER_MATCH_SUCCESS = 0x12;
+
+    /**
+     * Handler 消息类型 匹配失败消息
+     */
+    public static final int HANDLER_MATCH_FAILURE = 0x13;
+
+    /**
+     * Handler 消息类型 进入游戏消息
+     */
+    public static final int HANDLER_ENTER_THE_GAME = 0x14;
 
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
