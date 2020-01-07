@@ -347,10 +347,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                             loginSuccess(response, false);
                         }else {
-                            runOnUiThread(() -> Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show());
+                            throw new Exception(response.getString("msg"));
                         }
                     }catch (Exception e){
                         LoggerUtils.e(e.getMessage());
+                        runOnUiThread(() -> Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show());
                     }finally {
                         runOnUiThread(() -> {
                             if (alertDialog != null) {
@@ -504,26 +505,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                                 loginSuccess(response, false);
                             }else {
-                                Looper.prepare();
-                                Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                                Looper.loop();
+                                throw new Exception(response.getString("msg"));
                             }
                         }catch (Exception e){
                             LoggerUtils.e(e.getMessage());
+                            runOnUiThread(() -> Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show());
                         }finally {
+                            runOnUiThread(() -> {
+                                if (alertDialog != null) {
+                                    alertDialog.dismiss();
+                                    alertDialog = null;
+                                }
+                            });
+                        }
+                    }else {
+                        runOnUiThread(() -> {
                             if (alertDialog != null) {
                                 alertDialog.dismiss();
                                 alertDialog = null;
                             }
-                        }
-                    }else {
-                        Looper.prepare();
-                        if (alertDialog != null) {
-                            alertDialog.dismiss();
-                            alertDialog = null;
-                        }
-                        Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
-                        Looper.loop();
+                            Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
+                        });
                     }
                 });
             }
@@ -575,22 +577,22 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 //解析返回数据
                                 if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
                                     //正确结果
-                                    Looper.prepare();
-                                    registerDialog.dismiss();
-                                    Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
-                                    Looper.loop();
+                                    activity.runOnUiThread(() -> {
+                                        registerDialog.dismiss();
+                                        Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
+                                    });
                                 }else {
-                                    Looper.prepare();
-                                    Toast.makeText(activity, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                                    Looper.loop();
+                                    throw new Exception(response.getString("msg"));
                                 }
-                                alertDialog.dismiss();
                             }catch (Exception e){
                                 LoggerUtils.e(e.getMessage());
-                                Looper.prepare();
-                                alertDialog.dismiss();
-                                Toast.makeText(activity, "网络异常", Toast.LENGTH_SHORT).show();
-                                Looper.loop();
+                                activity.runOnUiThread(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
+                            } finally {
+                                activity.runOnUiThread(() -> {
+                                    if (alertDialog != null) {
+                                        alertDialog.dismiss();
+                                    }
+                                });
                             }
                         });
                     } else {

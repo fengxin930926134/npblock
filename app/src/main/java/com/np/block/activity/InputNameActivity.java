@@ -50,30 +50,30 @@ public class InputNameActivity extends BaseActivity {
         title.setText(Html.fromHtml(str6));
         submitName.setOnClickListener( v -> {
             String name = inputName.getText().toString();
-            users.setGameName(name);
             // 验证游戏名
             if (VerificationUtils.validateGameName(name)) {
                 AlertDialog dialog = DialogUtils.showDialog(context);
                 //请求服务器修改
                 ThreadPoolManager.getInstance().execute(() -> {
+                    // 设置请求参数
+                    Users user = new Users();
+                    user.setToken(users.getToken());
+                    user.setGameName(name);
                     try {
-                        JSONObject response = OkHttpUtils.post("/user/gameName", JSONObject.toJSONString(users));
-                        int intValue = response.getIntValue(ConstUtils.CODE);
-                        if (intValue == ConstUtils.CODE_ERROR) {
-                            runOnUiThread(() -> DialogUtils.showTextDialog(context, null, "您的名字被取啦！！"));
-                        } else if (intValue == ConstUtils.CODE_SUCCESS) {
+                        JSONObject response = OkHttpUtils.post("/user/gameName", JSONObject.toJSONString(user));
+                        if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
                             //保存游戏名称成功
                             //更新缓存
                             CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, users);
                             startActivity(new Intent(context, MainActivity.class));
                         } else {
-                            throw new Exception("更改数据库错误");
+                            throw new Exception(response.getString(ConstUtils.MSG));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        runOnUiThread(() -> Toast.makeText(context, "网络异常，请检查网络", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show());
                     }finally {
-                        dialog.dismiss();
+                        runOnUiThread(dialog::cancel);
                     }
                 });
 
