@@ -167,6 +167,8 @@ public class SocketServerManager {
                     Message receiveMsg = JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
                     // 获取匹配等待时间
                     matchWaitTime = receiveMsg.getMatchWaitTime();
+                    // not stop
+                    receiveStop = false;
                     receivedResponse = true;
                 } catch (InterruptedIOException e) {
                     tries ++;

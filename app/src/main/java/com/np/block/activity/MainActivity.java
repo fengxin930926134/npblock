@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
@@ -144,7 +145,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     matchDialog.dismiss();
                     matchDialog = null;
                 }
-                startActivity(new Intent(this, SinglePlayerActivity.class));
+                startActivityForResult(new Intent(this, SinglePlayerActivity.class), 1);
+                break;
             }
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
@@ -238,6 +240,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            //初始化接收匹配队列消息的Handler
+            SocketServerManager.getInstance().setHandler(mHandler);
         }
     }
 
