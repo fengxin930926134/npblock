@@ -14,6 +14,10 @@ import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.util.ConstUtils;
 import butterknife.BindView;
 
+/**
+ * 单人匹配游戏
+ * @author fengxin
+ */
 public class SinglePlayerActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.exit_message)
@@ -57,23 +61,19 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
                 break;
             }
             case R.id.exit_message: {
-                ThreadPoolManager.getInstance().execute(() -> {
-                    if (SocketServerManager.getInstance().gameOver()) {
-                        finish();
-                        ActivityManager.getInstance().removeActivity(SinglePlayerActivity.this);
-                    } else {
-                        runOnUiThread(() -> Toast.makeText(context, "退出失败", Toast.LENGTH_SHORT).show());
-                    }
-                });
+                finish();
+                ActivityManager.getInstance().removeActivity(SinglePlayerActivity.this);
                 break;
             }
+            default:
+                throw new IllegalStateException("Unexpected value: " + v.getId());
         }
     }
 
     @Override
     protected void onPause() {
         if (isFinishing()) {
-            //如果是游戏中退出游戏则自动退出游戏
+            //如果是退出游戏则自动退出游戏游戏队列
             ThreadPoolManager.getInstance().execute(() -> SocketServerManager.getInstance().gameOver());
         }
         super.onPause();

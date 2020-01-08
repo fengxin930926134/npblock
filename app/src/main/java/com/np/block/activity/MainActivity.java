@@ -134,6 +134,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             Toast.makeText(context, "退出队列", Toast.LENGTH_SHORT).show();
                         }
                     });
+                    // 重置状态
+                    enterSuccess = false;
                 }
                 break;
             }
@@ -145,6 +147,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     matchDialog.dismiss();
                     matchDialog = null;
                 }
+                // 重置状态
+                enterSuccess = false;
                 startActivityForResult(new Intent(this, SinglePlayerActivity.class), 1);
                 break;
             }

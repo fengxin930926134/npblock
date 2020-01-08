@@ -178,8 +178,10 @@ public class SocketServerManager {
         } catch (IOException e) {
             LoggerUtils.e(e.getMessage());
         }
-        // 进入队列 开启接收服务器消息
-        ThreadPoolManager.getInstance().execute(this::startSocketReceiverServer);
+        if (receivedResponse) {
+            // 进入队列 开启接收服务器消息
+            ThreadPoolManager.getInstance().execute(this::startSocketReceiverServer);
+        }
         return receivedResponse;
     }
 
@@ -226,10 +228,8 @@ public class SocketServerManager {
 
     /**
      * 游戏结束
-     *
-     * @return 是否成功
      */
-    public synchronized boolean gameOver() {
+    public synchronized void gameOver() {
         try {
             JSONObject response = OkHttpUtils.post("/match/remove", JSONObject.toJSONString(message));
             if (response.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
@@ -240,11 +240,8 @@ public class SocketServerManager {
             stopSocketReceive();
             // 重置状态
             resetState();
-            //只要正常请求都返回true
-            return true;
         } catch (Exception e) {
             LoggerUtils.e(e.getMessage());
-            return false;
         }
     }
 
