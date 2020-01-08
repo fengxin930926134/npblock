@@ -34,7 +34,6 @@ import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
-import com.np.block.core.model.Message;
 import com.np.block.core.model.Users;
 import com.np.block.fragment.ClassicRankFragment;
 import com.np.block.fragment.RankingRankFragment;
@@ -48,7 +47,6 @@ import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
-
 import java.util.List;
 import butterknife.BindView;
 
@@ -102,17 +100,51 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private TextView content;
     /**Handler接收来自匹配队列消息*/
     private Handler mHandler = new Handler(msg -> {
+        Object obj = msg.obj;
         switch (msg.what) {
             case ConstUtils.HANDLER_MATCH_SUCCESS: {
-                //匹配成功
-                Object obj = msg.obj;
-                if (obj instanceof Message){
-                    showConfirmDialog((Message) obj);
-                }
+                //匹配成功 暂停匹配计时
+                gameChronometer.stop();
+                gameChronometerLayout.setVisibility(View.INVISIBLE);
+                //弹出弹窗
+                showConfirmDialog((long) obj);
                 break;
             }
             case ConstUtils.HANDLER_TIME_STRING: {
+                //更新弹窗文字
+                content.setText((String) obj);
                 break;
+            }
+            case ConstUtils.HANDLER_MATCH_FAILURE: {
+                //取消弹窗
+                if (matchDialog != null) {
+                    matchDialog.dismiss();
+                    matchDialog = null;
+                }
+                //检查是否点击确认
+                if (confirmOk) {
+                    //重新进入计时
+                    gameChronometerLayout.setVisibility(View.VISIBLE);
+                    gameChronometer.start();
+                } else {
+                    //退出队列
+                    ThreadPoolManager.getInstance().execute(() -> {
+                        if (SocketServerManager.getInstance().signOutMatchQueue()) {
+                            Toast.makeText(context, "退出队列", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                break;
+            }
+            case ConstUtils.HANDLER_ENTER_THE_GAME: {
+                //进入游戏
+                content.setText((String) obj);
+                //取消弹窗
+                if (matchDialog != null) {
+                    matchDialog.dismiss();
+                    matchDialog = null;
+                }
+                startActivity(new Intent(this, SinglePlayerActivity.class));
             }
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
@@ -212,7 +244,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**
      * 弹出确认进入游戏弹窗
      */
-    private void showConfirmDialog(Message msg) {
+    private void showConfirmDialog(long matchWaitTime) {
         confirmOk = false;
         matchDialog = DialogUtils.showDialogDefault(context);
         matchDialog.setCancelable(false);
@@ -221,28 +253,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         TextView title = inflate.findViewById(R.id.tv_alert_title);
         title.setText("匹配成功");
         content = inflate.findViewById(R.id.tv_alert_content);
-        String matchWaitTimeText = "当前确认人数: 0 人\n倒计时: " + msg.getMatchWaitTime() / 1000 + " 秒";
+        String matchWaitTimeText = "当前确认人数: 0 人\n倒计时: " + (matchWaitTime / 1000 - 1) + " 秒";
         content.setText(matchWaitTimeText);
         Button alertOk = inflate.findViewById(R.id.btn_alert_ok);
         Button alertCancel = inflate.findViewById(R.id.btn_alert_cancel);
         alertOk.setText("确认");
         alertOk.setOnClickListener(v1 -> {
             //1.向服务器发TCP数据包确认收到
-            Message message = new Message();
-            message.setId(msg.getId());
             alertOk.setTextColor(Color.GRAY);
             alertOk.setEnabled(false);
             alertCancel.setEnabled(false);
             //确定 发送http去确认
-            ThreadPoolManager.getInstance().execute(() -> {
-                try {
-                    JSONObject post = OkHttpUtils.post("/match/confirm", JSONObject.toJSONString(message));
-                    LoggerUtils.toJson(post.toJSONString());
-                    confirmOk = true;
-                } catch (Exception e) {
-                    LoggerUtils.e(e.getMessage());
-                }
-            });
+            ThreadPoolManager.getInstance().execute(() ->
+                    confirmOk = SocketServerManager.getInstance().confirmMatch());
         });
         alertCancel.setText("拒绝");
         alertCancel.setOnClickListener(v12 -> {
