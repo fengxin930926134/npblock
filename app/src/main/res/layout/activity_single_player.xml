@@ -1,37 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_3">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/exit_message"
+        android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/single_player_tetris">
+
+        <com.np.block.view.NextTetrisView
+            android:id="@+id/next_tetris_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="退出游戏"/>
-        <Button
-            android:id="@+id/send_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="发送消息"/>
-        <EditText
-            android:id="@+id/edit_message"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"/>
+
+        <!--分数-->
+        <LinearLayout
+            android:id="@+id/score_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/app_name"
-            android:inputType="text"
-            android:importantForAutofill="no" />
+            android:gravity="center"
+            android:layout_above="@+id/left_and_right"
+            android:layout_marginBottom="100dp">
 
-    </LinearLayout>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:textColor="@color/colorWhite"
+                android:text="@string/battle_score_text" />
+
+            <TextView
+                android:id="@+id/score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorWhite"
+                style="@style/TextAppearance.AppCompat.Caption" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/left_and_right"
+            android:layout_alignTop="@+id/left_and_right"
+            android:text="@string/left_text"
+            tools:ignore="RelativeOverlap" />
+
         <TextView
-            android:id="@+id/message_text"
-            android:layout_width="match_parent"
+            android:id="@+id/left_and_right"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_centerHorizontal="true"/>
+
+        <Button
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_alignTop="@+id/left_and_right"
+            android:text="@string/right_text" />
+    </RelativeLayout>
+
+    <com.np.block.view.TetrisView
+        android:id="@+id/single_player_tetris"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <!--右边-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/single_player_tetris">
+
+        <com.np.block.view.SinglePlayerEnemyView
+            android:id="@+id/single_player_tetris_enemy"
+            android:layout_width="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/rotate_and_down"
             android:layout_height="wrap_content"/>
-    </ScrollView>
-</LinearLayout>
+
+        <Button
+            android:id="@+id/rotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/rotate_and_down"
+            android:layout_alignTop="@+id/rotate_and_down"
+            android:text="@string/rotate_text" />
+
+        <TextView
+            android:id="@+id/rotate_and_down"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_centerHorizontal="true"/>
+
+        <Button
+            android:id="@+id/down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/rotate_and_down"
+            android:layout_alignTop="@+id/rotate_and_down"
+            android:text="@string/down_text"
+            tools:ignore="RelativeOverlap" />
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -1,45 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/test_1"
+    <com.np.block.view.SinglePlayerEnemyView
+        android:id="@+id/single_player_tetris"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="进入匹配"/>
-    <Button
-        android:id="@+id/test_2"
+        android:layout_centerVertical="true"/>
+
+    <com.np.block.view.TetrisView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="发送消息"/>
-    <Button
-        android:id="@+id/test_5"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"/>
+
+    <com.np.block.view.NextTetrisView
+        android:id="@+id/next_tetris_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="退出队列"/>
-    <Button
-        android:id="@+id/test_4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="退出游戏"/>
-    <Button
-        android:id="@+id/test_6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="test网"/>
-    <EditText
-        android:id="@+id/edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="输入框"/>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/test_3"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </ScrollView>
-</LinearLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"/>
+</RelativeLayout>

@@ -109,7 +109,9 @@ public class RushTetrisView extends View {
         // 每行网格中包含俄罗斯方块单元的个数全部初始化为0
         Arrays.fill(blockRowNum, 0);
         // 初始化俄罗斯方块
-        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y, TetrisTypeEnum.DEFAULT, -1);
+        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y,
+                TetrisTypeEnum.DEFAULT, -1,
+                UnitBlock.BLOCK_SIZE);
         tetrisUnits = tetris.getTetris();
         // 生成俄罗斯方块模具
         generateTetrisRectf();
@@ -173,7 +175,8 @@ public class RushTetrisView extends View {
         Tetris nextTetris = fatherActivity.getNextTetris();
         // 从下一个俄罗斯方块生成当前俄罗斯方块
         tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y,
-                TetrisTypeEnum.getEnumByCode(nextTetris.getTetrisType()), nextTetris.getColor());
+                TetrisTypeEnum.getEnumByCode(nextTetris.getTetrisType()),
+                nextTetris.getColor(), UnitBlock.BLOCK_SIZE);
         // 获得单位方块集合
         tetrisUnits = tetris.getTetris();
     }

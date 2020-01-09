@@ -54,7 +54,8 @@ public class NextTetrisView extends View {
         }
         rectf = new RectF(0, 0, WIDTH, HEIGHT);
         //初始化下一个俄罗斯方块
-        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, TetrisTypeEnum.DEFAULT, -1);
+        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y,
+                TetrisTypeEnum.DEFAULT, -1, UnitBlock.BLOCK_SIZE);
         // 生成模具
         generateNextTetrisRectf();
     }
@@ -72,7 +73,8 @@ public class NextTetrisView extends View {
     public Tetris getNextTetris() {
         Tetris tetris = nextTetris;
         // 重新生成下一个俄罗斯方块
-        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y, TetrisTypeEnum.DEFAULT, -1);
+        nextTetris = new Tetris(BEGIN_LEN_X, BEGIN_LEN_Y,
+                TetrisTypeEnum.DEFAULT, -1, UnitBlock.BLOCK_SIZE);
         // 重新生成模具
         generateNextTetrisRectf();
         invalidate();

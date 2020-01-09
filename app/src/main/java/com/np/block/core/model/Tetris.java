@@ -51,7 +51,7 @@ public class Tetris extends LitePalSupport {
      * @param tetrisType 俄罗斯方块类型
      * @param color 颜色下标 (-1随机生成颜色)
      */
-    public Tetris(int x, int y, TetrisTypeEnum tetrisType, int color) {
+    public Tetris(int x, int y, TetrisTypeEnum tetrisType, int color, int blockSize) {
         this.x = x;
         this.y = y;
         tetris = new ArrayList<>();
@@ -70,49 +70,49 @@ public class Tetris extends LitePalSupport {
             // 俄罗斯方块横线类型
             case LINE_SHAPE:
                 for (int i = 0; i < TETRIS_NUMBER; i++) {
-                    tetris.add(new UnitBlock( x + (i - 2) *UnitBlock.BLOCK_SIZE, y, this.color));
+                    tetris.add(new UnitBlock( x + (i - 2) *blockSize, y, this.color));
                 }
                 break;
             // 俄罗斯方块凸类型
             case CONVEX_SHAPE:
                 tetris.add(new UnitBlock(x, y, this.color));
                 for (int i = 0; i < TETRIS_NUMBER-1; i++) {
-                    tetris.add(new UnitBlock(x + ( i - 1 ) * UnitBlock.BLOCK_SIZE, y + UnitBlock.BLOCK_SIZE ,this.color));
+                    tetris.add(new UnitBlock(x + ( i - 1 ) * blockSize, y + blockSize ,this.color));
                 }
                 break;
             // 俄罗斯方块田类型
             case FIELD_SHAPE:
                 for (int i = 0; i < TETRIS_NUMBER/DIVISOR; i++) {
-                    tetris.add(new UnitBlock(x + ( i - 1 ) * UnitBlock.BLOCK_SIZE, y, this.color));
-                    tetris.add(new UnitBlock(x + ( i - 1 ) * UnitBlock.BLOCK_SIZE, y + UnitBlock.BLOCK_SIZE, this.color));
+                    tetris.add(new UnitBlock(x + ( i - 1 ) * blockSize, y, this.color));
+                    tetris.add(new UnitBlock(x + ( i - 1 ) * blockSize, y + blockSize, this.color));
                 }
                 break;
             // 俄罗斯方块7类型
             case SEVEN_SHAPE:
-                tetris.add(new UnitBlock(x - UnitBlock.BLOCK_SIZE, y, this.color));
+                tetris.add(new UnitBlock(x - blockSize, y, this.color));
                 for (int i = 0; i < TETRIS_NUMBER-1; i++) {
-                    tetris.add(new UnitBlock(x, y + i * UnitBlock.BLOCK_SIZE, this.color));
+                    tetris.add(new UnitBlock(x, y + i * blockSize, this.color));
                 }
                 break;
             // 俄罗斯方块反7类型
             case BACK_SEVEN_SHAPE:
                 tetris.add(new UnitBlock(x, y, this.color));
                 for (int i = 0; i < TETRIS_NUMBER-1; i++) {
-                    tetris.add(new UnitBlock(x - UnitBlock.BLOCK_SIZE, y + i * UnitBlock.BLOCK_SIZE, this.color));
+                    tetris.add(new UnitBlock(x - blockSize, y + i * blockSize, this.color));
                 }
                 break;
             // 俄罗斯方块Z类型
             case Z_SHAPE:
                 for (int i = 0; i < TETRIS_NUMBER/DIVISOR; i++) {
-                    tetris.add(new UnitBlock(x - i * UnitBlock.BLOCK_SIZE, y, this.color));
-                    tetris.add(new UnitBlock(x + i * UnitBlock.BLOCK_SIZE, y + UnitBlock.BLOCK_SIZE, this.color));
+                    tetris.add(new UnitBlock(x - i * blockSize, y, this.color));
+                    tetris.add(new UnitBlock(x + i * blockSize, y + blockSize, this.color));
                 }
                 break;
             // 俄罗斯方块反Z类型
             case BACK_Z_SHAPE:
                 for (int i = 0; i < TETRIS_NUMBER/DIVISOR; i++) {
-                    tetris.add(new UnitBlock(x + (i - 1) * UnitBlock.BLOCK_SIZE, y, this.color));
-                    tetris.add(new UnitBlock(x - (i + 1) * UnitBlock.BLOCK_SIZE, y + UnitBlock.BLOCK_SIZE, this.color));
+                    tetris.add(new UnitBlock(x + (i - 1) * blockSize, y, this.color));
+                    tetris.add(new UnitBlock(x - (i + 1) * blockSize, y + blockSize, this.color));
                 }
                 break;
         }

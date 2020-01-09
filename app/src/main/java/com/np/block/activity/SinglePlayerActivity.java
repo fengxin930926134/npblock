@@ -3,32 +3,31 @@ package com.np.block.activity;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
-import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Tetris;
 import com.np.block.util.ConstUtils;
+import com.np.block.view.NextTetrisView;
+import com.np.block.view.SinglePlayerEnemyView;
 import butterknife.BindView;
 
 /**
  * 单人匹配游戏
+ * 对战胜利条件 400分或者另外一方死亡
+ * 对战基础设定 速度=700
+ *
  * @author fengxin
  */
 public class SinglePlayerActivity extends BaseActivity implements View.OnClickListener {
 
-    @BindView(R.id.exit_message)
-    Button exit;
-    @BindView(R.id.send_message)
-    Button send;
-    @BindView(R.id.edit_message)
-    EditText editText;
-    @BindView(R.id.message_text)
-    TextView text;
+    @BindView(R.id.single_player_tetris)
+    SinglePlayerEnemyView singlePlayerEnemyView;
+    /**下一个俄罗斯方块视图*/
+    @BindView(R.id.next_tetris_view)
+    NextTetrisView nextTetris;
     /**
      * 计时器 第一个参数总时间，第二个参数间隔时间。
      */
@@ -45,15 +44,12 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
         @Override
         public void onFinish() {
             //启动游戏
-            exit.setEnabled(true);
-            send.setEnabled(true);
         }
     };
     /**接收handler消息*/
     private Handler mHandler = new Handler(msg -> {
         if (msg.what == ConstUtils.HANDLER_GAME_DATA) {
-            String newText = (String) msg.obj;
-            text.setText(text.getText().toString().concat("\n").concat(newText));
+            //处理游戏消息
         }
         return false;
     });
@@ -62,10 +58,7 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     public void init() {
         //初始化接收匹配队列消息的Handler
         SocketServerManager.getInstance().setHandler(mHandler);
-        exit.setOnClickListener(this);
-        send.setOnClickListener(this);
-        exit.setEnabled(false);
-        send.setEnabled(false);
+        singlePlayerEnemyView.setFatherActivity(this);
         //启动倒计时操作
         countDownTimer.start();
     }
@@ -78,19 +71,16 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.send_message: {
-                String text = editText.getText().toString();
-                SocketServerManager.getInstance().sendGameMessage(text);
-                break;
-            }
-            case R.id.exit_message: {
-                finish();
-                ActivityManager.getInstance().removeActivity(SinglePlayerActivity.this);
-                break;
-            }
             default:
                 throw new IllegalStateException("未实现: " + v.getId());
         }
+    }
+
+    /**
+     * 从下一个方块视图里获取方块
+     */
+    public Tetris getNextTetris() {
+        return nextTetris.getNextTetris();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.np.block.view;
+package com.np.block.base;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import com.np.block.activity.ClassicBlockActivity;
 import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
@@ -18,10 +17,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 俄罗斯方块的视图
+ * 俄罗斯方块视图 base
  * @author fengxin
  */
-public class TetrisView extends View {
+public abstract class BaseTetrisView extends View {
     /**
      * 游戏主界面开始的坐标
      */
@@ -30,28 +29,22 @@ public class TetrisView extends View {
     /**
      * 行数和列数
      */
-    private static final int ROW_NUM = 20;
+    public static final int ROW_NUM = 20;
     public static final int COLUMN_NUM = 10;
     /**墙宽度*/
     public static final int BOUND_WIDTH_OF_WALL = 3;
+    /**方块宽度*/
+    public int blockSize;
     /**游戏主界面结束的x坐标*/
-    public static final int END_X_LEN = BEGIN_LEN_X + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * COLUMN_NUM + BOUND_WIDTH_OF_WALL;
+    public int end_x_len;
     /**游戏主界面结束的y坐标*/
-    public static final int END_Y_LEN = BEGIN_LEN_Y + (UnitBlock.BLOCK_SIZE + BOUND_WIDTH_OF_WALL) * ROW_NUM + BOUND_WIDTH_OF_WALL;
-    /**调用此对象的Activity对象 父视图*/
-    private ClassicBlockActivity fatherActivity = null;
-    /**背景墙画笔*/
-    private static Paint paintWall = null;
-    /**单元块画笔*/
-    private static Paint paintBlock = null;
-    /**保存每行网格中包含俄罗斯方块单元的个数*/
-    private int[] blockRowNum = new int[ROW_NUM];
+    public int end_y_len;
     /**俄罗斯方块*/
-    private Tetris tetris = null;
+    public Tetris tetris = null;
     /**俄罗斯方块的单元块集合*/
-    private List<UnitBlock> tetrisUnits = null;
+    public List<UnitBlock> tetrisUnits = null;
     /**视图中全部已下落单元块集合*/
-    private List<UnitBlock> allUnitBlock = new ArrayList<>();
+    public List<UnitBlock> allUnitBlock = new ArrayList<>();
     /**背景矩形模具集合*/
     private List<RectF> backgroundWall = new ArrayList<>();
     /**俄罗斯方块矩形模具集合*/
@@ -60,13 +53,23 @@ public class TetrisView extends View {
     private List<RectF> allBlockRectf = new ArrayList<>();
     /**视图中全部已下落单元块集合长度*/
     private int allUnitBlockLength = allUnitBlock.size();
+    /**背景墙画笔*/
+    private static Paint paintWall = null;
+    /**单元块画笔*/
+    private static Paint paintBlock = null;
+    /**保存每行网格中包含俄罗斯方块单元的个数*/
+    private int[] blockRowNum = new int[ROW_NUM];
 
-    public TetrisView(Context context) {
+    public BaseTetrisView(Context context) {
         super(context, null);
     }
 
-    public TetrisView(Context context, AttributeSet attrs) {
+    public BaseTetrisView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        // 初始化属性
+        blockSize = getBlockSize();
+        end_x_len = BEGIN_LEN_X + (blockSize + BOUND_WIDTH_OF_WALL) * COLUMN_NUM + BOUND_WIDTH_OF_WALL;
+        end_y_len = BEGIN_LEN_Y + (blockSize + BOUND_WIDTH_OF_WALL) * ROW_NUM + BOUND_WIDTH_OF_WALL;
         // 初始化背景墙笔
         if (paintWall == null) {
             paintWall = new Paint();
@@ -83,16 +86,16 @@ public class TetrisView extends View {
             paintBlock.setColor(Color.parseColor("#FF6600"));
         }
         // 初始化背景墙 因为忽略墙 会多画一次 所以减一
-        for (int i = BEGIN_LEN_X; i < END_X_LEN - UnitBlock.BLOCK_SIZE; i += UnitBlock.BLOCK_SIZE) {
-            for (int j = BEGIN_LEN_Y; j < END_Y_LEN - UnitBlock.BLOCK_SIZE; j += UnitBlock.BLOCK_SIZE) {
-                backgroundWall.add(new RectF(i, j, i + UnitBlock.BLOCK_SIZE, j + UnitBlock.BLOCK_SIZE));
+        for (int i = BEGIN_LEN_X; i < end_x_len - blockSize; i += blockSize) {
+            for (int j = BEGIN_LEN_Y; j < end_y_len - blockSize; j += blockSize) {
+                backgroundWall.add(new RectF(i, j, i + blockSize, j + blockSize));
             }
         }
         // 每行网格中包含俄罗斯方块单元的个数全部初始化为0
         Arrays.fill(blockRowNum, 0);
         // 初始化俄罗斯方块
-        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y,
-                TetrisTypeEnum.DEFAULT, -1, UnitBlock.BLOCK_SIZE);
+        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * blockSize, BEGIN_LEN_Y,
+                TetrisTypeEnum.DEFAULT, -1, blockSize);
         tetrisUnits = tetris.getTetris();
         // 生成俄罗斯方块模具
         generateTetrisRectf();
@@ -106,8 +109,8 @@ public class TetrisView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // 重新计算高度
-        int width = END_X_LEN - 5 * BEGIN_LEN_X - BOUND_WIDTH_OF_WALL;
-        int height = END_Y_LEN - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
+        int width = end_x_len - 5 * BEGIN_LEN_X - BOUND_WIDTH_OF_WALL;
+        int height = end_y_len - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
         // 设置宽高
         setMeasuredDimension(width, height);
     }
@@ -140,67 +143,18 @@ public class TetrisView extends View {
     }
 
     /**
-     * 设置当前游戏页面的父类activity
+     * 从子类获取方块宽高
      *
-     * @param context 父类
+     * @return 方块宽高
      */
-    public void setFatherActivity(Context context) {
-        this.fatherActivity = (ClassicBlockActivity)context;
-    }
+    public abstract int getBlockSize();
 
     /**
-     * 生成俄罗斯方块
+     * 从子类获取下一个俄罗斯方块
+     *
+     * @return 俄罗斯方块
      */
-    public void generateTetris() {
-        // 获得下一个俄罗斯方块
-        Tetris nextTetris = fatherActivity.getNextTetris();
-        // 从下一个俄罗斯方块生成当前俄罗斯方块
-        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y,
-                TetrisTypeEnum.getEnumByCode(nextTetris.getTetrisType()),
-                nextTetris.getColor(),
-                UnitBlock.BLOCK_SIZE);
-        // 获得单位方块集合
-        tetrisUnits = tetris.getTetris();
-    }
-
-    /**
-     * 生成俄罗斯方块模具
-     */
-    private void generateTetrisRectf(){
-        if (tetrisRectf.size() > 0) {
-            tetrisRectf.clear();
-        }
-        for (int i = 0; i < tetrisUnits.size(); i++) {
-            // 获取每个单位方块的坐标
-            int x = tetrisUnits.get(i).getX();
-            int y = tetrisUnits.get(i).getY();
-            // 设置俄罗斯方块单位的坐标矩形
-            tetrisRectf.add(new RectF(x + BOUND_WIDTH_OF_WALL, y + BOUND_WIDTH_OF_WALL,
-                    x + UnitBlock.BLOCK_SIZE - BOUND_WIDTH_OF_WALL, y + UnitBlock.BLOCK_SIZE - BOUND_WIDTH_OF_WALL));
-        }
-    }
-
-    /**
-     * 生成所有方块模具
-     */
-    private void generateAllBlockRectf(){
-        // 判断已下落的方块是否改变了 不改变就不需要重新生成
-        if (allUnitBlockLength != allUnitBlock.size()) {
-            if (allBlockRectf.size() > 0) {
-                allBlockRectf.clear();
-            }
-            for (int i = 0; i < allUnitBlock.size(); i++) {
-                // 获取每个单位方块的坐标
-                int x = allUnitBlock.get(i).getX();
-                int y = allUnitBlock.get(i).getY();
-                // 设置俄罗斯方块单位的坐标矩形
-                allBlockRectf.add(new RectF(x + BOUND_WIDTH_OF_WALL, y + BOUND_WIDTH_OF_WALL,
-                        x + UnitBlock.BLOCK_SIZE - BOUND_WIDTH_OF_WALL, y + UnitBlock.BLOCK_SIZE - BOUND_WIDTH_OF_WALL));
-            }
-            // 将新生成的长度保存
-            allUnitBlockLength = allUnitBlock.size();
-        }
-    }
+    public abstract Tetris getNextTetris();
 
     /**
      * 俄罗斯方块左移
@@ -208,7 +162,7 @@ public class TetrisView extends View {
     public void toLeft() {
         if (TetrisControllerUtils.canMoveLeft(tetrisUnits, allUnitBlock)) {
             TetrisControllerUtils.toLeft(tetrisUnits);
-            tetris.setX(tetris.getX() - UnitBlock.BLOCK_SIZE);
+            tetris.setX(tetris.getX() - blockSize);
             generateTetrisRectf();
         }
         invalidate();
@@ -220,7 +174,7 @@ public class TetrisView extends View {
     public void toRight() {
         if (TetrisControllerUtils.canMoveRight(tetrisUnits, allUnitBlock)) {
             TetrisControllerUtils.toRight(tetrisUnits);
-            tetris.setX(tetris.getX() + UnitBlock.BLOCK_SIZE);
+            tetris.setX(tetris.getX() + blockSize);
             generateTetrisRectf();
         }
         invalidate();
@@ -234,7 +188,7 @@ public class TetrisView extends View {
     public boolean toDown() {
         if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock)) {
             TetrisControllerUtils.toDown(tetrisUnits);
-            tetris.setY(tetris.getY() + UnitBlock.BLOCK_SIZE);
+            tetris.setY(tetris.getY() + blockSize);
             generateTetrisRectf();
             generateAllBlockRectf();
             invalidate();
@@ -252,7 +206,7 @@ public class TetrisView extends View {
         // 逆向遍历所有方块
         for (int i = allUnitBlock.size() - 1; i >= 0; i--) {
             // y是指方块是第几行
-            int y = (allUnitBlock.get(i).getY() - BEGIN_LEN_Y) / UnitBlock.BLOCK_SIZE;
+            int y = (allUnitBlock.get(i).getY() - BEGIN_LEN_Y) / blockSize;
             for (int j = blockRowNum.length; j > 0; j--) {
                 if (y == j) {
                     blockRowNum[j - 1]++;
@@ -284,6 +238,45 @@ public class TetrisView extends View {
     }
 
     /**
+     * 消除塞满方块的所有行
+     *
+     * @param rows 指定删除行
+     */
+    public void removeRowsBlock(List<Integer> rows) {
+        // 再次判断是否满足一行
+        if (rows.size() > 0) {
+            for (int row : rows) {
+                // 再次判断是否满足一行
+                if (blockRowNum[row - 1] == COLUMN_NUM) {
+                    // 循环移除要消掉的行
+                    TetrisControllerUtils.removeLine(allUnitBlock, row);
+                    // 将标记变量还原
+                    blockRowNum[row - 1] = 0;
+                    // 消除的一行的上方的方块整体下移
+                    TetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
+                }
+            }
+            // 对模具刷新
+            generateAllBlockRectf();
+        }
+    }
+
+    /**
+     * 生成俄罗斯方块
+     */
+    private void generateTetris(){
+        // 获得下一个俄罗斯方块
+        Tetris nextTetris = getNextTetris();
+        // 从下一个俄罗斯方块生成当前俄罗斯方块
+        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y,
+                TetrisTypeEnum.getEnumByCode(nextTetris.getTetrisType()),
+                nextTetris.getColor(),
+                UnitBlock.BLOCK_SIZE);
+        // 获得单位方块集合
+        tetrisUnits = tetris.getTetris();
+    }
+
+    /**
      * 判断方块满足一行的行数
      *
      * @return List<Integer>满足行数
@@ -301,32 +294,6 @@ public class TetrisView extends View {
     }
 
     /**
-     * 消除塞满方块的所有行
-     *
-     * @param rows 指定删除行
-     */
-    private void removeRowsBlock(List<Integer> rows) {
-        // 再次判断是否满足一行
-        if (rows.size() > 0) {
-            for (int row : rows) {
-                // 再次判断是否满足一行
-                if (blockRowNum[row - 1] == COLUMN_NUM) {
-                    // 循环移除要消掉的行
-                    TetrisControllerUtils.removeLine(allUnitBlock, row);
-                    // 将标记变量还原
-                    blockRowNum[row - 1] = 0;
-                    // 消除的一行的上方的方块整体下移
-                    TetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
-                }
-            }
-            // 对模具刷新
-            generateAllBlockRectf();
-            // 对主UI进行修改 计算得分等
-            fatherActivity.updateDataAndUi(rows.size());
-        }
-    }
-
-    /**
      * 判断游戏是否结束
      * @return true结束 false不结束
      */
@@ -338,6 +305,43 @@ public class TetrisView extends View {
         }
         return false;
     }
+
+    /**
+     * 生成俄罗斯方块模具
+     */
+    private void generateTetrisRectf(){
+        if (tetrisRectf.size() > 0) {
+            tetrisRectf.clear();
+        }
+        for (int i = 0; i < tetrisUnits.size(); i++) {
+            // 获取每个单位方块的坐标
+            int x = tetrisUnits.get(i).getX();
+            int y = tetrisUnits.get(i).getY();
+            // 设置俄罗斯方块单位的坐标矩形
+            tetrisRectf.add(new RectF(x + BOUND_WIDTH_OF_WALL, y + BOUND_WIDTH_OF_WALL,
+                    x + blockSize - BOUND_WIDTH_OF_WALL, y + blockSize - BOUND_WIDTH_OF_WALL));
+        }
+    }
+
+    /**
+     * 生成所有方块模具
+     */
+    private void generateAllBlockRectf(){
+        // 判断已下落的方块是否改变了 不改变就不需要重新生成
+        if (allUnitBlockLength != allUnitBlock.size()) {
+            if (allBlockRectf.size() > 0) {
+                allBlockRectf.clear();
+            }
+            for (int i = 0; i < allUnitBlock.size(); i++) {
+                // 获取每个单位方块的坐标
+                int x = allUnitBlock.get(i).getX();
+                int y = allUnitBlock.get(i).getY();
+                // 设置俄罗斯方块单位的坐标矩形
+                allBlockRectf.add(new RectF(x + BOUND_WIDTH_OF_WALL, y + BOUND_WIDTH_OF_WALL,
+                        x + blockSize - BOUND_WIDTH_OF_WALL, y + blockSize - BOUND_WIDTH_OF_WALL));
+            }
+            // 将新生成的长度保存
+            allUnitBlockLength = allUnitBlock.size();
+        }
+    }
 }
-
-
