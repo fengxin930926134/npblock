@@ -187,6 +187,8 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
 
     /**
      * 计算游戏等级
+     * 100 400 800 1600
+     *
      * @param grade 当前等级
      * @param score 当前分数
      * @return 应该处于的游戏等级

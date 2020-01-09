@@ -403,6 +403,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         refreshRankData();
                         // 清缓存
                         CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
+                    } else {
+                        throw new Exception(response.getString(ConstUtils.MSG));
                     }
                 } catch (Exception e) {
                     LoggerUtils.e(e.getMessage());

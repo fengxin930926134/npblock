@@ -62,8 +62,8 @@ public class InputNameActivity extends BaseActivity {
                     try {
                         JSONObject response = OkHttpUtils.post("/user/gameName", JSONObject.toJSONString(user));
                         if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
-                            //保存游戏名称成功
-                            //更新缓存
+                            //保存游戏名称成功 更新缓存
+                            users.setGameName(name);
                             CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, users);
                             startActivity(new Intent(context, MainActivity.class));
                         } else {
