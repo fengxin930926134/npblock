@@ -36,9 +36,9 @@ public abstract class BaseTetrisView extends View {
     /**方块宽度*/
     public int blockSize;
     /**游戏主界面结束的x坐标*/
-    public int end_x_len;
+    public int xEnd;
     /**游戏主界面结束的y坐标*/
-    public int end_y_len;
+    public int yEnd;
     /**俄罗斯方块*/
     public Tetris tetris = null;
     /**俄罗斯方块的单元块集合*/
@@ -68,8 +68,8 @@ public abstract class BaseTetrisView extends View {
         super(context, attrs);
         // 初始化属性
         blockSize = getBlockSize();
-        end_x_len = BEGIN_LEN_X + (blockSize + BOUND_WIDTH_OF_WALL) * COLUMN_NUM + BOUND_WIDTH_OF_WALL;
-        end_y_len = BEGIN_LEN_Y + (blockSize + BOUND_WIDTH_OF_WALL) * ROW_NUM + BOUND_WIDTH_OF_WALL;
+        xEnd = BEGIN_LEN_X + (blockSize + BOUND_WIDTH_OF_WALL) * COLUMN_NUM + BOUND_WIDTH_OF_WALL;
+        yEnd = BEGIN_LEN_Y + (blockSize + BOUND_WIDTH_OF_WALL) * ROW_NUM + BOUND_WIDTH_OF_WALL;
         // 初始化背景墙笔
         if (paintWall == null) {
             paintWall = new Paint();
@@ -86,8 +86,8 @@ public abstract class BaseTetrisView extends View {
             paintBlock.setColor(Color.parseColor("#FF6600"));
         }
         // 初始化背景墙 因为忽略墙 会多画一次 所以减一
-        for (int i = BEGIN_LEN_X; i < end_x_len - blockSize; i += blockSize) {
-            for (int j = BEGIN_LEN_Y; j < end_y_len - blockSize; j += blockSize) {
+        for (int i = BEGIN_LEN_X; i < xEnd - blockSize; i += blockSize) {
+            for (int j = BEGIN_LEN_Y; j < yEnd - blockSize; j += blockSize) {
                 backgroundWall.add(new RectF(i, j, i + blockSize, j + blockSize));
             }
         }
@@ -109,8 +109,8 @@ public abstract class BaseTetrisView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // 重新计算高度
-        int width = end_x_len - 5 * BEGIN_LEN_X - BOUND_WIDTH_OF_WALL;
-        int height = end_y_len - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
+        int width = xEnd - 5 * BEGIN_LEN_X - BOUND_WIDTH_OF_WALL;
+        int height = yEnd - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
         // 设置宽高
         setMeasuredDimension(width, height);
     }
@@ -160,8 +160,8 @@ public abstract class BaseTetrisView extends View {
      * 俄罗斯方块左移
      */
     public void toLeft() {
-        if (TetrisControllerUtils.canMoveLeft(tetrisUnits, allUnitBlock)) {
-            TetrisControllerUtils.toLeft(tetrisUnits);
+        if (TetrisControllerUtils.canMoveLeft(tetrisUnits, allUnitBlock, blockSize)) {
+            TetrisControllerUtils.toLeft(tetrisUnits, blockSize);
             tetris.setX(tetris.getX() - blockSize);
             generateTetrisRectf();
         }
@@ -172,8 +172,8 @@ public abstract class BaseTetrisView extends View {
      * 俄罗斯方块右移
      */
     public void toRight() {
-        if (TetrisControllerUtils.canMoveRight(tetrisUnits, allUnitBlock)) {
-            TetrisControllerUtils.toRight(tetrisUnits);
+        if (TetrisControllerUtils.canMoveRight(tetrisUnits, allUnitBlock, xEnd, blockSize)) {
+            TetrisControllerUtils.toRight(tetrisUnits, blockSize);
             tetris.setX(tetris.getX() + blockSize);
             generateTetrisRectf();
         }
@@ -186,8 +186,8 @@ public abstract class BaseTetrisView extends View {
      * @return boolean true表示游戏结束了
      */
     public boolean toDown() {
-        if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock)) {
-            TetrisControllerUtils.toDown(tetrisUnits);
+        if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock, yEnd, blockSize)) {
+            TetrisControllerUtils.toDown(tetrisUnits, blockSize);
             tetris.setY(tetris.getY() + blockSize);
             generateTetrisRectf();
             generateAllBlockRectf();
@@ -232,7 +232,7 @@ public abstract class BaseTetrisView extends View {
      * 俄罗斯方块旋转
      */
     public void toRotate() {
-        TetrisControllerUtils.toRotate(tetris, allUnitBlock);
+        TetrisControllerUtils.toRotate(tetris, allUnitBlock, xEnd, yEnd, blockSize);
         generateTetrisRectf();
         invalidate();
     }
@@ -243,22 +243,19 @@ public abstract class BaseTetrisView extends View {
      * @param rows 指定删除行
      */
     public void removeRowsBlock(List<Integer> rows) {
-        // 再次判断是否满足一行
-        if (rows.size() > 0) {
-            for (int row : rows) {
-                // 再次判断是否满足一行
-                if (blockRowNum[row - 1] == COLUMN_NUM) {
-                    // 循环移除要消掉的行
-                    TetrisControllerUtils.removeLine(allUnitBlock, row);
-                    // 将标记变量还原
-                    blockRowNum[row - 1] = 0;
-                    // 消除的一行的上方的方块整体下移
-                    TetrisControllerUtils.blockRowsToDown(allUnitBlock, row);
-                }
+        for (int row : rows) {
+            // 再次判断是否满足一行
+            if (blockRowNum[row - 1] == COLUMN_NUM) {
+                // 循环移除要消掉的行
+                TetrisControllerUtils.removeLine(allUnitBlock, row);
+                // 将标记变量还原
+                blockRowNum[row - 1] = 0;
+                // 消除的一行的上方的方块整体下移
+                TetrisControllerUtils.blockRowsToDown(allUnitBlock, row, blockSize);
             }
-            // 对模具刷新
-            generateAllBlockRectf();
         }
+        // 对模具刷新
+        generateAllBlockRectf();
     }
 
     /**
@@ -326,7 +323,7 @@ public abstract class BaseTetrisView extends View {
     /**
      * 生成所有方块模具
      */
-    private void generateAllBlockRectf(){
+    public void generateAllBlockRectf(){
         // 判断已下落的方块是否改变了 不改变就不需要重新生成
         if (allUnitBlockLength != allUnitBlock.size()) {
             if (allBlockRectf.size() > 0) {

@@ -93,8 +93,8 @@ public class NextTetrisView extends View {
         for (int i = 0; i < nextTetrisUnit.size(); i++) {
             int mx = nextTetrisUnit.get(i).getX() + BEGIN_LEN_X;
             int my = nextTetrisUnit.get(i).getY() + BEGIN_LEN_Y;
-            nextTetrisRectf.add(new RectF(mx + TetrisView.BOUND_WIDTH_OF_WALL , my + TetrisView.BOUND_WIDTH_OF_WALL,
-                    mx + UnitBlock.BLOCK_SIZE - TetrisView.BOUND_WIDTH_OF_WALL , my +  UnitBlock.BLOCK_SIZE  - TetrisView.BOUND_WIDTH_OF_WALL));
+            nextTetrisRectf.add(new RectF(mx + ClassicTetrisView.BOUND_WIDTH_OF_WALL , my + ClassicTetrisView.BOUND_WIDTH_OF_WALL,
+                    mx + UnitBlock.BLOCK_SIZE - ClassicTetrisView.BOUND_WIDTH_OF_WALL , my +  UnitBlock.BLOCK_SIZE  - ClassicTetrisView.BOUND_WIDTH_OF_WALL));
         }
     }
 

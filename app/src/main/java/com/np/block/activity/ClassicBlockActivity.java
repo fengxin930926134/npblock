@@ -18,7 +18,7 @@ import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.view.NextTetrisView;
-import com.np.block.view.TetrisView;
+import com.np.block.view.ClassicTetrisView;
 
 /**
  * 经典模式
@@ -26,7 +26,7 @@ import com.np.block.view.TetrisView;
  */
 public class ClassicBlockActivity extends BaseActivity implements View.OnClickListener {
     /**俄罗斯方块视图*/
-    private TetrisView tetris;
+    private ClassicTetrisView classicTetrisView;
     /**下一个俄罗斯方块视图*/
     private NextTetrisView nextTetris;
     /**分数*/
@@ -51,7 +51,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     @Override
     public void init() {
         // 获取对应的视图对象
-        tetris = findViewById(R.id.rush_tetris_view);
+        classicTetrisView = findViewById(R.id.rush_tetris_view);
         nextTetris = findViewById(R.id.nextTetrisView);
         score = findViewById(R.id.score);
         grade = findViewById(R.id.grade);
@@ -93,7 +93,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
             return false;
         });
         // 设置子视图对象的父视图
-        tetris.setFatherActivity(this);
+        classicTetrisView.setFatherActivity(this);
         // 启动下落线程  咳咳  游戏启动
         startDownThread();
     }
@@ -126,10 +126,10 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.left : tetris.toLeft(); break;
-            case R.id.right : tetris.toRight(); break;
+            case R.id.left : classicTetrisView.toLeft(); break;
+            case R.id.right : classicTetrisView.toRight(); break;
             case R.id.down : downEvent();break;
-            case R.id.rotate : tetris.toRotate(); break;
+            case R.id.rotate : classicTetrisView.toRotate(); break;
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
@@ -292,7 +292,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      */
     private void downEvent() {
         if (!isLongClick && beginGame) {
-            if (tetris.toDown()) {
+            if (classicTetrisView.toDown()) {
                 beginGame = false;
             }
         }else {
@@ -362,7 +362,7 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     private synchronized void down() {
         //下移
         runOnUiThread(() -> {
-            if (tetris.toDown()) {
+            if (classicTetrisView.toDown()) {
                 // 启动游戏结束的弹窗
                 startGameOverDialog();
             }
