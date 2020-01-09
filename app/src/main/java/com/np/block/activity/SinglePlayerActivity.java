@@ -12,6 +12,7 @@ import com.np.block.core.model.Tetris;
 import com.np.block.util.ConstUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.SinglePlayerEnemyView;
+import com.np.block.view.SinglePlayerView;
 import butterknife.BindView;
 
 /**
@@ -23,7 +24,11 @@ import butterknife.BindView;
  */
 public class SinglePlayerActivity extends BaseActivity implements View.OnClickListener {
 
+    /**俄罗斯方块视图*/
     @BindView(R.id.single_player_tetris)
+    SinglePlayerView singlePlayerView;
+    /**俄罗斯方块敌人视图*/
+    @BindView(R.id.single_player_tetris_enemy)
     SinglePlayerEnemyView singlePlayerEnemyView;
     /**下一个俄罗斯方块视图*/
     @BindView(R.id.next_tetris_view)
@@ -58,7 +63,9 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     public void init() {
         //初始化接收匹配队列消息的Handler
         SocketServerManager.getInstance().setHandler(mHandler);
+        //设置子类视图父类
         singlePlayerEnemyView.setFatherActivity(this);
+        singlePlayerView.setFatherActivity(this);
         //启动倒计时操作
         countDownTimer.start();
     }
