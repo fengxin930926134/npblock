@@ -8,7 +8,6 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import com.np.block.activity.RushBlockActivity;
-import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.model.Stage;

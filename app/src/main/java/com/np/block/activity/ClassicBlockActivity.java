@@ -139,22 +139,27 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
      * 从下一个方块视图里获取方块
      */
     public Tetris getNextTetris() {
+        //下落一个块+1分
+        int newScore = Integer.parseInt(score.getText().toString()) + 1;
+        runOnUiThread(() -> score.setText(String.valueOf(newScore)));
         return nextTetris.getNextTetris();
     }
 
     /**
      * 更新游戏数据和分数等
-     * TODO 计分标准为下落一个块10分，一次消一行100分、2行200分、3行400分、4行800分。(待实现)
+     * 计分标准为下落一个块1分，一次消一行10分、2行20分、3行40分、4行80分
      *
      * @param row 消掉的方块行数
      */
     public void updateDataAndUi(int row) {
         // 等级
         final int gradeUsed = Integer.parseInt(grade.getText().toString());
-        // 成绩=等级x方块数
-        final int scoreNew = Integer.parseInt(score.getText().toString()) + row * TetrisView.COLUMN_NUM * gradeUsed;
         // 消除行数
         final int rows = Integer.parseInt(rowNum.getText().toString()) + row;
+        // 计算需要增加的分数
+        int addScore = (int) Math.pow(2, row - 1) * 10;
+        // 成绩=旧成绩+新添成绩
+        final int scoreNew = Integer.parseInt(score.getText().toString()) + addScore;
         // 新等级
         final int gradeNew = computeGrade(gradeUsed, scoreNew);
         runOnUiThread(() -> {

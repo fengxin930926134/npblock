@@ -1,5 +1,6 @@
 package com.np.block.activity;
 
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +29,26 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     EditText editText;
     @BindView(R.id.message_text)
     TextView text;
+    /**
+     * 计时器 第一个参数总时间，第二个参数间隔时间。
+     */
+    private CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            long second = millisUntilFinished / 1000;
+            String text = "倒计时 " + second + " 秒\n后续改弹窗防止瞎点";
+            //后续改弹窗
+            Toast.makeText(SinglePlayerActivity.this, text, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onFinish() {
+            //启动游戏
+            exit.setEnabled(true);
+            send.setEnabled(true);
+        }
+    };
     /**接收handler消息*/
     private Handler mHandler = new Handler(msg -> {
         if (msg.what == ConstUtils.HANDLER_GAME_DATA) {
@@ -43,8 +64,10 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
         SocketServerManager.getInstance().setHandler(mHandler);
         exit.setOnClickListener(this);
         send.setOnClickListener(this);
-        //后续增加一个倒计时操作
-        Toast.makeText(context, "倒计时结束", Toast.LENGTH_SHORT).show();
+        exit.setEnabled(false);
+        send.setEnabled(false);
+        //启动倒计时操作
+        countDownTimer.start();
     }
 
     @Override
@@ -66,7 +89,7 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
                 break;
             }
             default:
-                throw new IllegalStateException("Unexpected value: " + v.getId());
+                throw new IllegalStateException("未实现: " + v.getId());
         }
     }
 
