@@ -8,7 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toStartOf="@+id/rush_tetris_view">
+        android:layout_toStartOf="@+id/classic_tetris_view">
 
         <com.np.block.view.NextTetrisView
             android:id="@+id/nextTetrisView"
@@ -44,7 +44,7 @@
     </RelativeLayout>
 
     <com.np.block.view.ClassicTetrisView
-        android:id="@+id/rush_tetris_view"
+        android:id="@+id/classic_tetris_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
@@ -52,7 +52,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toEndOf="@+id/rush_tetris_view">
+        android:layout_toEndOf="@+id/classic_tetris_view">
 
         <!--分数-->
         <LinearLayout
@@ -75,6 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
+                android:text="@string/classic_score_initial"
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
 
@@ -100,10 +101,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
+                android:text="@string/classic_grade_initial"
                 style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 
-        <!--速度-->
+        <!--消除行数-->
         <LinearLayout
             android:id="@+id/row_num_layout"
             android:layout_width="match_parent"
@@ -125,6 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
+                android:text="@string/classic_row_initial"
                 style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 

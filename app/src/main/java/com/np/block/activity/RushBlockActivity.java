@@ -2,21 +2,15 @@ package com.np.block.activity;
 
 import android.app.AlertDialog;
 import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.np.block.R;
-import com.np.block.base.BaseActivity;
-import com.np.block.core.enums.StageTypeEnum;
-import com.np.block.core.manager.ActivityManager;
+import com.np.block.base.BaseGameActivity;
+import com.np.block.base.BaseTetrisView;
 import com.np.block.core.manager.CacheManager;
-import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Stage;
-import com.np.block.core.model.Tetris;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
-import com.np.block.view.NextTetrisView;
 import com.np.block.view.RushTetrisView;
 import org.litepal.LitePal;
 import butterknife.BindView;
@@ -26,42 +20,27 @@ import butterknife.BindView;
  *
  * @author fengxin
  */
-public class RushBlockActivity extends BaseActivity implements View.OnClickListener {
+public class RushBlockActivity extends BaseGameActivity {
     /**俄罗斯方块视图*/
-    @BindView(R.id.rush_tetris_view)
-    RushTetrisView tetris;
-    /**下一个俄罗斯方块视图*/
-    @BindView(R.id.nextTetrisView)
-    NextTetrisView nextTetris;
-    /**左移按钮*/
-    @BindView(R.id.left)
-    Button left;
-    /**右移按钮*/
-    @BindView(R.id.right)
-    Button right;
-    /**下落按钮*/
-    @BindView(R.id.down)
-    Button down;
-    /**旋转按钮*/
-    @BindView(R.id.rotate)
-    Button rotate;
+    @BindView(R.id.classic_tetris_view)
+    RushTetrisView rushTetrisView;
+    /**关卡名称*/
     @BindView(R.id.rush_mode_name)
     TextView rushModeName;
     /**暂停对话框*/
     private AlertDialog pauseDialog = null;
-    /**判断是否长点击*/
-    private boolean isLongClick = false;
-    /**标识游戏是暂停还是运行*/
-    private boolean runningStatus = true;
-    /**标识游戏是开始还是结束*/
-    private boolean beginGame = true;
     /**关卡属性*/
     private Stage stage;
     /**消掉的行数*/
     private int rowNum = 0;
 
     @Override
-    public void init() {
+    public BaseTetrisView getTetrisView() {
+        return rushTetrisView;
+    }
+
+    @Override
+    public void initData() {
         String stageType = (String) CacheManager.getInstance().get(ConstUtils.CACHE_RUSH_STAGE_TYPE);
         // 初始化关卡属性
         stage = LitePal
@@ -69,19 +48,6 @@ public class RushBlockActivity extends BaseActivity implements View.OnClickListe
                 .findLast(Stage.class);
         // 设置关卡名称
         rushModeName.setText(stage.getName());
-        // 设置按钮单击事件
-        left.setOnClickListener(this);
-        right.setOnClickListener(this);
-        down.setOnClickListener(this);
-        rotate.setOnClickListener(this);
-        down.setOnLongClickListener(v -> {
-            //启动长按下落线程
-            startDownLongThread();
-            // 如果让回调消耗该长按，返回true，否则false，如果false，其他地方监听生效
-            return false;
-        });
-        // 设置子视图对象的父视图
-        tetris.setFatherActivity(this);
         // 游戏启动
         startDownThread();
     }
@@ -105,30 +71,6 @@ public class RushBlockActivity extends BaseActivity implements View.OnClickListe
             runningStatus = true;
         }
         super.onResume();
-    }
-
-    /**
-     * 游戏界面的单击事件
-     *
-     * @param view 被单击对象
-     */
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.left : tetris.toLeft(); break;
-            case R.id.right : tetris.toRight(); break;
-            case R.id.down : downEvent();break;
-            case R.id.rotate : tetris.toRotate(); break;
-            default:
-                Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * 从下一个方块视图里获取方块
-     */
-    public Tetris getNextTetris() {
-        return nextTetris.getNextTetris();
     }
 
     /**
@@ -174,8 +116,9 @@ public class RushBlockActivity extends BaseActivity implements View.OnClickListe
     /**
      * 创建游戏结束的弹窗
      */
-    private void startGameOverDialog() {
-        beginGame = false;
+    @Override
+    public void startGameOverDialog() {
+        super.startGameOverDialog();
         // 弹出弹窗
         runOnUiThread(() -> DialogUtils.showDialog(context, "游戏结束", "别灰心，再来一次就通关！",
                 "回到主页", "重来", false, false,
@@ -237,87 +180,5 @@ public class RushBlockActivity extends BaseActivity implements View.OnClickListe
             }
         }
         return true;
-    }
-
-    /**
-     * 下落按钮的点击事件
-     */
-    private void downEvent() {
-        if (!isLongClick && beginGame) {
-            if (tetris.toDown()) {
-                beginGame = false;
-            }
-        }else {
-            isLongClick = false;
-        }
-    }
-
-    /**
-     * 退出游戏
-     */
-    private void exitGame() {
-        //关闭游戏
-        beginGame = false;
-        finish();
-        ActivityManager.getInstance().removeActivity(this);
-    }
-
-    /**
-     * 刷新游戏
-     * 调用recreate方法重新创建Activity会比正常启动Activity多调用了onSaveInstanceState()和
-     * onRestoreInstanceState()两个方法，onSaveInstanceState()会在onCreate方法之前调用。
-     * 所以可以在onCreate()方法中获取onSaveInstanceState()保存的Theme数据
-     */
-    private void refreshGame() {
-        recreate();
-    }
-
-    /**
-     * 启动下落游戏线程
-     */
-    private void startDownThread () {
-        ThreadPoolManager.getInstance().execute(() -> {
-            while (beginGame) {
-                if (runningStatus) {
-                    //下移
-                    down();
-                    try {
-                        Thread.sleep(stage.getSpeed());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
-
-    /**
-     * 启动长按下落线程
-     */
-    private void startDownLongThread() {
-        isLongClick = true;
-        ThreadPoolManager.getInstance().execute(() -> {
-            do {
-                down();
-                try {
-                    Thread.sleep(80);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } while (isLongClick && beginGame);
-        });
-    }
-
-    /**
-     * 在ui线程中执行方块下落
-     */
-    private synchronized void down() {
-        //下移
-        runOnUiThread(() -> {
-            if (tetris.toDown()) {
-                // 启动游戏结束的弹窗
-                startGameOverDialog();
-            }
-        });
     }
 }

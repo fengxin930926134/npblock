@@ -2,98 +2,65 @@ package com.np.block.activity;
 
 import android.app.AlertDialog;
 import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.np.block.R;
-import com.np.block.base.BaseActivity;
-import com.np.block.core.manager.ActivityManager;
+import com.np.block.base.BaseGameActivity;
+import com.np.block.base.BaseTetrisView;
 import com.np.block.core.manager.CacheManager;
-import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.SharedPreferencesUtils;
-import com.np.block.view.NextTetrisView;
 import com.np.block.view.ClassicTetrisView;
+import butterknife.BindView;
 
 /**
  * 经典模式
  * @author fengxin
  */
-public class ClassicBlockActivity extends BaseActivity implements View.OnClickListener {
+public class ClassicBlockActivity extends BaseGameActivity {
     /**俄罗斯方块视图*/
-    private ClassicTetrisView classicTetrisView;
-    /**下一个俄罗斯方块视图*/
-    private NextTetrisView nextTetris;
+    @BindView(R.id.classic_tetris_view)
+    ClassicTetrisView classicTetrisView;
     /**分数*/
-    private TextView score;
+    @BindView(R.id.score)
+    TextView score;
     /**等级*/
-    private TextView grade;
+    @BindView(R.id.grade)
+    TextView grade;
     /**消掉的行数*/
-    private TextView rowNum;
+    @BindView(R.id.row_num)
+    TextView rowNum;
+    /**最高分文本*/
+    @BindView(R.id.max_score)
+    TextView maxScoreText;
     /**最高分*/
     private int maxScore;
     /**暂停对话框*/
     private AlertDialog pauseDialog = null;
-    /**判断是否长点击*/
-    private boolean isLongClick = false;
-    /**下落的速度*/
-    private int speed = 1000;
-    /**标识游戏是暂停还是运行*/
-    private boolean runningStatus = true;
-    /**标识游戏是开始还是结束*/
-    private boolean beginGame = true;
 
     @Override
-    public void init() {
-        // 获取对应的视图对象
-        classicTetrisView = findViewById(R.id.rush_tetris_view);
-        nextTetris = findViewById(R.id.nextTetrisView);
-        score = findViewById(R.id.score);
-        grade = findViewById(R.id.grade);
-        rowNum = findViewById(R.id.row_num);
-        TextView maxScore = findViewById(R.id.max_score);
-        // 初始化数据
-        score.setText("0");
-        grade.setText("1");
-        rowNum.setText("0");
-        // 当本地数据没有的时候读取缓存数据
-        if ((this.maxScore = SharedPreferencesUtils.readScore()) == 0) {
+    public BaseTetrisView getTetrisView() {
+        return classicTetrisView;
+    }
+
+    @Override
+    public void initData() {
+        // 初始化最高分 当本地数据没有的时候读取缓存数据
+        if ((maxScore = SharedPreferencesUtils.readScore()) == 0) {
             Users user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
             if (user != null && user.getClassicScore() != null && user.getClassicScore() > 0) {
-                this.maxScore = user.getClassicScore();
+                maxScore = user.getClassicScore();
                 // 保存本地
-                if (SharedPreferencesUtils.saveScore(this.maxScore)) {
+                if (SharedPreferencesUtils.saveScore(maxScore)) {
                     LoggerUtils.i("[SP] 保存成绩失败");
                 }
             }
         }
-        maxScore.setText(String.valueOf(this.maxScore));
-        // 左移按钮
-        Button left = findViewById(R.id.left);
-        // 右移按钮
-        Button right = findViewById(R.id.right);
-        // 下落按钮
-        Button down = findViewById(R.id.down);
-        // 旋转按钮
-        Button rotate = findViewById(R.id.rotate);
-        // 设置按钮单击事件
-        left.setOnClickListener(this);
-        right.setOnClickListener(this);
-        down.setOnClickListener(this);
-        rotate.setOnClickListener(this);
-        down.setOnLongClickListener(v -> {
-            //启动长按下落线程
-            startDownLongThread();
-            // 如果让回调消耗该长按，返回true，否则false，如果false，其他地方监听生效
-            return false;
-        });
-        // 设置子视图对象的父视图
-        classicTetrisView.setFatherActivity(this);
+        maxScoreText.setText(String.valueOf(maxScore));
         // 启动下落线程  咳咳  游戏启动
         startDownThread();
     }
@@ -120,29 +87,14 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     }
 
     /**
-     * 主界面的单击事件
-     * @param view 被单击对象
-     */
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.left : classicTetrisView.toLeft(); break;
-            case R.id.right : classicTetrisView.toRight(); break;
-            case R.id.down : downEvent();break;
-            case R.id.rotate : classicTetrisView.toRotate(); break;
-            default:
-                Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
      * 从下一个方块视图里获取方块
      */
+    @Override
     public Tetris getNextTetris() {
         //下落一个块+1分
         int newScore = Integer.parseInt(score.getText().toString()) + 1;
         runOnUiThread(() -> score.setText(String.valueOf(newScore)));
-        return nextTetris.getNextTetris();
+        return super.getNextTetris();
     }
 
     /**
@@ -208,8 +160,9 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
     /**
      * 创建游戏结束的弹窗
      */
-    private void startGameOverDialog() {
-        beginGame = false;
+    @Override
+    public void startGameOverDialog() {
+        super.startGameOverDialog();
         int maxScoreNew = Integer.parseInt(score.getText().toString());
         final String textContent;
         // 判断成绩是否需要保存
@@ -285,87 +238,5 @@ public class ClassicBlockActivity extends BaseActivity implements View.OnClickLi
             }
         }
         return true;
-    }
-
-    /**
-     * 下落按钮的点击事件
-     */
-    private void downEvent() {
-        if (!isLongClick && beginGame) {
-            if (classicTetrisView.toDown()) {
-                beginGame = false;
-            }
-        }else {
-            isLongClick = false;
-        }
-    }
-
-    /**
-     * 退出游戏
-     */
-    private void exitGame() {
-        //关闭游戏
-        beginGame = false;
-        finish();
-        ActivityManager.getInstance().removeActivity(this);
-    }
-
-    /**
-     * 刷新游戏
-     * 调用recreate方法重新创建Activity会比正常启动Activity多调用了onSaveInstanceState()和
-     * onRestoreInstanceState()两个方法，onSaveInstanceState()会在onCreate方法之前调用。
-     * 所以可以在onCreate()方法中获取onSaveInstanceState()保存的Theme数据
-     */
-    private void refreshGame() {
-        recreate();
-    }
-
-    /**
-     * 启动下落游戏线程
-     */
-    private void startDownThread () {
-        ThreadPoolManager.getInstance().execute(() -> {
-            while (beginGame) {
-                if (runningStatus) {
-                    //下移
-                    down();
-                    try {
-                        Thread.sleep(speed);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
-
-    /**
-     * 启动长按下落线程
-     */
-    private void startDownLongThread() {
-        isLongClick = true;
-        ThreadPoolManager.getInstance().execute(() -> {
-            do {
-                down();
-                try {
-                    Thread.sleep(80);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } while (isLongClick && beginGame);
-        });
-    }
-
-    /**
-     * 在ui线程中执行方块下落
-     */
-    private synchronized void down() {
-        //下移
-        runOnUiThread(() -> {
-            if (classicTetrisView.toDown()) {
-                // 启动游戏结束的弹窗
-                startGameOverDialog();
-            }
-        });
     }
 }

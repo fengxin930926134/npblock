@@ -126,6 +126,25 @@ public abstract class BaseGameActivity extends BaseActivity{
     }
 
     /**
+     * 退出游戏
+     */
+    public void exitGame() {
+        //关闭游戏
+        beginGame = false;
+        finish();
+    }
+
+    /**
+     * 刷新游戏
+     * 调用recreate方法重新创建Activity会比正常启动Activity多调用了onSaveInstanceState()和
+     * onRestoreInstanceState()两个方法，onSaveInstanceState()会在onCreate方法之前调用。
+     * 所以可以在onCreate()方法中获取onSaveInstanceState()保存的Theme数据
+     */
+    public void refreshGame() {
+        recreate();
+    }
+
+    /**
      * 启动长按下落线程
      */
     private void startDownLongThread() {
