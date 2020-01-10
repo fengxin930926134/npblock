@@ -51,16 +51,16 @@ public class DefaultDataBase {
             stage.setStageType(stageType.getCode());
             //设置阻碍用的方块
             stage.getHinderTetris().add(new Tetris(
-                    RushTetrisView.BEGIN_LEN_X + UnitBlock.BLOCK_SIZE * 2,
-                    RushTetrisView.BEGIN_LEN_Y + UnitBlock.BLOCK_SIZE * 5,
+                    RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 2,
+                    RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 5,
                     TetrisTypeEnum.LINE_SHAPE, -1,
-                    UnitBlock.BLOCK_SIZE
+                    RushTetrisView.BLOCK_SIZE
             ));
             stage.getHinderTetris().add(new Tetris(
-                    RushTetrisView.BEGIN_LEN_X + UnitBlock.BLOCK_SIZE * (RushTetrisView.COLUMN_NUM - 2),
-                    RushTetrisView.BEGIN_LEN_Y + UnitBlock.BLOCK_SIZE * 16,
+                    RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * (RushTetrisView.COLUMN_NUM - 2),
+                    RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 16,
                     TetrisTypeEnum.LINE_SHAPE, -1,
-                    UnitBlock.BLOCK_SIZE
+                    RushTetrisView.BLOCK_SIZE
             ));
             stage.save();
         }
