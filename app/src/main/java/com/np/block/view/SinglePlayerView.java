@@ -7,6 +7,7 @@ import com.np.block.activity.SinglePlayerActivity;
 import com.np.block.base.BaseTetrisView;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
+import java.util.List;
 
 /**
  * 单人匹配对战俄罗斯方块的视图
@@ -38,5 +39,12 @@ public class SinglePlayerView extends BaseTetrisView {
     @Override
     public void setFatherActivity(Activity activity) {
         fatherActivity = activity;
+    }
+
+    @Override
+    public void removeRowsBlock(List<Integer> rows) {
+        super.removeRowsBlock(rows);
+        //清除俄罗斯方块后的操作
+        ((SinglePlayerActivity)fatherActivity).updateDataAndUi(rows.size());
     }
 }

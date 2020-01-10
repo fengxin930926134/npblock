@@ -17,6 +17,30 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="50dp"/>
 
+        <!--敌人分数-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_above="@+id/score_layout"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:textColor="@color/colorWhite"
+                android:text="@string/enemy_score_text" />
+
+            <TextView
+                android:id="@+id/enemy_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorWhite"
+                android:text="@string/zero_initial"
+                style="@style/TextAppearance.AppCompat.Caption" />
+        </LinearLayout>
+
         <!--分数-->
         <LinearLayout
             android:id="@+id/score_layout"
@@ -24,7 +48,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_above="@+id/left_and_right"
-            android:layout_marginBottom="100dp">
+            android:layout_marginBottom="50dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -38,6 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
+                android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
 

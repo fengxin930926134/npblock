@@ -75,7 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:text="@string/classic_score_initial"
+                android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
 
@@ -101,7 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:text="@string/classic_grade_initial"
+                android:text="@string/one_initial"
                 style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 
@@ -127,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:text="@string/classic_row_initial"
+                android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 

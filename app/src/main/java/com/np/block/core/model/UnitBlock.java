@@ -28,7 +28,7 @@ public class UnitBlock extends LitePalSupport implements Cloneable {
     /**单元块的y坐标*/
     private int y;
 
-    UnitBlock(int x, int y, int color) {
+    public UnitBlock(int x, int y, int color) {
         this.x = x;
         this.y = y;
         this.color = color;

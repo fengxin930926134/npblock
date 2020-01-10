@@ -139,6 +139,21 @@ public class ConstUtils {
      */
     public static final int HANDLER_ENTER_THE_GAME = 0x14;
 
+    /**
+     * json数据key 所有方块坐标
+     */
+    public static final String JSON_KEY_ALL_BLOCK = "json_key_all_block";
+
+    /**
+     * json数据key 俄罗斯方块坐标
+     */
+    public static final String JSON_KEY_TETRIS_BLOCK = "json_key_tetris_block";
+
+    /**
+     * json数据key 敌人成绩
+     */
+    public static final String JSON_KEY_ENEMY_SCORE = "json_key_enemy_score";
+
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }

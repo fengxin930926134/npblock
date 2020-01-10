@@ -314,7 +314,7 @@ public abstract class BaseTetrisView extends View {
     /**
      * 生成俄罗斯方块模具
      */
-    private void generateTetrisRectf(){
+    public void generateTetrisRectf(){
         if (tetrisRectf.size() > 0) {
             tetrisRectf.clear();
         }

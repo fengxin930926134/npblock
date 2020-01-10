@@ -1,11 +1,7 @@
 package com.np.block.core.manager;
 
-import androidx.annotation.NonNull;
-
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * 线程池管理类
@@ -14,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 public class ThreadPoolManager {
 
     /**
+     * 不推荐使用Executors创建线程池 但是为了方便使用定时任务 于是用这个方法创建
+     *
      * corePoolSize: 该线程池中核心线程的数量。
      * maximumPoolSize：该线程池中最大线程数量。(区别于corePoolSize)
      * keepAliveTime:从字面上就可以理解，是非核心线程空闲时要等待下一个任务到来的时间，当任务很多，每个任务执行时间很短的情况下调大该值有助于提高线程利用率。注意：当allowCoreThreadTimeOut属性设为true时，该属性也可用于核心线程。
@@ -27,13 +25,11 @@ public class ThreadPoolManager {
      * demo中设置的任务队列长度为100，所以不会开启额外的5-3=2个非核心线程，如果将任务队列设为25，则前三个任务被核心线程执行，剩下的30-3=27个任务进入队列会满，此时会开启2个非核心线程来执行剩下的两个任务。
      */
     private static class Inner {
-        private static ThreadPoolExecutor instance = new ThreadPoolExecutor(3,5,1, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(100),new ThreadFactory() {
-            @Override
-            public Thread newThread(@NonNull Runnable r) {
-                return new Thread(r, "MyThread");
-            }
-        });
+//        private static ThreadPoolExecutor instance =
+//                new ThreadPoolExecutor(3,5,1, TimeUnit.SECONDS,
+//                new LinkedBlockingQueue<>(100), r -> new Thread(r, "MyThread"));
+        private static ScheduledExecutorService instance =
+                Executors.newScheduledThreadPool(3, r -> new Thread(r, "MyThread"));
     }
 
     /**私有化构造方法*/
@@ -41,7 +37,7 @@ public class ThreadPoolManager {
     }
 
     /**提供一个共有的可以返回类对象的方法*/
-    public static ThreadPoolExecutor getInstance(){
+    public static ScheduledExecutorService getInstance(){
         return Inner.instance;
     }
 
