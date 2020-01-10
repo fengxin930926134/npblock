@@ -1,5 +1,6 @@
 package com.np.block.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import com.np.block.activity.ClassicBlockActivity;
@@ -16,8 +17,6 @@ public class ClassicTetrisView extends BaseTetrisView {
 
     /**此类型方块大小*/
     public static final int BLOCK_SIZE = UnitBlock.BLOCK_SIZE;
-    /**调用此对象的Activity对象 父视图*/
-    private ClassicBlockActivity fatherActivity = null;
 
     public ClassicTetrisView(Context context) {
         super(context);
@@ -27,14 +26,6 @@ public class ClassicTetrisView extends BaseTetrisView {
         super(context, attrs);
     }
 
-    /**
-     * 设置当前游戏页面的父类activity
-     * @param context 父类
-     */
-    public void setFatherActivity(Context context) {
-        this.fatherActivity = (ClassicBlockActivity)context;
-    }
-
     @Override
     public int getBlockSize() {
         return BLOCK_SIZE;
@@ -42,7 +33,12 @@ public class ClassicTetrisView extends BaseTetrisView {
 
     @Override
     public Tetris getNextTetris() {
-        return fatherActivity.getNextTetris();
+        return ((ClassicBlockActivity)fatherActivity).getNextTetris();
+    }
+
+    @Override
+    public void setFatherActivity(Activity activity) {
+        fatherActivity = activity;
     }
 
     /**
@@ -53,7 +49,7 @@ public class ClassicTetrisView extends BaseTetrisView {
     public void removeRowsBlock(List<Integer> rows) {
         super.removeRowsBlock(rows);
         // 对主UI进行修改 计算得分等
-        fatherActivity.updateDataAndUi(rows.size());
+        ((ClassicBlockActivity)fatherActivity).updateDataAndUi(rows.size());
     }
 }
 

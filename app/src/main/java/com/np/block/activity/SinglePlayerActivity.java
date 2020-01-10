@@ -3,9 +3,13 @@ package com.np.block.activity;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.base.BaseGameActivity;
+import com.np.block.base.BaseTetrisView;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
@@ -22,7 +26,7 @@ import butterknife.BindView;
  *
  * @author fengxin
  */
-public class SinglePlayerActivity extends BaseActivity implements View.OnClickListener {
+public class SinglePlayerActivity extends BaseGameActivity {
 
     /**俄罗斯方块视图*/
     @BindView(R.id.single_player_tetris)
@@ -33,6 +37,9 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     /**下一个俄罗斯方块视图*/
     @BindView(R.id.next_tetris_view)
     NextTetrisView nextTetris;
+    /**成绩*/
+    @BindView(R.id.score)
+    TextView score;
     /**
      * 计时器 第一个参数总时间，第二个参数间隔时间。
      */
@@ -49,6 +56,7 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
         @Override
         public void onFinish() {
             //启动游戏
+            startDownThread();
         }
     };
     /**接收handler消息*/
@@ -60,12 +68,14 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     });
 
     @Override
-    public void init() {
+    public BaseTetrisView getTetrisView() {
+        return singlePlayerView;
+    }
+
+    @Override
+    public void initData() {
         //初始化接收匹配队列消息的Handler
         SocketServerManager.getInstance().setHandler(mHandler);
-        //设置子类视图父类
-        singlePlayerEnemyView.setFatherActivity(this);
-        singlePlayerView.setFatherActivity(this);
         //启动倒计时操作
         countDownTimer.start();
     }
@@ -73,21 +83,6 @@ public class SinglePlayerActivity extends BaseActivity implements View.OnClickLi
     @Override
     public int getContentView() {
         return R.layout.activity_single_player;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            default:
-                throw new IllegalStateException("未实现: " + v.getId());
-        }
-    }
-
-    /**
-     * 从下一个方块视图里获取方块
-     */
-    public Tetris getNextTetris() {
-        return nextTetris.getNextTetris();
     }
 
     @Override

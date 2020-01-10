@@ -119,7 +119,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     /**
      * 退出app需要做的事
      */
-    private void exitApp() {
+    public void exitApp() {
         //退出环信
         EMClient.getInstance().logout(true);
         ActivityManager.getInstance().finishAll();

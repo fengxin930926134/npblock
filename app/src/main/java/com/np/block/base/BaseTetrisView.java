@@ -1,5 +1,6 @@
 package com.np.block.base;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -59,6 +60,27 @@ public abstract class BaseTetrisView extends View {
     private static Paint paintBlock = null;
     /**保存每行网格中包含俄罗斯方块单元的个数*/
     private int[] blockRowNum = new int[ROW_NUM];
+    /**调用此对象的Activity对象 父视图*/
+    public Activity fatherActivity = null;
+
+    /**
+     * 从子类获取方块宽高
+     *
+     * @return 方块宽高
+     */
+    public abstract int getBlockSize();
+
+    /**
+     * 从子类获取下一个俄罗斯方块
+     *
+     * @return 俄罗斯方块
+     */
+    public abstract Tetris getNextTetris();
+
+    /**
+     * 获取子类的activity
+     */
+    public abstract void setFatherActivity(Activity activity);
 
     public BaseTetrisView(Context context) {
         super(context, null);
@@ -141,20 +163,6 @@ public abstract class BaseTetrisView extends View {
             canvas.drawRoundRect(allBlockRectf.get(i), UnitBlock.ANGLE, UnitBlock.ANGLE, paintBlock);
         }
     }
-
-    /**
-     * 从子类获取方块宽高
-     *
-     * @return 方块宽高
-     */
-    public abstract int getBlockSize();
-
-    /**
-     * 从子类获取下一个俄罗斯方块
-     *
-     * @return 俄罗斯方块
-     */
-    public abstract Tetris getNextTetris();
 
     /**
      * 俄罗斯方块左移
