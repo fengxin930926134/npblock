@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.db.DefaultDataBase;
+import com.np.block.core.manager.ActivityManager;
+
 import butterknife.BindView;
 
 /**
@@ -53,7 +55,7 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
     public void onAnimationEnd(Animation animation) {
         // 跳转至更新界面
         startActivity(new Intent(this, GameUpdateActivity.class));
-        this.finish();
+        ActivityManager.getInstance().removeActivity(this);
     }
 
     /**

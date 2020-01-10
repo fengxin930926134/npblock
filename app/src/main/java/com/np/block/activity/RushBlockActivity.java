@@ -107,8 +107,9 @@ public class RushBlockActivity extends BaseGameActivity {
                 },
                 //开始下一关
                 (dialog, which) -> {
-                    dialog.cancel();
                     Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
+                    dialog.cancel();
+                    exitGame();
                 },
                 null));
     }

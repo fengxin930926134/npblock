@@ -124,10 +124,4 @@ public abstract class BaseActivity extends AppCompatActivity {
         EMClient.getInstance().logout(true);
         ActivityManager.getInstance().finishAll();
     }
-
-    @Override
-    public void finish() {
-        super.finish();
-        ActivityManager.getInstance().removeActivity(this);
-    }
 }

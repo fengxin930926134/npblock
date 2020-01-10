@@ -280,7 +280,6 @@ public class SocketServerManager {
                 Message receiveMsg;
                 try {
                     receiveMsg = JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
-                    LoggerUtils.i("收到数据:" + receiveMsg.toString());
                 }catch (Exception e) {
                     LoggerUtils.e("{接收到的数据格式有误, 转换失败！info = [" + reply + "]}");
                     continue;

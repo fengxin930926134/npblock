@@ -61,6 +61,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
         public void onFinish() {
             //启动游戏
             startDownThread();
+            //启动定时发送数据线程
+            taskSendCoordinate();
         }
     };
     /**接收handler消息*/
@@ -129,8 +131,12 @@ public class SinglePlayerActivity extends BaseGameActivity {
      * 发送当前游戏数据到服务器
      */
     private void taskSendCoordinate() {
-        scheduledFuture = ThreadPoolManager.getInstance().scheduleAtFixedRate(new Thread(() -> {
-
-        }), 0, 1000, TimeUnit.MILLISECONDS);
+        scheduledFuture = ThreadPoolManager.getInstance().scheduleAtFixedRate(() -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(ConstUtils.JSON_KEY_ALL_BLOCK, singlePlayerView.allUnitBlock);
+            jsonObject.put(ConstUtils.JSON_KEY_ENEMY_SCORE, score.getText().toString());
+            jsonObject.put(ConstUtils.JSON_KEY_TETRIS_BLOCK, singlePlayerView.tetrisUnits);
+            SocketServerManager.getInstance().sendGameMessage(jsonObject.toJSONString());
+        }, 1000, 500, TimeUnit.MILLISECONDS);
     }
 }

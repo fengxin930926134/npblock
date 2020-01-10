@@ -40,7 +40,10 @@ public class ActivityManager {
      * @param activity 需要删除的activity
      */
     public void removeActivity(Activity activity) {
-        activities.remove(activity);
+        if (!activity.isFinishing()){
+            activity.finish();
+            activities.remove(activity);
+        }
     }
 
     /**
@@ -52,5 +55,6 @@ public class ActivityManager {
                 activity.finish();
             }
         }
+        activities.clear();
     }
 }

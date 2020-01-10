@@ -37,6 +37,9 @@ public class UnitBlock extends LitePalSupport implements Cloneable {
         }
     }
 
+    public UnitBlock(){
+    }
+
     @NonNull
     @Override
     public UnitBlock clone() throws CloneNotSupportedException {

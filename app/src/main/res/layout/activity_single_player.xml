@@ -11,7 +11,7 @@
         android:layout_toStartOf="@+id/single_player_tetris">
 
         <com.np.block.view.NextTetrisView
-            android:id="@+id/next_tetris_view"
+            android:id="@+id/nextTetrisView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"

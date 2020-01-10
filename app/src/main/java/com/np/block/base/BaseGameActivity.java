@@ -2,10 +2,15 @@ package com.np.block.base;
 
 import android.widget.Button;
 import com.np.block.R;
+import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
 import com.np.block.view.NextTetrisView;
 
+/**
+ * 俄罗斯方块游戏base类
+ * @author fengxin
+ */
 public abstract class BaseGameActivity extends BaseActivity{
     private BaseTetrisView tetrisView;
     /**下一个俄罗斯方块视图*/
@@ -131,7 +136,7 @@ public abstract class BaseGameActivity extends BaseActivity{
     public void exitGame() {
         //关闭游戏
         beginGame = false;
-        finish();
+        ActivityManager.getInstance().removeActivity(this);
     }
 
     /**
