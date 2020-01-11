@@ -215,7 +215,8 @@ public class DialogUtils {
      */
     public synchronized static void showTextDialog(Context context,
                                                    String title,
-                                                   String content) {
+                                                   String content,
+                                                   DialogInterface.OnClickListener okListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         AlertDialog dialog = builder.create();
         // 设置点击dialog的外部能否取消弹窗
@@ -238,6 +239,13 @@ public class DialogUtils {
         tvContent.setText(TextUtils.isEmpty(content) ? "" : content);
         buttonOk.setText("确定");
         buttonOk.setOnClickListener( v -> dialog.cancel());
+        final AlertDialog dialogFinal = dialog;
+        if (okListener != null) {
+            final DialogInterface.OnClickListener finalSureListener = okListener;
+            buttonOk.setOnClickListener(v -> finalSureListener.onClick(dialogFinal, DialogInterface.BUTTON_NEGATIVE));
+        } else {
+            buttonOk.setOnClickListener(v -> dialogFinal.cancel());
+        }
         dialog.show();
         //设置背景透明,去四个角
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.color.colorTransparent);

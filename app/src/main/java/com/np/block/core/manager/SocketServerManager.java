@@ -4,6 +4,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.text.TextUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.np.block.core.enums.GameOverTypeEnum;
 import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.MessageTypeEnum;
 import com.np.block.core.model.Message;
@@ -106,7 +107,6 @@ public class SocketServerManager {
 
     /**
      * 向服务器发送游戏消息
-     *
      * @param msg msg
      */
     public void sendGameMessage(String msg) {
@@ -114,19 +114,52 @@ public class SocketServerManager {
             if (!TextUtils.isEmpty(msg)) {
                 message.setMsg(msg);
             } else {
-                message.setMsg("这是测试消息");
+               return;
             }
             message.setMessageType(MessageTypeEnum.GAME_MESSAGE_TYPE);
             byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
             try {
-                /*
-                 * 向服务器端发送游戏数据
-                 */
                 DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
-                // 4.向服务器端发送数据报
+                //向服务器端发送数据报
                 socket.send(packet);
             } catch (Exception e) {
                 LoggerUtils.e("sendGameMessage:" + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * 向服务器发送游戏胜利消息
+     * @param time 胜利time
+     */
+    public void sendGameWinMessage(long time) {
+        ThreadPoolManager.getInstance().execute(() -> {
+            message.setMessageType(MessageTypeEnum.GAME_WIN_MESSAGE_TYPE);
+            message.setWinTime(time);
+            byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+            try {
+                DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
+                // 向服务器端发送数据报
+                socket.send(packet);
+            } catch (Exception e) {
+                LoggerUtils.e("sendGameWinMessage:" + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * 向服务器发送游戏失败消息
+     */
+    public void sendGameOverMessage() {
+        ThreadPoolManager.getInstance().execute(() -> {
+            message.setMessageType(MessageTypeEnum.GAME_DEFEAT_MESSAGE_TYPE);
+            byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+            try {
+                DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
+                // 向服务器端发送数据报
+                socket.send(packet);
+            } catch (Exception e) {
+                LoggerUtils.e("sendGameOverMessage:" + e.getMessage());
             }
         });
     }
@@ -314,6 +347,32 @@ public class SocketServerManager {
                                 msg.what = ConstUtils.HANDLER_ENTER_THE_GAME;
                                 msg.obj = "当前确认人数: " + message.getConfirmNum() + "人\n即将进入游戏";
                                 handler.sendMessage(msg);
+                            }
+                        }
+                        break;
+                    }
+                    case GAME_WIN_MESSAGE_TYPE:{
+                        //检查是否发送过
+                        if (enterGame) {
+                            //停止接收服务器消息
+                            stopSocketReceive();
+                            // 重置状态
+                            resetState();
+                            //发送游戏结束消息
+                            switch (GameOverTypeEnum.getEnumByCode(receiveMsg.getMsg())){
+                                case GAME_OVER_WIN_TYPE:{
+                                    handler.sendEmptyMessage(ConstUtils.HANDLER_GAME_WIN);
+                                    break;
+                                }
+                                case GAME_OVER_LOSE_TYPE:{
+                                    handler.sendEmptyMessage(ConstUtils.HANDLER_LOSE_GAME);
+                                    break;
+                                }
+                                case GAME_OVER_ESCAPE_TYPE:{
+                                    handler.sendEmptyMessage(ConstUtils.HANDLER_ESCAPE_GAME);
+                                    break;
+                                }
+                                default: LoggerUtils.e("未知游戏结束类型");
                             }
                         }
                         break;

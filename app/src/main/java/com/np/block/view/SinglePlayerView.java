@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 import com.np.block.activity.SinglePlayerActivity;
 import com.np.block.base.BaseTetrisView;
 import com.np.block.core.model.Tetris;
-import com.np.block.core.model.UnitBlock;
 import java.util.List;
 
 /**
@@ -16,7 +15,7 @@ import java.util.List;
 public class SinglePlayerView extends BaseTetrisView {
 
     /**此类型方块大小*/
-    public static final int BLOCK_SIZE = UnitBlock.BLOCK_SIZE;
+    public static final int BLOCK_SIZE = 40;
 
     public SinglePlayerView(Context context) {
         super(context);
@@ -46,5 +45,14 @@ public class SinglePlayerView extends BaseTetrisView {
         super.removeRowsBlock(rows);
         //清除俄罗斯方块后的操作
         ((SinglePlayerActivity)fatherActivity).updateDataAndUi(rows.size());
+    }
+
+    @Override
+    public boolean toDown() {
+        if (super.toDown()) {
+            ((SinglePlayerActivity)fatherActivity).gameOver();
+            return true;
+        }
+        return false;
     }
 }

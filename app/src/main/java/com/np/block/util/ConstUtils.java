@@ -140,6 +140,21 @@ public class ConstUtils {
     public static final int HANDLER_ENTER_THE_GAME = 0x14;
 
     /**
+     * Handler 消息类型 游戏成功消息
+     */
+    public static final int HANDLER_GAME_WIN = 0x15;
+
+    /**
+     * Handler 消息类型 游戏失败消息
+     */
+    public static final int HANDLER_LOSE_GAME = 0x16;
+
+    /**
+     * Handler 消息类型 游戏敌人逃跑消息
+     */
+    public static final int HANDLER_ESCAPE_GAME = 0x17;
+
+    /**
      * json数据key 所有方块坐标
      */
     public static final String JSON_KEY_ALL_BLOCK = "json_key_all_block";

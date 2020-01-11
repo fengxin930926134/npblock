@@ -23,6 +23,8 @@ public class Message {
     private Long matchWaitTime;
     /**游戏类型*/
     private String gameType;
+    /**胜利时间*/
+    private Long winTime;
 
     public MessageTypeEnum getMessageType() {
         return MessageTypeEnum.getEnumByCode(messageType);

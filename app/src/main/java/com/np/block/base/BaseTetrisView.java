@@ -273,10 +273,10 @@ public abstract class BaseTetrisView extends View {
         // 获得下一个俄罗斯方块
         Tetris nextTetris = getNextTetris();
         // 从下一个俄罗斯方块生成当前俄罗斯方块
-        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE, BEGIN_LEN_Y,
+        tetris = new Tetris(BEGIN_LEN_X + COLUMN_NUM / 2 * blockSize, BEGIN_LEN_Y,
                 TetrisTypeEnum.getEnumByCode(nextTetris.getTetrisType()),
                 nextTetris.getColor(),
-                UnitBlock.BLOCK_SIZE);
+                blockSize);
         // 获得单位方块集合
         tetrisUnits = tetris.getTetris();
     }
