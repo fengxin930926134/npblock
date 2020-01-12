@@ -161,8 +161,8 @@ public class ClassicBlockActivity extends BaseGameActivity {
      * 创建游戏结束的弹窗
      */
     @Override
-    public void startGameOverDialog() {
-        super.startGameOverDialog();
+    public void gameOver() {
+        super.gameOver();
         int maxScoreNew = Integer.parseInt(score.getText().toString());
         final String textContent;
         // 判断成绩是否需要保存

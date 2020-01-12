@@ -2,9 +2,17 @@ package com.np.block.activity;
 
 import com.np.block.R;
 import com.np.block.base.BaseActivity;
+import com.np.block.base.BaseTetrisView;
+import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.model.Tetris;
+import com.np.block.core.model.UnitBlock;
+import com.np.block.util.LoggerUtils;
+import com.np.block.util.TetrisControllerUtils;
 import com.np.block.view.NextTetrisView;
 import com.np.block.view.SinglePlayerEnemyView;
+import com.np.block.view.SinglePlayerView;
+
+import java.util.List;
 
 import butterknife.BindView;
 
@@ -15,22 +23,30 @@ import butterknife.BindView;
  */
 public class TestActivity extends BaseActivity {
 
-    @BindView(R.id.single_player_tetris)
-    SinglePlayerEnemyView singlePlayerEnemyView;
-    /**下一个俄罗斯方块视图*/
-    @BindView(R.id.next_tetris_view)
-    NextTetrisView nextTetris;
     @Override
     public void init() {
-        singlePlayerEnemyView.setFatherActivity(this);
+        Tetris tetris = new Tetris(BaseTetrisView.BEGIN_LEN_X + BaseTetrisView.COLUMN_NUM / 2 * SinglePlayerView.BLOCK_SIZE,
+                BaseTetrisView.BEGIN_LEN_Y,
+                TetrisTypeEnum.BACK_Z_SHAPE, -1, SinglePlayerView.BLOCK_SIZE);
+
+        List<UnitBlock> tetris1 = tetris.getTetris();
+
+        TetrisControllerUtils.toDown(tetris1, SinglePlayerEnemyView.BLOCK_SIZE);
+        System.out.println();
+        LoggerUtils.i(tetris1.toString());
+        System.out.println();
+        System.out.println();
+
+        Tetris tetris2 = new Tetris(BaseTetrisView.BEGIN_LEN_X + BaseTetrisView.COLUMN_NUM / 2 * SinglePlayerEnemyView.BLOCK_SIZE,
+                BaseTetrisView.BEGIN_LEN_Y,
+                TetrisTypeEnum.BACK_Z_SHAPE, -1, SinglePlayerEnemyView.BLOCK_SIZE);
+
+
+        List<UnitBlock> tetris3 = tetris2.getTetris();
+        TetrisControllerUtils.toDown(tetris3, SinglePlayerEnemyView.BLOCK_SIZE);
+        LoggerUtils.i(tetris3.toString());
     }
 
-    /**
-     * 从下一个方块视图里获取方块
-     */
-    public Tetris getNextTetris() {
-        return nextTetris.getNextTetris();
-    }
 
     @Override
     public int getContentView() {

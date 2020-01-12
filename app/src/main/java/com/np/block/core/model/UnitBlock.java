@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 public class UnitBlock extends LitePalSupport implements Cloneable {
     /**单元块的默认边长*/
-    public static final int BLOCK_SIZE = 50;
+    public static final int BLOCK_SIZE = 45;
     /**单元块的默认角度*/
     public static final int ANGLE = 8;
     /**保存到数据库的开关*/

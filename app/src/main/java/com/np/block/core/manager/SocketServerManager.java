@@ -48,6 +48,8 @@ public class SocketServerManager {
     private static boolean receiveStop = false;
     /**接收Socket*/
     private static DatagramSocket socket;
+    /**发送Socket*/
+    private static DatagramSocket sendSocket;
     /**判断是否进入游戏*/
     private boolean enterGame = false;
     /**确认收到key 防止服务器多个同样消息*/
@@ -118,10 +120,10 @@ public class SocketServerManager {
             }
             message.setMessageType(MessageTypeEnum.GAME_MESSAGE_TYPE);
             byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+            DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
             try {
-                DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
                 //向服务器端发送数据报
-                socket.send(packet);
+                sendSocket.send(packet);
             } catch (Exception e) {
                 LoggerUtils.e("sendGameMessage:" + e.getMessage());
             }
@@ -137,10 +139,10 @@ public class SocketServerManager {
             message.setMessageType(MessageTypeEnum.GAME_WIN_MESSAGE_TYPE);
             message.setWinTime(time);
             byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+            DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
             try {
-                DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
                 // 向服务器端发送数据报
-                socket.send(packet);
+                sendSocket.send(packet);
             } catch (Exception e) {
                 LoggerUtils.e("sendGameWinMessage:" + e.getMessage());
             }
@@ -157,7 +159,7 @@ public class SocketServerManager {
             try {
                 DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
                 // 向服务器端发送数据报
-                socket.send(packet);
+                sendSocket.send(packet);
             } catch (Exception e) {
                 LoggerUtils.e("sendGameOverMessage:" + e.getMessage());
             }
@@ -248,7 +250,7 @@ public class SocketServerManager {
                 LoggerUtils.i(response.getString("msg"));
             }
             //停止接收服务器消息
-            stopSocketReceive();
+            stopSocketServer();
             // 重置状态
             resetState();
             //只要正常请求都返回true
@@ -270,7 +272,7 @@ public class SocketServerManager {
                 LoggerUtils.i(response.getString("msg"));
             }
             //停止接收服务器消息
-            stopSocketReceive();
+            stopSocketServer();
             // 重置状态
             resetState();
         } catch (Exception e) {
@@ -294,6 +296,7 @@ public class SocketServerManager {
     private void startSocketReceiverServer() {
         try {
             socket = new DatagramSocket(receiverPort);
+            sendSocket = new DatagramSocket();
             socket.setSendBufferSize(BUF_SIZE);
             socket.setReceiveBufferSize(BUF_SIZE);
             LoggerUtils.i("SocketReceiverServer启动完成...");
@@ -355,7 +358,7 @@ public class SocketServerManager {
                         //检查是否发送过
                         if (enterGame) {
                             //停止接收服务器消息
-                            stopSocketReceive();
+                            stopSocketServer();
                             // 重置状态
                             resetState();
                             //发送游戏结束消息
@@ -386,11 +389,12 @@ public class SocketServerManager {
     }
 
     /**
-     * 停止Socket接收消息
+     * 停止Socket服务
      */
-    private void stopSocketReceive() {
+    private void stopSocketServer() {
         if (socket != null && !socket.isClosed()) {
             socket.close();
+            sendSocket.close();
             socket.disconnect();
             receiveStop = true;
         }

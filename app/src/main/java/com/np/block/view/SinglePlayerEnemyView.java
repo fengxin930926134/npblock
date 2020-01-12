@@ -18,7 +18,7 @@ import java.util.List;
 public class SinglePlayerEnemyView extends BaseTetrisView {
 
     /**此类型方块大小*/
-    public static final int BLOCK_SIZE = 40;
+    public static final int BLOCK_SIZE = 26;
 
     public SinglePlayerEnemyView(Context context) {
         super(context);
@@ -57,13 +57,15 @@ public class SinglePlayerEnemyView extends BaseTetrisView {
         if (data != null) {
             List<UnitBlock> allBlock = JSONObject.parseArray(
                     data.getString(ConstUtils.JSON_KEY_ALL_BLOCK), UnitBlock.class);
-            List<UnitBlock> tetrisBlock = JSONObject.parseArray(
-                    data.getString(ConstUtils.JSON_KEY_TETRIS_BLOCK), UnitBlock.class);
+            Tetris tetris = data.getObject(ConstUtils.JSON_KEY_TETRIS_BLOCK, Tetris.class);
             //装入容器
-            allUnitBlock.clear();
             tetrisUnits.clear();
-            allUnitBlock.addAll(allBlock);
-            tetrisUnits.addAll(tetrisBlock);
+            if (allBlock.size() != allUnitBlock.size()) {
+                allUnitBlock.clear();
+                allUnitBlock.addAll(allBlock);
+            }
+            this.tetris = tetris;
+            tetrisUnits.addAll(tetris.getTetris());
             //生成模具
             generateTetrisRectf();
             generateAllBlockRectf();

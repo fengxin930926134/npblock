@@ -73,13 +73,13 @@ public class TetrisControllerUtils {
      * 判断方块是否可以向下移动
      * @param tetris 正在下落的方块
      * @param allBlock 已经落下的全部方块
-     * @param yEnd y轴结束时坐标
+     * @param blockEnd 方块结束时坐标（只算方块大小）
      * @param blockSize 方块大小
      * @return false不能移动; true能移动
      */
-    public static boolean canMoveDown(List<UnitBlock> tetris, List<UnitBlock> allBlock, int yEnd, int blockSize){
+    public static boolean canMoveDown(List<UnitBlock> tetris, List<UnitBlock> allBlock, int blockEnd, int blockSize){
         for (UnitBlock unitBlock: tetris) {
-            if (unitBlock.getY() + 2 * blockSize > yEnd) {
+            if (unitBlock.getY() + blockSize >= blockEnd) {
                 return false;
             }
             if (isOverlap(allBlock, unitBlock.getX(), unitBlock.getY() + blockSize, blockSize)){

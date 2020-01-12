@@ -36,7 +36,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
     /** 游戏速度*/
     public static final int GAME_SPEED = 700;
     /** 游戏延迟*/
-    public static final int GAME_DELAY = 250;
+    public static final int GAME_DELAY = 180;
     /**俄罗斯方块视图*/
     @BindView(R.id.single_player_tetris)
     SinglePlayerView singlePlayerView;
@@ -117,6 +117,9 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 break;
             }
             case ConstUtils.HANDLER_GAME_WIN:{
+                beginGame = false;
+                //关闭定时发送数据
+                scheduledFuture.cancel(true);
                 //游戏胜利
                 DialogUtils.showTextDialog(context, "游戏胜利", "不错不错，不要骄傲", (dialog, which) -> {
                     dialog.cancel();
@@ -125,6 +128,9 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 break;
             }
             case ConstUtils.HANDLER_LOSE_GAME:{
+                beginGame = false;
+                //关闭定时发送数据
+                scheduledFuture.cancel(true);
                 //游戏失败
                 DialogUtils.showTextDialog(context, "你输了", "菜鸡，别人比你强", (dialog, which) -> {
                     dialog.cancel();
@@ -133,6 +139,9 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 break;
             }
             case ConstUtils.HANDLER_ESCAPE_GAME:{
+                beginGame = false;
+                //关闭定时发送数据
+                scheduledFuture.cancel(true);
                 //对方逃跑
                 DialogUtils.showTextDialog(context, "游戏胜利", "对方屈服于您的淫威, 逃跑了", (dialog, which) -> {
                     dialog.cancel();
@@ -144,6 +153,13 @@ public class SinglePlayerActivity extends BaseGameActivity {
         }
         return false;
     });
+
+    @Override
+    public void gameOver() {
+        super.gameOver();
+        //通知服务器
+        defeatDownTimer.start();
+    }
 
     @Override
     public BaseTetrisView getTetrisView() {
@@ -186,19 +202,6 @@ public class SinglePlayerActivity extends BaseGameActivity {
             scheduledFuture.cancel(true);
         }
         runOnUiThread(() -> score.setText(String.valueOf(scoreTemporary)));
-    }
-
-    /**
-     * 方块满了
-     * 游戏结束
-     */
-    public void gameOver() {
-        //通知服务器
-        defeatDownTimer.start();
-        //结束本地游戏
-        beginGame = false;
-        //关闭定时发送数据
-        scheduledFuture.cancel(true);
     }
 
     @Override
@@ -251,9 +254,9 @@ public class SinglePlayerActivity extends BaseGameActivity {
         scheduledFuture = ThreadPoolManager.getInstance().scheduleAtFixedRate(() -> {
             // 构建当前游戏数据的消息体
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put(ConstUtils.JSON_KEY_ALL_BLOCK, singlePlayerView.allUnitBlock);
+            jsonObject.put(ConstUtils.JSON_KEY_ALL_BLOCK, singlePlayerView.getAllBlockSmall());
             jsonObject.put(ConstUtils.JSON_KEY_ENEMY_SCORE, score.getText().toString());
-            jsonObject.put(ConstUtils.JSON_KEY_TETRIS_BLOCK, singlePlayerView.tetrisUnits);
+            jsonObject.put(ConstUtils.JSON_KEY_TETRIS_BLOCK, singlePlayerView.getTetrisSmall());
             // 发送消息
             SocketServerManager.getInstance().sendGameMessage(jsonObject.toJSONString());
         }, 500, GAME_DELAY, TimeUnit.MILLISECONDS);

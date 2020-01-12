@@ -71,9 +71,9 @@ public abstract class BaseGameActivity extends BaseActivity{
     }
 
     /**
-     * 创建游戏结束的弹窗
+     * 游戏结束
      */
-    public void startGameOverDialog() {
+    public void gameOver() {
         beginGame = false;
     }
 
@@ -174,7 +174,7 @@ public abstract class BaseGameActivity extends BaseActivity{
         runOnUiThread(() -> {
             if (tetrisView.toDown()) {
                 // 启动游戏结束的弹窗
-                startGameOverDialog();
+                gameOver();
             }
         });
     }

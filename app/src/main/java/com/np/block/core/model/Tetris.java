@@ -120,4 +120,7 @@ public class Tetris extends LitePalSupport {
             save();
         }
     }
+
+    public Tetris(){
+    }
 }

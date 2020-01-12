@@ -79,6 +79,7 @@ public abstract class BaseTetrisView extends View {
 
     /**
      * 获取子类的activity
+     * @param activity activity
      */
     public abstract void setFatherActivity(Activity activity);
 
@@ -107,9 +108,11 @@ public abstract class BaseTetrisView extends View {
             paintBlock = new Paint();
             paintBlock.setColor(Color.parseColor("#FF6600"));
         }
-        // 初始化背景墙 因为忽略墙 会多画一次 所以减一
-        for (int i = BEGIN_LEN_X; i < xEnd - blockSize; i += blockSize) {
-            for (int j = BEGIN_LEN_Y; j < yEnd - blockSize; j += blockSize) {
+        // 计算因为忽略墙需要减掉的距离
+        int i1 = BOUND_WIDTH_OF_WALL * (COLUMN_NUM + 1);
+        int j1 = BOUND_WIDTH_OF_WALL * (ROW_NUM + 1);
+        for (int i = BEGIN_LEN_X; i < xEnd - i1; i += blockSize) {
+            for (int j = BEGIN_LEN_Y; j < yEnd - j1; j += blockSize) {
                 backgroundWall.add(new RectF(i, j, i + blockSize, j + blockSize));
             }
         }
@@ -131,8 +134,8 @@ public abstract class BaseTetrisView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // 重新计算高度
-        int width = xEnd - 5 * BEGIN_LEN_X - BOUND_WIDTH_OF_WALL;
-        int height = yEnd - BEGIN_LEN_Y - BOUND_WIDTH_OF_WALL;
+        int width = xEnd - BOUND_WIDTH_OF_WALL * COLUMN_NUM;
+        int height = yEnd - BOUND_WIDTH_OF_WALL * ROW_NUM;
         // 设置宽高
         setMeasuredDimension(width, height);
     }
@@ -172,7 +175,14 @@ public abstract class BaseTetrisView extends View {
             TetrisControllerUtils.toLeft(tetrisUnits, blockSize);
             tetris.setX(tetris.getX() - blockSize);
             generateTetrisRectf();
+            toLeftAfter();
         }
+    }
+
+    /**
+     * 俄罗斯方块左移过后
+     */
+    public void toLeftAfter() {
         invalidate();
     }
 
@@ -184,7 +194,14 @@ public abstract class BaseTetrisView extends View {
             TetrisControllerUtils.toRight(tetrisUnits, blockSize);
             tetris.setX(tetris.getX() + blockSize);
             generateTetrisRectf();
+            toRightAfter();
         }
+    }
+
+    /**
+     * 俄罗斯方块右移过后
+     */
+    public void toRightAfter() {
         invalidate();
     }
 
@@ -194,12 +211,12 @@ public abstract class BaseTetrisView extends View {
      * @return boolean true表示游戏结束了
      */
     public boolean toDown() {
-        if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock, yEnd, blockSize)) {
+        if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock, ROW_NUM * blockSize + BEGIN_LEN_Y, blockSize)) {
             TetrisControllerUtils.toDown(tetrisUnits, blockSize);
             tetris.setY(tetris.getY() + blockSize);
             generateTetrisRectf();
             generateAllBlockRectf();
-            invalidate();
+            toDownAfter();
             return false;
         }
         // 如果方块超出则结束游戏
@@ -210,7 +227,7 @@ public abstract class BaseTetrisView extends View {
         // 重新给每行方块数赋值为0 然后重新计算每行方块数
         Arrays.fill(blockRowNum, 0);
         // 把已经固定的俄罗斯方块加入总方块
-        allUnitBlock.addAll(tetrisUnits);
+        addBlockToAll();
         // 逆向遍历所有方块
         for (int i = allUnitBlock.size() - 1; i >= 0; i--) {
             // y是指方块是第几行
@@ -234,6 +251,20 @@ public abstract class BaseTetrisView extends View {
         generateTetrisRectf();
         invalidate();
         return false;
+    }
+
+    /**
+     * 俄罗斯方块下移过后
+     */
+    public void toDownAfter() {
+        invalidate();
+    }
+
+    /**
+     * 把已经固定的俄罗斯方块加入总方块
+     */
+    public void addBlockToAll() {
+        allUnitBlock.addAll(tetrisUnits);
     }
 
     /**
@@ -262,14 +293,12 @@ public abstract class BaseTetrisView extends View {
                 TetrisControllerUtils.blockRowsToDown(allUnitBlock, row, blockSize);
             }
         }
-        // 对模具刷新
-        generateAllBlockRectf();
     }
 
     /**
      * 生成俄罗斯方块
      */
-    private void generateTetris(){
+    public void generateTetris(){
         // 获得下一个俄罗斯方块
         Tetris nextTetris = getNextTetris();
         // 从下一个俄罗斯方块生成当前俄罗斯方块

@@ -118,8 +118,8 @@ public class RushBlockActivity extends BaseGameActivity {
      * 创建游戏结束的弹窗
      */
     @Override
-    public void startGameOverDialog() {
-        super.startGameOverDialog();
+    public void gameOver() {
+        super.gameOver();
         // 弹出弹窗
         runOnUiThread(() -> DialogUtils.showDialog(context, "游戏结束", "别灰心，再来一次就通关！",
                 "回到主页", "重来", false, false,

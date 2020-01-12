@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.np.block.view.SinglePlayerEnemyView
-        android:id="@+id/single_player_tetris"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"/>
+<!--    <com.np.block.view.SinglePlayerEnemyView-->
+<!--        android:id="@+id/single_player_tetris"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerVertical="true"/>-->
 
-    <com.np.block.view.ClassicTetrisView
+    <com.np.block.view.SinglePlayerView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"/>
+        android:layout_marginStart="20dp"
+        android:layout_x="18dp"
+        android:layout_y="125dp" />
+
+    <com.np.block.view.SinglePlayerEnemyView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="11dp"
+        android:layout_x="191dp"
+        android:layout_y="126dp" />
 
     <com.np.block.view.NextTetrisView
         android:id="@+id/next_tetris_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"/>
-</RelativeLayout>
+        android:layout_width="75dp"
+        android:layout_height="69dp"
+        android:layout_marginTop="50dp"
+        android:layout_x="193dp"
+        android:layout_y="327dp" />
+</AbsoluteLayout>
