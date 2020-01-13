@@ -4,7 +4,6 @@ import com.np.block.base.BaseTetrisView;
 import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
-import com.np.block.view.ClassicTetrisView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,8 +57,9 @@ public class TetrisControllerUtils {
      * @return false不能移动; true能移动
      */
     public static boolean canMoveRight(List<UnitBlock> tetris, List<UnitBlock> allBlock, int xEnd, int blockSize){
+        int i1 = BaseTetrisView.BOUND_WIDTH_OF_WALL * (BaseTetrisView.COLUMN_NUM + 1);
         for (UnitBlock unitBlock : tetris) {
-            if (unitBlock.getX() + blockSize > xEnd - blockSize){
+            if (unitBlock.getX() + blockSize >= xEnd - i1){
                 return false;
             }
             if (isOverlap(allBlock, unitBlock.getX() + blockSize, unitBlock.getY(), blockSize)){
@@ -215,16 +215,19 @@ public class TetrisControllerUtils {
         boolean needRightTran = false;
         // 下边超出
         boolean needUpTran = false;
+        // 计算因为忽略墙需要减掉的距离
+        int i1 = BaseTetrisView.BOUND_WIDTH_OF_WALL * (BaseTetrisView.COLUMN_NUM + 1);
+        int j1 = BaseTetrisView.BOUND_WIDTH_OF_WALL * (BaseTetrisView.ROW_NUM + 1);
         // 循环判断是否超出边界以及重叠
         for (UnitBlock u : unitBlocks) {
             if (!needLeftTran && u.getX() < BaseTetrisView.BEGIN_LEN_X) {
                 needLeftTran = true;
             }
-            if (!needRightTran && u.getX() > xEnd - UnitBlock.BLOCK_SIZE) {
+            if (!needRightTran && u.getX() >= xEnd - i1) {
                 needRightTran = true;
             }
             //超出下边界
-            if (!needUpTran && u.getY() > yEnd - UnitBlock.BLOCK_SIZE) {
+            if (!needUpTran && u.getY() >= yEnd - j1) {
                 needUpTran = true;
             }
             if (!overlapAllBlock && isOverlap(all, u.getX(), u.getY(), blockSize)){
@@ -244,7 +247,7 @@ public class TetrisControllerUtils {
             }
             needLeftTran = false;
             for (UnitBlock u : unitBlocks) {
-                if (u.getX() < ClassicTetrisView.BEGIN_LEN_X) {
+                if (u.getX() < BaseTetrisView.BEGIN_LEN_X) {
                     needLeftTran = true;
                     break;
                 }
@@ -259,7 +262,7 @@ public class TetrisControllerUtils {
             }
             needRightTran = false;
             for (UnitBlock u : unitBlocks) {
-                if (u.getX() > xEnd - UnitBlock.BLOCK_SIZE) {
+                if (u.getX() >= xEnd - i1) {
                     needRightTran = true;
                     break;
                 }
@@ -317,7 +320,7 @@ public class TetrisControllerUtils {
                     needUpTran = false;
                     for (UnitBlock u : unitBlocks) {
                         //超出下边界
-                        if (u.getY() > yEnd - UnitBlock.BLOCK_SIZE) {
+                        if (u.getY() >= yEnd - j1) {
                             needUpTran = true;
                             break;
                         }
@@ -366,12 +369,13 @@ public class TetrisControllerUtils {
      * @return boolean
      */
     private static boolean isNotExceed(List<UnitBlock> unitBlocks, int xEnd) {
+        int i1 = BaseTetrisView.BOUND_WIDTH_OF_WALL * (BaseTetrisView.COLUMN_NUM + 1);
         // 循环判断是否超出边界
         for (UnitBlock u : unitBlocks) {
-            if (u.getX() < xEnd) {
+            if (u.getX() < BaseTetrisView.BEGIN_LEN_X) {
                 return false;
             }
-            if (u.getX() > xEnd - UnitBlock.BLOCK_SIZE) {
+            if (u.getX() >= xEnd - i1) {
                 return false;
             }
         }
@@ -383,9 +387,9 @@ public class TetrisControllerUtils {
      * @param allUnitBlock 所有的单位方块
      * @param y y行
      */
-    public static void removeLine(List<UnitBlock> allUnitBlock, int y ){
+    public static void removeLine(List<UnitBlock> allUnitBlock, int y, int blockSize){
         for (int i = allUnitBlock.size() - 1; i >= 0; i--) {
-            if ((allUnitBlock.get(i).getY() - ClassicTetrisView.BEGIN_LEN_Y) / UnitBlock.BLOCK_SIZE == y){
+            if ((allUnitBlock.get(i).getY() - BaseTetrisView.BEGIN_LEN_Y) / blockSize == y){
                 allUnitBlock.remove(i);
             }
         }
