@@ -38,6 +38,7 @@
             android:layout_centerHorizontal="true"
             android:orientation="horizontal"
             android:background="@color/colorWhiteTransparent"
+            android:layout_alignParentBottom="true"
             android:visibility="invisible">
             <Chronometer
                 android:id="@+id/game_chronometer"
@@ -137,11 +138,10 @@
 
         <Button
             android:id="@+id/view_leaderboards"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_toEndOf="@+id/left_linear_rank"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="15dp"/>
+            android:layout_centerVertical="true"/>
         <!--内容左结束-->
 
     </RelativeLayout>

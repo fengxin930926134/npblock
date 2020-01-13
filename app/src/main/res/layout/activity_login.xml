@@ -57,7 +57,7 @@
         android:layout_toStartOf="@+id/cancellation"
         android:layout_alignBottom="@+id/cancellation"
         android:gravity="center"
-        android:background="@color/colorTransparent"
+        android:background="@color/colorWhiteTransparent"
         android:visibility="invisible"/>
     <!--  注销按钮  -->
     <Button

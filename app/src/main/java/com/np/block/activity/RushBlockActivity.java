@@ -22,7 +22,7 @@ import butterknife.BindView;
  */
 public class RushBlockActivity extends BaseGameActivity {
     /**俄罗斯方块视图*/
-    @BindView(R.id.classic_tetris_view)
+    @BindView(R.id.rush_tetris_view)
     RushTetrisView rushTetrisView;
     /**关卡名称*/
     @BindView(R.id.rush_mode_name)

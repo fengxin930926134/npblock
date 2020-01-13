@@ -1,92 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@drawable/bg_3">
 
+    <!--上半部分-->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_toStartOf="@+id/classic_tetris_view">
+        android:layout_weight="6.6"
+        android:layout_height="0dp">
 
-        <com.np.block.view.NextTetrisView
-            android:id="@+id/nextTetrisView"
+        <com.np.block.view.RushTetrisView
+            android:id="@+id/rush_tetris_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/left_and_right"
+            android:layout_centerInParent="true"/>
+
+        <!--中间分割-->
+        <TextView
+            android:id="@+id/left_and_right"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="50dp"
+            android:layout_centerHorizontal="true"/>
+
+        <TextView
+            android:id="@+id/rush_mode_name"
+            android:layout_toEndOf="@id/left_and_right"
+            android:layout_alignTop="@+id/rush_tetris_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"/>
+            android:textColor="@color/colorWhite"
+            android:textSize="30sp"
+            tools:ignore="RelativeOverlap" />
+
+        <com.np.block.view.NextTetrisView
+            android:id="@+id/nextTetrisView"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/rush_tetris_view"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3.4">
 
         <Button
             android:id="@+id/left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/left_and_right"
-            android:layout_alignTop="@+id/left_and_right"
+            android:layout_above="@id/rotate_and_down"
             android:text="@string/left_text"
+            android:layout_toStartOf="@id/right"
             tools:ignore="RelativeOverlap" />
-
-        <TextView
-            android:id="@+id/left_and_right"
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dp"
-            android:layout_centerHorizontal="true"/>
 
         <Button
             android:id="@+id/right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/left_and_right"
-            android:layout_alignTop="@+id/left_and_right"
+            android:layout_above="@id/rotate_and_down"
+            android:layout_toStartOf="@+id/rotate_and_down"
             android:text="@string/right_text" />
-    </RelativeLayout>
-
-    <com.np.block.view.RushTetrisView
-        android:id="@+id/classic_tetris_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_toEndOf="@+id/classic_tetris_view">
-
-        <TextView
-            android:id="@+id/rush_mode_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"
-            android:textColor="@color/colorWhite"
-            android:textSize="30sp"/>
 
         <Button
-            android:id="@+id/rotate"
+            android:id="@+id/down"
             android:layout_width="wrap_content"
+            android:layout_marginEnd="50dp"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/rotate_and_down"
-            android:layout_alignTop="@+id/rotate_and_down"
-            android:text="@string/rotate_text" />
+            android:layout_toStartOf="@+id/rotate_and_down"
+            android:layout_below="@+id/rotate_and_down"
+            android:text="@string/down_text"
+            tools:ignore="RelativeOverlap" />
 
         <TextView
             android:id="@+id/rotate_and_down"
             android:layout_width="5dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dp"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerInParent="true"/>
 
         <Button
-            android:id="@+id/down"
+            android:id="@+id/rotate"
+            android:layout_alignTop="@+id/rotate_and_down"
+            android:layout_toEndOf="@+id/rotate_and_down"
+            android:layout_marginStart="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/rotate_and_down"
-            android:layout_alignTop="@+id/rotate_and_down"
-            android:text="@string/down_text"
-            tools:ignore="RelativeOverlap" />
+            android:text="@string/rotate_text" />
+
     </RelativeLayout>
 
-</RelativeLayout>
+</LinearLayout>

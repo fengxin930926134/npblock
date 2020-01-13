@@ -1,54 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_3">
+    android:orientation="horizontal"
+    android:background="@drawable/bg_3"
+    android:baselineAligned="false">
 
+    <!--左边-->
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_toStartOf="@+id/single_player_tetris">
-
-        <com.np.block.view.NextTetrisView
-            android:id="@+id/nextTetrisView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"/>
-
-        <!--敌人分数-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_above="@+id/score_layout"
-            android:layout_marginBottom="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorWhite"
-                android:text="@string/enemy_score_text" />
-
-            <TextView
-                android:id="@+id/enemy_score"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
-                android:text="@string/zero_initial"
-                style="@style/TextAppearance.AppCompat.Caption" />
-        </LinearLayout>
-
+        android:layout_weight="1">
         <!--分数-->
         <LinearLayout
             android:id="@+id/score_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_above="@+id/left_and_right"
-            android:layout_marginBottom="50dp">
+            android:layout_marginTop="80dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -66,6 +36,14 @@
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
 
+        <com.np.block.view.SinglePlayerView
+            android:id="@+id/single_player_tetris"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:layout_below="@+id/score_layout"
+            android:layout_centerHorizontal="true"/>
+
         <Button
             android:id="@+id/left"
             android:layout_width="wrap_content"
@@ -77,10 +55,10 @@
 
         <TextView
             android:id="@+id/left_and_right"
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="50dp"
+            android:layout_width="10dp"
+            android:layout_height="50dp"
+            android:layout_below="@+id/single_player_tetris"
+            android:layout_marginTop="100dp"
             android:layout_centerHorizontal="true"/>
 
         <Button
@@ -90,51 +68,68 @@
             android:layout_toEndOf="@+id/left_and_right"
             android:layout_alignTop="@+id/left_and_right"
             android:text="@string/right_text" />
-    </RelativeLayout>
-
-    <com.np.block.view.SinglePlayerView
-        android:id="@+id/single_player_tetris"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
-
-    <!--右边-->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_toEndOf="@+id/single_player_tetris">
-
-        <com.np.block.view.SinglePlayerEnemyView
-            android:id="@+id/single_player_tetris_enemy"
-            android:layout_width="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_above="@+id/rotate_and_down"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/rotate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/rotate_and_down"
-            android:layout_alignTop="@+id/rotate_and_down"
-            android:text="@string/rotate_text" />
-
-        <TextView
-            android:id="@+id/rotate_and_down"
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="50dp"
-            android:layout_centerHorizontal="true"/>
 
         <Button
             android:id="@+id/down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/rotate_and_down"
-            android:layout_alignTop="@+id/rotate_and_down"
-            android:text="@string/down_text"
-            tools:ignore="RelativeOverlap" />
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/left_and_right"
+            android:text="@string/down_text"/>
     </RelativeLayout>
 
-</RelativeLayout>
+    <!--右边-->
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+        <!--敌人分数-->
+        <LinearLayout
+            android:id="@+id/score_layout_enemy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="80dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:textColor="@color/colorWhite"
+                android:text="@string/enemy_score_text" />
+
+            <TextView
+                android:id="@+id/enemy_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorWhite"
+                android:text="@string/zero_initial"
+                style="@style/TextAppearance.AppCompat.Caption" />
+        </LinearLayout>
+
+        <com.np.block.view.SinglePlayerEnemyView
+            android:id="@+id/single_player_tetris_enemy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/score_layout_enemy"
+            android:layout_marginTop="50dp"
+            android:layout_centerHorizontal="true"/>
+
+        <com.np.block.view.NextTetrisView
+            android:id="@+id/nextTetrisView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="33dp"
+            android:layout_below="@+id/single_player_tetris_enemy"/>
+
+        <Button
+            android:id="@+id/rotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"
+            android:layout_below="@+id/nextTetrisView"
+            android:text="@string/rotate_text" />
+    </RelativeLayout>
+
+</LinearLayout>
