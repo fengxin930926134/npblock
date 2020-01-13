@@ -42,7 +42,7 @@ public class InputNameActivity extends BaseActivity {
     public void init() {
         users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         //对图片模糊化处理
-        Bitmap bitmap = FormatConversionUtils.blurBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.name_input_bg));
+        Bitmap bitmap = FormatConversionUtils.blurBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.lou_ti));
         nameBackground.setImageBitmap(bitmap);
         //将图片等比例缩放，让图像的短边与ImageView的边长度相同，即不能留有空白，缩放后截取中间部分进行显示
         nameBackground.setScaleType(ImageView.ScaleType. CENTER_CROP);

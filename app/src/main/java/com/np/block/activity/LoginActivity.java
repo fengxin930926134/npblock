@@ -8,13 +8,17 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
+
 import androidx.annotation.Nullable;
+import butterknife.BindView;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 import com.alibaba.fastjson.JSONObject;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.np.block.NpBlockApplication;
@@ -45,22 +49,27 @@ import java.util.Map;
  */
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
-    /**创建播放视频的控件对象*/
-    private VideoView videoview;
-    /**圆圈弹窗*/
-    private AlertDialog alertDialog;
+    /**gif背景图*/
+    @BindView(R.id.background_gif)
+    ImageView backgroundImg;
     /**登录后名字*/
-    private TextView userName;
+    @BindView(R.id.user_name)
+    TextView userName;
     /**注销按钮*/
-    private Button cancellation;
+    @BindView(R.id.cancellation)
+    Button cancellation;
     /**开始游戏按钮*/
-    private Button beginGame;
+    @BindView(R.id.begin_game)
+    Button beginGame;
     /**手机登录按钮*/
-    private Button phoneLogin;
+    @BindView(R.id.phone_login)
+    Button phoneLogin;
     /**QQ登录按钮*/
-    private Button qqLogin;
+    @BindView(R.id.qq_login)
+    Button qqLogin;
     /** 区服 */
-    private TextView districtService;
+    @BindView(R.id.district_service)
+    TextView districtService;
     /**腾讯服务*/
     private Tencent mTencent;
     private IUiListener qqLoginListener;
@@ -84,13 +93,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static AlertDialog registerDialog;
     /**用户信息*/
     private Users users;
+    /**圆圈弹窗*/
+    private AlertDialog alertDialog;
 
     @Override
     public void init() {
+        //加载gif背景资源
+        Glide.with(this).load(R.mipmap.bg_gif).apply(new RequestOptions().fitCenter()).into(backgroundImg);
         //初始化控件
         initFind();
-        //初始化背景
-        initVideo();
         //Tencent类是SDK的主要实现类，开发者可通过Tencent类访问腾讯开放的OpenAPI。
         mTencent = Tencent.createInstance(ConstUtils.APP_ID, NpBlockApplication.getInstance().getApplicationContext());
         qqLoginListener = new BaseUiListener();
@@ -140,17 +151,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 初始化find和click(this)
      */
     private void initFind() {
-        //加载视频资源控件
-        videoview = findViewById(R.id.video_view);
-        //用户名
-        userName = findViewById(R.id.user_name);
-        qqLogin = findViewById(R.id.qq_login);
-        phoneLogin = findViewById(R.id.phone_login);
-        districtService = findViewById(R.id.district_service);
-        //注销
-        cancellation = findViewById(R.id.cancellation);
-        //开始游戏
-        beginGame = findViewById(R.id.begin_game);
         phoneLogin.setOnClickListener(this);
         cancellation.setOnClickListener(this);
         qqLogin.setOnClickListener(this);
@@ -195,35 +195,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         });
     }
 
-    /**
-     * 初始化背景
-     */
-    private void initVideo() {
-        //设置播放加载路径
-        videoview.setVideoPath("android.resource://" + getPackageName() + "/" + R.raw.login_bg);
-        //播放
-        videoview.start();
-        //循环播放
-        videoview.setOnCompletionListener(mediaPlayer -> videoview.start());
-    }
-
     @Override
     public int getContentView() {
         return R.layout.activity_login;
-    }
-
-    @Override
-    protected void onRestart() {
-        //返回重启加载
-        initVideo();
-        super.onRestart();
-    }
-
-    @Override
-    protected void onStop() {
-        //防止锁屏或者切出的时候，音乐在播放
-        videoview.stopPlayback();
-        super.onStop();
     }
 
     @Override
@@ -273,7 +247,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE, result);
                     CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_RANKING_MODE, result);
                     CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE, result);
-                    videoview.stopPlayback();
                     //判断是新用户还是老用户
                     if (!TextUtils.isEmpty(users.getGameName())) {
                         startActivity(new Intent(context, MainActivity.class));

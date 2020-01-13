@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_1">
+    android:background="@mipmap/hai_zei_wang">
 
     <!--系统提供的水平进度条-->
     <ProgressBar
