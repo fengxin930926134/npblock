@@ -59,7 +59,7 @@ public abstract class BaseTetrisView extends View {
     /**单元块画笔*/
     private static Paint paintBlock = null;
     /**保存每行网格中包含俄罗斯方块单元的个数*/
-    private int[] blockRowNum = new int[ROW_NUM];
+    public int[] blockRowNum = new int[ROW_NUM];
     /**调用此对象的Activity对象 父视图*/
     public Activity fatherActivity = null;
 
@@ -213,6 +213,7 @@ public abstract class BaseTetrisView extends View {
     public boolean toDown() {
         if (TetrisControllerUtils.canMoveDown(tetrisUnits, allUnitBlock, ROW_NUM * blockSize + BEGIN_LEN_Y, blockSize)) {
             TetrisControllerUtils.toDown(tetrisUnits, blockSize);
+            //下落只是里面的坐标下落了，整体坐标还需要再加一次
             tetris.setY(tetris.getY() + blockSize);
             generateTetrisRectf();
             generateAllBlockRectf();
@@ -286,7 +287,7 @@ public abstract class BaseTetrisView extends View {
             // 再次判断是否满足一行
             if (blockRowNum[row - 1] == COLUMN_NUM) {
                 // 循环移除要消掉的行
-                TetrisControllerUtils.removeLine(allUnitBlock, row);
+                TetrisControllerUtils.removeLine(allUnitBlock, row, blockSize);
                 // 将标记变量还原
                 blockRowNum[row - 1] = 0;
                 // 消除的一行的上方的方块整体下移

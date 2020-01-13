@@ -36,7 +36,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
     /** 游戏速度*/
     public static final int GAME_SPEED = 700;
     /** 游戏延迟*/
-    public static final int GAME_DELAY = 180;
+    public static final int GAME_DELAY = 150;
     /**俄罗斯方块视图*/
     @BindView(R.id.single_player_tetris)
     SinglePlayerView singlePlayerView;

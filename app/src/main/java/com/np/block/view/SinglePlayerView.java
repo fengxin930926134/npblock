@@ -62,7 +62,7 @@ public class SinglePlayerView extends BaseTetrisView {
     public void removeRowsBlock(List<Integer> rows) {
         for (int row : rows) {
             // 循环移除要消掉的行
-            TetrisControllerUtils.removeLine(allBlockSmall, row);
+            TetrisControllerUtils.removeLine(allBlockSmall, row, SinglePlayerEnemyView.BLOCK_SIZE);
             // 消除的一行的上方的方块整体下移
             TetrisControllerUtils.blockRowsToDown(allBlockSmall, row, SinglePlayerEnemyView.BLOCK_SIZE);
         }
@@ -75,24 +75,27 @@ public class SinglePlayerView extends BaseTetrisView {
     public void toLeftAfter() {
         super.toLeftAfter();
         TetrisControllerUtils.toLeft(tetrisSmall.getTetris(), SinglePlayerEnemyView.BLOCK_SIZE);
+        tetrisSmall.setX(tetrisSmall.getX() - SinglePlayerEnemyView.BLOCK_SIZE);
     }
 
     @Override
     public void toRightAfter() {
         super.toRightAfter();
         TetrisControllerUtils.toRight(tetrisSmall.getTetris(), SinglePlayerEnemyView.BLOCK_SIZE);
+        tetrisSmall.setX(tetrisSmall.getX() + SinglePlayerEnemyView.BLOCK_SIZE);
     }
 
     @Override
     public void toDownAfter() {
         super.toDownAfter();
         TetrisControllerUtils.toDown(tetrisSmall.getTetris(), SinglePlayerEnemyView.BLOCK_SIZE);
+        tetrisSmall.setY(tetrisSmall.getY() + SinglePlayerEnemyView.BLOCK_SIZE);
     }
 
     @Override
     public void toRotate() {
         super.toRotate();
-        TetrisControllerUtils.toRotate(tetrisSmall, allBlockSmall, xEndSmall, yEndSmall, SinglePlayerEnemyView.BLOCK_SIZE);
+        TetrisControllerUtils.toRotate(tetrisSmall, allUnitBlock, xEndSmall, yEndSmall, SinglePlayerEnemyView.BLOCK_SIZE);
     }
 
     @Override
