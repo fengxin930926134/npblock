@@ -39,4 +39,12 @@
     <string name="zero_initial">0</string>
     <string name="one_initial">1</string>
     <string name="enemy_score_text">对方成绩：</string>
+    <string name="social_text">社交</string>
+    <string name="btnMan_text">男</string>
+    <string name="btnWoman_text">女</string>
+    <string name="edit_search_text">输入要搜索的名字</string>
+    <string name="search_text">搜索</string>
+    <string name="friend_management_text">好友管理</string>
+    <string name="add_friend_text">添加好友</string>
+    <string name="friend_apply_text">好友申请</string>
 </resources>

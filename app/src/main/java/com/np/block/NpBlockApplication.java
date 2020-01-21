@@ -29,12 +29,14 @@ public class NpBlockApplication extends Application {
         options.setAutoTransferMessageAttachments(true);
         // 是否自动下载附件类消息的缩略图等，默认为 true 这里和上边这个参数相关联
         options.setAutoDownloadThumbnail(true);
-        // 自动登陆
-        options.setAutoLogin(true);
+        // 关闭自动登陆
+        options.setAutoLogin(false);
         // 初始化
         EMClient.getInstance().init(app.getApplicationContext(), options);
+        // 默认好友请求是自动同意的，设置为手动同意
+        EMClient.getInstance().getOptions().setAcceptInvitationAlways(false);
         // 在做打包混淆时，关闭debug模式，避免消耗不必要的资源
-        EMClient.getInstance().setDebugMode(false);
+        EMClient.getInstance().setDebugMode(true);
         //初始化LitePal 不用一直传递Context参数，简化API
         LitePal.initialize(this);
     }

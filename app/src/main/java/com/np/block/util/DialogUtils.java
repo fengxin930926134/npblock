@@ -4,9 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import lombok.NonNull;
@@ -203,6 +206,33 @@ public class DialogUtils {
         dialog.getWindow().setLayout(dp2Px(context, 290), LinearLayout.LayoutParams.WRAP_CONTENT);
         //AlertDialog默认设置了WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM这个标志，所以键盘不会显示
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        return dialog;
+    }
+
+    /**
+     *  默认全屏弹窗 不透明
+     *  @param context 上下文
+     *
+     * @return View
+     */
+    public synchronized static AlertDialog showDialogFull(Context context,
+                                                          boolean touchOutside,
+                                                          boolean cancelable) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(touchOutside);
+        dialog.setCancelable(cancelable);
+        dialog.show();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams mParams = window.getAttributes();
+            mParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+            mParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+            // 此处可以设置dialog显示的位置
+            window.setGravity(Gravity.CENTER);
+            window.setBackgroundDrawableResource(android.R.color.white);
+            window.setAttributes(mParams);
+        }
         return dialog;
     }
 

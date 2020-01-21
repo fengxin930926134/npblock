@@ -67,6 +67,8 @@ dependencies {
     //tabLayout框架
     implementation(name:'library-2.0.0', ext:'aar')
     implementation(name:'utils-v4-2.0.0', ext:'aar')
+    //悬浮窗框架
+    implementation 'com.github.yhaolpz:FloatWindow:1.0.9'
 }
 
 MobSDK {

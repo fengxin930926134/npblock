@@ -40,9 +40,14 @@ public class ConstUtils {
     public static final String CODE = "code";
 
     /**
-     * 接口返回的错误信息
+     * 接口返回的信息
      */
     public static final String MSG = "msg";
+
+    /**
+     * 接口返回的数据
+     */
+    public static final String RESULT = "result";
 
     /**
      * sp 保存token的key值
@@ -98,6 +103,11 @@ public class ConstUtils {
      * 缓存 关卡信息的KEY
      */
     public static final String CACHE_RUSH_STAGE_TYPE = "cache_rush_stage_type";
+
+    /**
+     * 缓存 用户好友信息
+     */
+    public static final String CACHE_USER_FRIEND_INFO = "cache_user_friend_info";
 
     /**
      * 请求url

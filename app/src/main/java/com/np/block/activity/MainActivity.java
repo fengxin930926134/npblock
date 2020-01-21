@@ -1,11 +1,18 @@
 package com.np.block.activity;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,22 +20,34 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.hyphenate.EMConnectionListener;
+import com.hyphenate.EMContactListener;
 import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.util.NetUtils;
 import com.np.block.R;
+import com.np.block.adapter.AddFriendAdapter;
 import com.np.block.adapter.ClassicRankAdapter;
+import com.np.block.adapter.FriendApplyAdapter;
+import com.np.block.adapter.FriendManageAdapter;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
@@ -48,6 +67,9 @@ import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
+import com.yhao.floatwindow.FloatWindow;
+import com.yhao.floatwindow.MoveType;
+import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 
@@ -77,18 +99,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**查看排行榜按钮*/
     @BindView(R.id.view_leaderboards)
     Button viewLeaderboards;
+    /**社交*/
+    @BindView(R.id.social)
+    TextView social;
+    @BindView(R.id.social_notification)
+    View socialNotification;
     /**左边的排行榜整体*/
     @BindView(R.id.left_linear_rank)
     RelativeLayout leftLinearRank;
-    /**计时器整体*/
-    @BindView(R.id.game_chronometer_layout)
-    LinearLayout gameChronometerLayout;
     /**计时器*/
-    @BindView(R.id.game_chronometer)
-    Chronometer gameChronometer;
-    /**计时器关闭按钮*/
-    @BindView(R.id.game_chronometer_close)
-    ImageView gameChronometerClose;
+    private Chronometer gameChronometer;
     /**经典模式排行榜适配器*/
     public ClassicRankAdapter classicRankAdapter = null;
     /**是否进入匹配 防止多次点击*/
@@ -99,6 +119,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private boolean confirmOk = false;
     /**确认进入匹配弹窗的内容*/
     private TextView content;
+    /**是否收到好友申请*/
+    private boolean receiveApplication = false;
+    /**好友申请被同意*/
+    private boolean applicationAgree = false;
+    /**好友管理通知*/
+    private View managementNotification;
+    /**好友申请*/
+    private List<Users> receiveApplyData = new ArrayList<>();
+    /**好友管理适配器数据*/
+    private List<Users> friendManageItems = new ArrayList<>();
+    /**设置好友管理适配器*/
+    private FriendManageAdapter friendManageAdapter = new FriendManageAdapter(R.layout.friend_manage_item, friendManageItems);
     /**Handler接收来自匹配队列消息*/
     private Handler mHandler = new Handler(msg -> {
         Object obj = msg.obj;
@@ -106,7 +138,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case ConstUtils.HANDLER_MATCH_SUCCESS: {
                 //匹配成功 暂停匹配计时
                 gameChronometer.stop();
-                gameChronometerLayout.setVisibility(View.INVISIBLE);
+                FloatWindow.get().hide();
                 //弹出弹窗
                 showConfirmDialog((long) obj);
                 break;
@@ -125,7 +157,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 //检查是否点击确认
                 if (confirmOk) {
                     //重新进入计时
-                    gameChronometerLayout.setVisibility(View.VISIBLE);
+                    FloatWindow.get().show();
                     gameChronometer.start();
                 } else {
                     //退出队列
@@ -167,43 +199,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         classic.setOnClickListener(this);
         battle.setOnClickListener(this);
         interest.setOnClickListener(this);
-        gameChronometerClose.setOnClickListener(this);
         viewLeaderboards.setText(">");
         viewLeaderboards.setOnClickListener(this);
+        social.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
-
-        //-----排行榜相关
-        //创建标签组
-        ViewGroup tab = findViewById(R.id.tab);
-        //添加标签组的子视图
-        tab.addView(LayoutInflater.from(this).inflate(R.layout.rank_title_effect, tab, false));
-
-        //设置页
-        ViewPager viewPager = findViewById(R.id.viewpager);
-        SmartTabLayout viewPagerTab = findViewById(R.id.viewPagerTab);
-
-        //循环生成每一个Fragment
-        FragmentPagerItems pages = new FragmentPagerItems(this);
-        pages.add(FragmentPagerItem.of(getString(R.string.classic_block_text), ClassicRankFragment.class));
-        pages.add(FragmentPagerItem.of(getString(R.string.battle_block_text), RankingRankFragment.class));
-        pages.add(FragmentPagerItem.of(getString(R.string.interest_block_text), RushRankFragment.class));
-
-        //创建页面切换组件的适配器（pages类似于list，类似页面的集合）
-        FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
-                getSupportFragmentManager(), pages);
-
-        //设置页面切换组件的适配器
-        viewPager.setAdapter(adapter);
-        //设置tab组件关联的viewPage
-        viewPagerTab.setViewPager(viewPager);
-
-        //-----排行榜相关
-
+        //排行榜
+        initRank();
         //注册一个监听连接状态的listener
         EMClient.getInstance().addConnectionListener(new EmClientConnectionListener());
         //初始化接收匹配队列消息的Handler
         SocketServerManager.getInstance().setHandler(mHandler);
+        //初始化悬浮窗
+        initFloatWindow();
+        //环信社交监听
+        initContactListener();
+        //初始化好友
+        initFriendCache();
     }
 
     @Override
@@ -231,11 +243,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     //防止重复点击
                     return;
                 }
+                //退出队列
                 ThreadPoolManager.getInstance().execute(() -> {
                     if (SocketServerManager.getInstance().signOutMatchQueue()) {
                         runOnUiThread(() -> {
                             gameChronometer.stop();
-                            gameChronometerLayout.setVisibility(View.INVISIBLE);
+                            FloatWindow.get().hide();
                             Toast.makeText(context, "退出队列", Toast.LENGTH_SHORT).show();
                         });
                         enterSuccess = false;
@@ -243,8 +256,212 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 });
                 break;
             }
+            //社交
+            case R.id.social:{
+                AlertDialog socialDialog = DialogUtils.showDialogFull(context, false, true);
+                View inflate = View.inflate(context, R.layout.alert_dialog_social, null);
+                //加载好友管理通知
+                managementNotification = inflate.findViewById(R.id.friend_management_notification);
+                if (applicationAgree || receiveApplication) {
+                    //收到申请或者申请被同意则打开通知
+                    managementNotification.setVisibility(View.VISIBLE);
+                }
+                LinearLayout body = inflate.findViewById(R.id.body);
+                TextView add = inflate.findViewById(R.id.add_friend);
+                TextView management = inflate.findViewById(R.id.friend_management);
+                //back
+                inflate.findViewById(R.id.back).setOnClickListener(v1 -> socialDialog.cancel());
+                //默认首页是添加好友布局
+                body.addView(initSearch());
+                add.setBackgroundColor(Color.BLACK);
+                add.setEnabled(false);
+                management.setBackgroundColor(Color.TRANSPARENT);
+                management.setEnabled(true);
+                //添加好友
+                add.setOnClickListener(v12 -> {
+                    body.removeAllViews();
+                    body.addView(initSearch());
+                    add.setBackgroundColor(Color.BLACK);
+                    add.setEnabled(false);
+                    management.setBackgroundColor(Color.TRANSPARENT);
+                    management.setEnabled(true);
+                });
+                //好友管理
+                management.setOnClickListener(v14 -> {
+                    //点击后关闭通知
+                    if (applicationAgree) {
+                        managementNotification.setVisibility(View.INVISIBLE);
+                        socialNotification.setVisibility(View.INVISIBLE);
+                        applicationAgree = false;
+                    }
+                    //将view添加进入body
+                    body.removeAllViews();
+                    body.addView(initFriendManage());
+                    add.setBackgroundColor(Color.TRANSPARENT);
+                    add.setEnabled(true);
+                    management.setBackgroundColor(Color.BLACK);
+                    management.setEnabled(false);
+                });
+                socialDialog.setContentView(inflate);
+                break;
+            }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 初始化搜索好友的布局 (动画效果)
+     *          * 渐显 ALPHAIN
+     *          * 缩放 SCALEIN
+     *          * 从下到上 SLIDEIN_BOTTOM
+     *          * 从左到右 SLIDEIN_LEFT
+     *          * 从右到左 SLIDEIN_RIGHT
+     * @return view
+     */
+    private View initSearch() {
+        LinearLayout view = (LinearLayout) View.inflate(context, R.layout.social_search, null);
+        List<Users> usersItems = new ArrayList<>();
+        //获取RecyclerView
+        RecyclerView userList = view.findViewById(R.id.user_recycler_view);
+        // 设置布局管理器
+        userList.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        // 设置adapter适配器
+        AddFriendAdapter mAdapter = new AddFriendAdapter(R.layout.add_item, usersItems);
+        //开启动画效果
+        mAdapter.openLoadAnimation();
+        //设置动画效果
+        mAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
+        //添加分割线
+        userList.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        userList.setAdapter(mAdapter);
+        //设置权值为1
+        view.setLayoutParams(
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        //TODO 无法弹出键盘
+        EditText edit = view.findViewById(R.id.edit_search);
+        RadioGroup radGroup = view.findViewById(R.id.radioGroup);
+        //设置查询事件
+        view.findViewById(R.id.search).setOnClickListener(v13 -> {
+            String name = edit.getText().toString();
+            Users users = new Users();
+            users.setToken(MainActivity.users.getToken());
+            //获取姓名
+            if (!TextUtils.isEmpty(name)) {
+                users.setName(name);
+            }
+            //获取性别
+            for (int i = 1; i <= radGroup.getChildCount(); i++) {
+                RadioButton childAt = (RadioButton) radGroup.getChildAt(i - 1);
+                if (childAt.isChecked()) {
+                    users.setSex(i);
+                    break;
+                }
+            }
+            //查询数据
+            ThreadPoolManager.getInstance().execute(() -> {
+                try {
+                    JSONObject response = OkHttpUtils.post("/social/select", JSONObject.toJSONString(users));
+                    if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                        JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+                        if (objects != null) {
+                            //适配器数据
+                            List<Users> users1 = objects.toJavaList(Users.class);
+                            usersItems.clear();
+                            usersItems.addAll(users1);
+                            //更新
+                            runOnUiThread(mAdapter::notifyDataSetChanged);
+                        }
+                    }
+                } catch (Exception e) {
+                    LoggerUtils.e("查询失败：" + e.getMessage());
+                    Toast.makeText(context, "查询失败", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+        return view;
+    }
+
+    /**
+     * 初始化好友管理布局
+     * @return view
+     */
+    private View initFriendManage(){
+        LinearLayout view = (LinearLayout) View.inflate(context, R.layout.social_manage, null);
+
+        View applyNotification = view.findViewById(R.id.apply_notification);
+        if (receiveApplication) {
+            applyNotification.setVisibility(View.VISIBLE);
+        }
+        RecyclerView userList = view.findViewById(R.id.user_recycler_view);
+        // 设置布局管理器
+        userList.setLayoutManager(new LinearLayoutManager(view.getContext()));
+
+        //开启动画效果
+        friendManageAdapter.openLoadAnimation();
+        //设置动画效果
+        friendManageAdapter.openLoadAnimation(BaseQuickAdapter.ALPHAIN);
+        //添加分割线
+        userList.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        userList.setAdapter(friendManageAdapter);
+        //获取好友数据
+        if (CacheManager.getInstance().containsUsers(ConstUtils.CACHE_USER_FRIEND_INFO)) {
+            List<Users> users = CacheManager.getInstance().getUsers(ConstUtils.CACHE_USER_FRIEND_INFO);
+            friendManageItems.clear();
+            friendManageItems.addAll(users);
+            //更新
+            friendManageAdapter.notifyDataSetChanged();
+        }else {
+            //查询
+            initFriendCache();
+        }
+        //好友申请按钮
+        TextView friendApply = view.findViewById(R.id.friend_apply);
+        friendApply.setOnClickListener(v -> {
+            initFriendApplyDialog();
+            if (receiveApplication) {
+                managementNotification.setVisibility(View.INVISIBLE);
+                socialNotification.setVisibility(View.INVISIBLE);
+                applyNotification.setVisibility(View.INVISIBLE);
+                receiveApplication = false;
+            }
+        });
+        //设置权值为1
+        view.setLayoutParams(
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        return view;
+    }
+
+    /**
+     * 查看好友申请弹窗
+     */
+    private void initFriendApplyDialog() {
+        AlertDialog friendApplyDialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_friend_application, null);
+        //finish按钮
+        view.findViewById(R.id.alert_finish).setOnClickListener(v -> {
+            friendApplyDialog.cancel();
+            initFriendCache();
+        });
+        //标题
+        TextView title = view.findViewById(R.id.tv_alert_title);
+        title.setText("好友申请");
+        //配置recyclerView
+        RecyclerView recyclerView = view.findViewById(R.id.friend_apply_recycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        //添加分割线
+        recyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        //adapter
+        FriendApplyAdapter applyAdapter = new FriendApplyAdapter(R.layout.friend_apply_item, receiveApplyData);
+        //开启动画效果
+        applyAdapter.openLoadAnimation();
+        //设置动画效果
+        applyAdapter.openLoadAnimation(BaseQuickAdapter.ALPHAIN);
+        recyclerView.setAdapter(applyAdapter);
+        //刷新
+        runOnUiThread(applyAdapter::notifyDataSetChanged);
+        friendApplyDialog.setContentView(view);
     }
 
     @Override
@@ -296,7 +513,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 排行榜动画事件
      */
     private void rankAnimEvent() {
-        if (viewLeaderboards.getText().toString().equals(">")) {
+        String e = ">";
+        if (viewLeaderboards.getText().toString().equals(e)) {
             final int left = leftLinearRank.getLeft();
             final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
             rankAnimator.setDuration(250);
@@ -352,6 +570,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.findViewById(R.id.alert_battle_finish).setOnClickListener(v -> dialog.cancel());
         //设置单人匹配按钮
         view.findViewById(R.id.alert_battle).setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (!Settings.canDrawOverlays(this)) {
+                    //若未授权则请求权限
+                    Toast.makeText(context, "需要悬浮窗权限", Toast.LENGTH_SHORT).show();
+                    getOverlayPermission();
+                }
+            }
             dialog.cancel();
             if (enterSuccess) {
                 return;
@@ -361,14 +586,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             ThreadPoolManager.getInstance().execute(() -> {
                 if (SocketServerManager.getInstance().enterMatchQueue(GameTypeEnum.SINGLE_PLAYER_GAME)) {
                     runOnUiThread(() -> {
+                        FloatWindow.get().show();
                         gameChronometer.setBase(SystemClock.elapsedRealtime());
-                        //显示计时器
-                        gameChronometerLayout.setVisibility(View.VISIBLE);
                         //开始计时
                         gameChronometer.start();
                         Toast.makeText(context, "进入队列", Toast.LENGTH_SHORT).show();
                     });
-                    //启动一个后台socket服务
                 } else {
                     runOnUiThread(() -> Toast.makeText(context, "请检查网络连接是否正常", Toast.LENGTH_SHORT).show());
                     enterSuccess = false;
@@ -412,6 +635,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             });
         }
         super.onResume();
+        if (!enterSuccess && FloatWindow.get() != null) {
+            FloatWindow.get().hide();
+        }
     }
 
     /**
@@ -497,5 +723,158 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             });
         }
+    }
+
+    /**
+     * 初始化排行榜
+     */
+    private void initRank() {
+        //创建标签组
+        ViewGroup tab = findViewById(R.id.tab);
+        //添加标签组的子视图
+        tab.addView(LayoutInflater.from(this).inflate(R.layout.rank_title_effect, tab, false));
+
+        //设置页
+        ViewPager viewPager = findViewById(R.id.viewpager);
+        SmartTabLayout viewPagerTab = findViewById(R.id.viewPagerTab);
+
+        //循环生成每一个Fragment
+        FragmentPagerItems pages = new FragmentPagerItems(this);
+        pages.add(FragmentPagerItem.of(getString(R.string.classic_block_text), ClassicRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.battle_block_text), RankingRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.interest_block_text), RushRankFragment.class));
+
+        //创建页面切换组件的适配器（pages类似于list，类似页面的集合）
+        FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
+                getSupportFragmentManager(), pages);
+
+        //设置页面切换组件的适配器
+        viewPager.setAdapter(adapter);
+        //设置tab组件关联的viewPage
+        viewPagerTab.setViewPager(viewPager);
+    }
+
+    /**
+     * 初始化悬浮窗
+     */
+    private void initFloatWindow() {
+        if (FloatWindow.get() == null) {
+            @SuppressLint("InflateParams")
+            View gameChronometerLayout = LayoutInflater.from(getApplicationContext()).inflate(R.layout.game_chronometer_layout, null);
+            gameChronometer = gameChronometerLayout.findViewById(R.id.game_chronometer);
+            //计时器关闭按钮
+            gameChronometerLayout.findViewById(R.id.game_chronometer_close).setOnClickListener(this);
+            //获取当前界面宽度和view宽度
+            Rect outSize = new Rect();
+            getWindowManager().getDefaultDisplay().getRectSize(outSize);
+            int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            gameChronometerLayout.measure(w, h);
+            int width = gameChronometerLayout.getMeasuredWidth();
+            //获取要设置的坐标位置
+            int right = outSize.right - width;
+            FloatWindow
+                    .with(getApplication())
+                    .setView(gameChronometerLayout)
+                    //设置控件初始位置
+                    .setX(right)
+                    .setY(10)
+                    //桌面是否显示
+                    .setDesktopShow(false)
+                    .setMoveType(MoveType.slide)
+                    //app中显示的页面
+                    .setFilter(true, MainActivity.class)
+                    .build();
+            FloatWindow.get().hide();
+        }
+    }
+
+    /**
+     * 申请悬浮窗权限
+     */
+    @TargetApi(Build.VERSION_CODES.M)
+    private void getOverlayPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, 0);
+    }
+
+    /**
+     * 初始化环信监听器
+     */
+    private void initContactListener(){
+        EMClient.getInstance().contactManager().setContactListener(new EMContactListener() {
+            @Override
+            public void onContactInvited(String username, String reason) {
+                LoggerUtils.i("收到好友邀请");
+                receiveApplication = true;
+                if (username != null) {
+                    Users users = new Users();
+                    users.setId(Integer.valueOf(username));
+                    users.setReason(reason);
+                    receiveApplyData.add(users);
+                }
+                //打开社交通知
+                runOnUiThread(() -> socialNotification.setVisibility(View.VISIBLE));
+            }
+
+            @Override
+            public void onFriendRequestAccepted(String s) {
+                LoggerUtils.i("好友请求被同意");
+                applicationAgree = true;
+                //后期用邮件说明
+                //打开社交通知
+                runOnUiThread(() -> socialNotification.setVisibility(View.VISIBLE));
+            }
+
+            @Override
+            public void onFriendRequestDeclined(String s) {
+                LoggerUtils.i("好友请求被拒绝");
+                Toast.makeText(context, "好友申请被拒绝", Toast.LENGTH_SHORT).show();
+                //后期用邮件说明
+            }
+
+            @Override
+            public void onContactDeleted(String username) {
+                LoggerUtils.i("被删除时回调此方法");
+                CacheManager.getInstance().removeUsers(ConstUtils.CACHE_USER_FRIEND_INFO);
+                //
+            }
+
+            @Override
+            public void onContactAdded(String username) {
+                LoggerUtils.i("增加了联系人时回调此方法");
+                CacheManager.getInstance().removeUsers(ConstUtils.CACHE_USER_FRIEND_INFO);
+            }
+        });
+    }
+
+    /**
+     * 初始化好友缓存
+     */
+    public void initFriendCache() {
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                JSONObject params = new JSONObject();
+                params.put("id", users.getId());
+                JSONObject response = OkHttpUtils.post("/social/friend", params.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                    JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+                    if (objects != null) {
+                        LoggerUtils.toJson(objects.toJSONString());
+                        //适配器数据
+                        List<Users> users = objects.toJavaList(Users.class);
+                        //加入缓存
+                        CacheManager.getInstance().putUsers(ConstUtils.CACHE_USER_FRIEND_INFO, users);
+                        friendManageItems.clear();
+                        friendManageItems.addAll(users);
+                        //更新
+                        runOnUiThread(() -> friendManageAdapter.notifyDataSetChanged());
+                    }
+                }
+            } catch (Exception e) {
+                LoggerUtils.e("好友缓存失败：" + e.getMessage());
+            }
+        });
     }
 }

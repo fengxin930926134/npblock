@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 import butterknife.BindView;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -87,6 +89,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static String figureUrl;
     /**获取QQ登录的openId*/
     private static String openId;
+    private static String gender;
     /**是否取消登录 false取消*/
     private static boolean flag = true;
     /**注册弹窗*/
@@ -128,7 +131,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                         //解析返回数据
                         if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                            loginSuccess(response, true);
+                            loginSuccess(response);
                         }else {
                             runOnUiThread(() -> Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show());
                         }
@@ -317,7 +320,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                         //解析返回数据
                         if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                            loginSuccess(response, false);
+                            loginSuccess(response);
                         }else {
                             throw new Exception(response.getString("msg"));
                         }
@@ -471,11 +474,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         users.setOpenId(openId);
                         users.setName(name);
                         users.setHeadSculpture(figureUrl);
+                        users.setSex("女".equals(gender)? 2: 1);
                         try {
                             JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                             //解析返回数据
                             if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                                loginSuccess(response, false);
+                                loginSuccess(response);
                             }else {
                                 throw new Exception(response.getString("msg"));
                             }
@@ -604,6 +608,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
                         name = jsonObject.getString("nickname");
                         figureUrl = jsonObject.getString("figureurl_qq_2");
+                        gender = jsonObject.getString("gender");
                     }
 
                     @Override
@@ -645,12 +650,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 登录成功处理数据
      * @param data 数据
      */
-    private void loginSuccess(JSONObject data, boolean isTokenLogin) {
+    private void loginSuccess(JSONObject data) {
         Users usersResult = data.getObject("result", Users.class);
-        if (!isTokenLogin) {
-            //登陆环信
-            loginEmClient(usersResult.getId(), usersResult.getToken());
-        }
+        //登陆环信
+        loginEmClient(usersResult.getId(), usersResult.getToken());
         // 保存token
         if (SharedPreferencesUtils.saveToken(usersResult.getToken(), usersResult.getTokenTime())){
             LoggerUtils.i("[SP] token保存失败");
@@ -681,7 +684,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
             @Override
             public void onError(int code, String message) {
-                LoggerUtils.d("登录聊天服务器失败！");
+                LoggerUtils.e("登录聊天服务器失败！\n" + "id=" + id + " token=" + token);
+                LoggerUtils.e("失败原因 code=" + code +" msg=" + message);
             }
         });
     }

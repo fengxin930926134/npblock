@@ -29,31 +29,6 @@
             android:textSize="10pt"
             android:layout_toEndOf="@+id/head_img"
             android:layout_marginTop="10dp"/>
-
-        <!--匹配计时器-->
-        <LinearLayout
-            android:id="@+id/game_chronometer_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_centerHorizontal="true"
-            android:orientation="horizontal"
-            android:background="@color/colorWhiteTransparent"
-            android:layout_alignParentBottom="true"
-            android:visibility="invisible">
-            <Chronometer
-                android:id="@+id/game_chronometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/colorTransparent"
-                android:layout_gravity="center_vertical"
-                android:textSize="6pt"/>
-            <ImageView
-                android:id="@+id/game_chronometer_close"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/app_name"
-                android:src="@mipmap/ic_calculator_close"/>
-        </LinearLayout>
     </RelativeLayout>
     <!--头部结尾-->
 
@@ -150,37 +125,58 @@
     <!--尾部开始-->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginTop="50dp"
         android:background="@color/colorDarkBlue">
 
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/social"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/social_text"
+                android:layout_margin="5dp"
+                android:textSize="8pt"
+                android:textColor="@color/colorBlack"
+                android:gravity="center"
+                android:background="@drawable/bg_frame_search"
+                tools:ignore="ButtonStyle" />
+            <View
+                android:id="@+id/social_notification"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="10dp"
+                android:visibility="invisible"
+                android:background="@drawable/notification_spot_red" />
+        </RelativeLayout>
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/app_name"
+            tools:ignore="ButtonStyle" />
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/app_name"
             tools:ignore="ButtonStyle" />
         <Button
-            android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            tools:ignore="ButtonStyle" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/app_name"
             tools:ignore="ButtonStyle" />
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/app_name"
-            tools:ignore="ButtonStyle" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/app_name"
             tools:ignore="ButtonStyle" />

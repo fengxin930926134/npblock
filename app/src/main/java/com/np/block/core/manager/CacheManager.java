@@ -59,6 +59,10 @@ public class CacheManager {
         return usersMap.containsKey(key);
     }
 
+    public void removeUsers(String key) {
+        usersMap.remove(key);
+    }
+
     /**私有化构造方法*/
     private CacheManager() {
         mMap = new HashMap<>();
