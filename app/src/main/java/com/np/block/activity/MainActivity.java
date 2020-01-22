@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
@@ -39,10 +40,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.hyphenate.EMConnectionListener;
-import com.hyphenate.EMContactListener;
 import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.util.NetUtils;
+import com.np.block.NpBlockApplication;
 import com.np.block.R;
 import com.np.block.adapter.AddFriendAdapter;
 import com.np.block.adapter.ClassicRankAdapter;
@@ -119,14 +120,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private boolean confirmOk = false;
     /**确认进入匹配弹窗的内容*/
     private TextView content;
-    /**是否收到好友申请*/
-    private boolean receiveApplication = false;
-    /**好友申请被同意*/
-    private boolean applicationAgree = false;
     /**好友管理通知*/
     private View managementNotification;
-    /**好友申请*/
-    private List<Users> receiveApplyData = new ArrayList<>();
     /**好友管理适配器数据*/
     private List<Users> friendManageItems = new ArrayList<>();
     /**设置好友管理适配器*/
@@ -212,10 +207,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         SocketServerManager.getInstance().setHandler(mHandler);
         //初始化悬浮窗
         initFloatWindow();
-        //环信社交监听
-        initContactListener();
         //初始化好友
         initFriendCache();
+        //检查消息
+        socialNotification();
+    }
+
+    /**
+     * 社交消息通知
+     */
+    public void socialNotification() {
+        if (NpBlockApplication.getInstance().receiveApplication ||
+                NpBlockApplication.getInstance().applicationAgree) {
+            socialNotification.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -262,7 +267,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 View inflate = View.inflate(context, R.layout.alert_dialog_social, null);
                 //加载好友管理通知
                 managementNotification = inflate.findViewById(R.id.friend_management_notification);
-                if (applicationAgree || receiveApplication) {
+                if (NpBlockApplication.getInstance().applicationAgree ||
+                        NpBlockApplication.getInstance().receiveApplication) {
                     //收到申请或者申请被同意则打开通知
                     managementNotification.setVisibility(View.VISIBLE);
                 }
@@ -275,6 +281,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 body.addView(initSearch());
                 add.setBackgroundColor(Color.BLACK);
                 add.setEnabled(false);
+                //只用下面这一行弹出对话框时需要点击输入框才能弹出软键盘
+                if (socialDialog.getWindow() != null) {
+                    socialDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                }
                 management.setBackgroundColor(Color.TRANSPARENT);
                 management.setEnabled(true);
                 //添加好友
@@ -289,10 +299,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 //好友管理
                 management.setOnClickListener(v14 -> {
                     //点击后关闭通知
-                    if (applicationAgree) {
+                    if (NpBlockApplication.getInstance().applicationAgree) {
                         managementNotification.setVisibility(View.INVISIBLE);
                         socialNotification.setVisibility(View.INVISIBLE);
-                        applicationAgree = false;
+                        NpBlockApplication.getInstance().applicationAgree = false;
                     }
                     //将view添加进入body
                     body.removeAllViews();
@@ -390,7 +400,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         LinearLayout view = (LinearLayout) View.inflate(context, R.layout.social_manage, null);
 
         View applyNotification = view.findViewById(R.id.apply_notification);
-        if (receiveApplication) {
+        if (NpBlockApplication.getInstance().receiveApplication) {
             applyNotification.setVisibility(View.VISIBLE);
         }
         RecyclerView userList = view.findViewById(R.id.user_recycler_view);
@@ -419,11 +429,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         TextView friendApply = view.findViewById(R.id.friend_apply);
         friendApply.setOnClickListener(v -> {
             initFriendApplyDialog();
-            if (receiveApplication) {
+            if (NpBlockApplication.getInstance().receiveApplication) {
                 managementNotification.setVisibility(View.INVISIBLE);
                 socialNotification.setVisibility(View.INVISIBLE);
                 applyNotification.setVisibility(View.INVISIBLE);
-                receiveApplication = false;
+                NpBlockApplication.getInstance().receiveApplication = false;
             }
         });
         //设置权值为1
@@ -453,7 +463,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //添加分割线
         recyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
         //adapter
-        FriendApplyAdapter applyAdapter = new FriendApplyAdapter(R.layout.friend_apply_item, receiveApplyData);
+        FriendApplyAdapter applyAdapter = new FriendApplyAdapter(R.layout.friend_apply_item, NpBlockApplication.getInstance().receiveApplyData);
         //开启动画效果
         applyAdapter.openLoadAnimation();
         //设置动画效果
@@ -800,59 +810,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
-     * 初始化环信监听器
-     */
-    private void initContactListener(){
-        EMClient.getInstance().contactManager().setContactListener(new EMContactListener() {
-            @Override
-            public void onContactInvited(String username, String reason) {
-                LoggerUtils.i("收到好友邀请");
-                receiveApplication = true;
-                if (username != null) {
-                    Users users = new Users();
-                    users.setId(Integer.valueOf(username));
-                    users.setReason(reason);
-                    receiveApplyData.add(users);
-                }
-                //打开社交通知
-                runOnUiThread(() -> socialNotification.setVisibility(View.VISIBLE));
-            }
-
-            @Override
-            public void onFriendRequestAccepted(String s) {
-                LoggerUtils.i("好友请求被同意");
-                applicationAgree = true;
-                //后期用邮件说明
-                //打开社交通知
-                runOnUiThread(() -> socialNotification.setVisibility(View.VISIBLE));
-            }
-
-            @Override
-            public void onFriendRequestDeclined(String s) {
-                LoggerUtils.i("好友请求被拒绝");
-                Toast.makeText(context, "好友申请被拒绝", Toast.LENGTH_SHORT).show();
-                //后期用邮件说明
-            }
-
-            @Override
-            public void onContactDeleted(String username) {
-                LoggerUtils.i("被删除时回调此方法");
-                CacheManager.getInstance().removeUsers(ConstUtils.CACHE_USER_FRIEND_INFO);
-                //
-            }
-
-            @Override
-            public void onContactAdded(String username) {
-                LoggerUtils.i("增加了联系人时回调此方法");
-                CacheManager.getInstance().removeUsers(ConstUtils.CACHE_USER_FRIEND_INFO);
-            }
-        });
-    }
-
-    /**
      * 初始化好友缓存
      */
-    public void initFriendCache() {
+    private void initFriendCache() {
         ThreadPoolManager.getInstance().execute(() -> {
             try {
                 JSONObject params = new JSONObject();

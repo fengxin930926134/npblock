@@ -1,6 +1,11 @@
 package com.np.block.core.manager;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+
+import com.np.block.base.BaseActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,5 +61,18 @@ public class ActivityManager {
             }
         }
         activities.clear();
+    }
+
+    /**
+     * 通过反射获取activity
+     * @param className className
+     */
+    public Activity getActivity(Class<? extends Activity> className) {
+        for (Activity activity : activities) {
+            if (activity != null && activity.getClass().equals(className)) {
+                return activity;
+            }
+        }
+        return null;
     }
 }

@@ -1,6 +1,9 @@
 package com.np.block;
 
 import com.alibaba.fastjson.JSONObject;
+import com.np.block.base.BaseTetrisView;
+import com.np.block.core.enums.TetrisTypeEnum;
+import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.core.model.Users;
 import com.np.block.util.OkHttpUtils;
@@ -8,7 +11,13 @@ import com.np.block.util.OkHttpUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -25,7 +34,8 @@ public class ExampleUnitTest {
 //        String response = OkHttpUtils.get("/hello");
 //        System.out.println(response);
 
-
+        System.out.println(BaseTetrisView.BEGIN_LEN_X + BaseTetrisView.COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE);
+        System.out.println(BaseTetrisView.BEGIN_LEN_Y);
 
 //        JSONObject jsonObject = new JSONObject();
 //        JSONObject jsonObject1 = new JSONObject();
@@ -77,9 +87,33 @@ public class ExampleUnitTest {
 //        jsonObject3.put("params2", jsonObject2);
 //        System.out.println(jsonObject3.toJSONString());
 
-        String s = "[{\"classicScore\":12314,\"id\":3,\"createDate\":1575697962000},{\"classicScore\":123,\"openId\":\"12412dawd\",\"sex\":1,\"tokenTime\":1241254,\"token\":\"1241512512\",\"gameName\":\"124124\",\"phone\":\"14124\",\"name\":\"13123\",\"id\":1,\"createDate\":1575697957000}]";
-        List<Users> users = JSONObject.parseArray(s, Users.class);
-        System.out.println(users);
+//        int notOccupyPort = OkHttpUtils.getNotOccupyPort();
+//        DatagramSocket socket = new DatagramSocket(notOccupyPort);
+//        System.out.println("使用"+notOccupyPort+"成功");
+//        System.out.println(getIpAddressString());
+//        String s = "[{\"classicScore\":12314,\"id\":3,\"createDate\":1575697962000},{\"classicScore\":123,\"openId\":\"12412dawd\",\"sex\":1,\"tokenTime\":1241254,\"token\":\"1241512512\",\"gameName\":\"124124\",\"phone\":\"14124\",\"name\":\"13123\",\"id\":1,\"createDate\":1575697957000}]";
+//        List<Users> users = JSONObject.parseArray(s, Users.class);
+//        System.out.println(users);
+    }
+
+
+    public static String getIpAddressString() {
+        try {
+            for (Enumeration<NetworkInterface> enNetI = NetworkInterface
+                    .getNetworkInterfaces(); enNetI.hasMoreElements(); ) {
+                NetworkInterface netI = enNetI.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = netI
+                        .getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return "0.0.0.0";
     }
 
     private int cmpGrade(int grade, int score) {
