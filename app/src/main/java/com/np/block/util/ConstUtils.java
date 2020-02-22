@@ -165,6 +165,11 @@ public class ConstUtils {
     public static final int HANDLER_ESCAPE_GAME = 0x17;
 
     /**
+     * Handler 消息类型 建立聊天窗口消息
+     */
+    public static final int HANDLER_CHAT_WINDOW = 0x18;
+
+    /**
      * json数据key 所有方块坐标
      */
     public static final String JSON_KEY_ALL_BLOCK = "json_key_all_block";

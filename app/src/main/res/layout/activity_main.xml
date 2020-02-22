@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_2">
+    android:background="@mipmap/x1002">
 
     <!--头部开始-->
     <RelativeLayout
+        android:id="@+id/head_relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1.0"
-        android:background="@color/colorBlack">
+        android:padding="4dp"
+        android:layout_height="90dp"
+        android:background="@color/colorGrayTransparent">
 
         <ImageView
             android:id="@+id/head_img"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@mipmap/np_block_launcher"
+            android:layout_alignParentStart="true"
             android:contentDescription="@string/app_name"/>
 
         <TextView
@@ -26,107 +28,125 @@
             android:layout_height="wrap_content"
             android:textColor="@color/colorWhite"
             android:text="@string/app_name"
-            android:textSize="10pt"
+            android:textSize="6pt"
             android:layout_toEndOf="@+id/head_img"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="2dp"/>
     </RelativeLayout>
     <!--头部结尾-->
 
     <!--中间开始-->
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="6.6"
-        android:paddingTop="50dp"
-        android:paddingBottom="10dp"
-        android:layout_marginEnd="15dp">
-
-        <!--内容右开始-->
-        <RelativeLayout
-            android:id="@+id/middle_content"
+        android:id="@+id/middle_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="90dp"
+        android:layout_marginBottom="70dp"
+        android:padding="8dp">
+        <Button
+            android:id="@+id/battle_block"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toEndOf="@+id/view_leaderboards">
+            android:layout_height="170dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:textColor="@color/colorWhite"
+            android:layout_marginTop="205dp"
+            android:textSize="16pt"
+            android:background="@drawable/bg_1"
+            android:text="@string/battle_block_text"/>
 
-            <Button
-                android:id="@+id/battle_block"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_toStartOf="@id/middle_content_middle"
-                android:textColor="@color/colorWhite"
-                android:textSize="16pt"
-                android:background="@mipmap/hai_zei_wang"
-                android:text="@string/battle_block_text"/>
-
-            <!--中间分割点-->
-            <TextView
-                android:id="@+id/middle_content_middle"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="10dp"
-                android:layout_centerInParent="true"/>
-
-            <Button
-                android:id="@+id/classic_block"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/classic_block_text"
-                android:textSize="16pt"
-                android:layout_toEndOf="@+id/middle_content_middle"
-                android:layout_alignBottom="@+id/middle_content_middle"
-                android:background="@mipmap/lou_ti"/>
-
-            <Button
-                android:id="@+id/interest_block"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
-                android:text="@string/interest_block_text"
-                android:textColor="@color/colorWhite"
-                android:textSize="16pt"
-                android:layout_toEndOf="@+id/middle_content_middle"
-                android:layout_alignTop="@+id/middle_content_middle"
-                android:background="@mipmap/tai_yang"/>
-        </RelativeLayout>
-        <!--内容右结束-->
-
-        <!--内容左开始-->
-        <RelativeLayout
-            android:id="@+id/left_linear_rank"
-            android:layout_marginStart="-200dp"
-            android:layout_width="200dp"
-            android:layout_height="match_parent">
-
-            <FrameLayout
-                android:id="@+id/tab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/primary"/>
-
-            <androidx.viewpager.widget.ViewPager
-                android:id="@+id/viewpager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/tab"/>
-
-        </RelativeLayout>
+        <!--中间分割点-->
+        <TextView
+            android:id="@+id/middle_content_middle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="10dp"
+            android:layout_centerInParent="true"/>
 
         <Button
-            android:id="@+id/view_leaderboards"
-            android:layout_width="40dp"
-            android:layout_toEndOf="@+id/left_linear_rank"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"/>
-        <!--内容左结束-->
+            android:id="@+id/classic_block"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:text="@string/classic_block_text"
+            android:textSize="15pt"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="5dp"
+            android:layout_toEndOf="@+id/middle_content_middle"
+            android:layout_marginStart="20dp"
+            android:layout_alignParentTop="true"
+            android:background="@mipmap/lou_ti"/>
 
+        <Button
+            android:id="@+id/interest_block"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="50dp"
+            android:text="@string/interest_block_text"
+            android:textColor="@color/colorWhite"
+            android:textSize="13pt"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_toStartOf="@+id/middle_content_middle"
+            android:background="@mipmap/tai_yang"/>
+
+        <Button
+            android:id="@+id/task"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:text="@string/task_text"
+            android:textSize="15pt"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/middle_content_middle"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="450dp"
+            android:layout_alignParentTop="true"
+            android:background="@mipmap/lou_ti"/>
+
+        <Button
+            android:id="@+id/punch"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:text="@string/punch_text"
+            android:textSize="10pt"
+            android:layout_marginEnd="80dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="380dp"
+            android:layout_alignParentTop="true"
+            android:background="@mipmap/lou_ti"/>
+
+        <ImageButton
+            android:id="@+id/talk"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textSize="10pt"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:src="@mipmap/lou_ti"
+            android:text="@string/talk_text"
+            android:contentDescription="@string/talk_text" />
+
+        <TextView
+            android:id="@+id/talk_notification"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="65dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:textSize="6pt"
+            android:background="@drawable/notification_spot_red"/>
     </RelativeLayout>
     <!--中间结束-->
 
     <!--尾部开始-->
     <LinearLayout
+        android:id="@+id/rear_linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_marginTop="50dp"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
         android:background="@color/colorDarkBlue">
 
         <RelativeLayout
@@ -174,12 +194,38 @@
             android:layout_weight="1"
             android:text="@string/app_name"
             tools:ignore="ButtonStyle" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/app_name"
-            tools:ignore="ButtonStyle" />
     </LinearLayout>
     <!--尾部结尾-->
-</LinearLayout>
+
+    <!--内容左开始-->
+    <RelativeLayout
+        android:id="@+id/left_linear_rank"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="-200dp"
+        android:layout_width="200dp"
+        android:layout_centerVertical="true"
+        android:layout_height="400dp">
+
+        <FrameLayout
+            android:id="@+id/tab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"/>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/tab"/>
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/view_leaderboards"
+        android:layout_width="40dp"
+        android:layout_toEndOf="@+id/left_linear_rank"
+        android:layout_marginBottom="-200dp"
+        android:layout_marginTop="480dp"
+        android:layout_height="50dp"/>
+    <!--内容左结束-->
+</RelativeLayout>

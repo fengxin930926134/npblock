@@ -22,6 +22,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -41,7 +42,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMError;
+import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMMessage;
 import com.hyphenate.util.NetUtils;
 import com.np.block.NpBlockApplication;
 import com.np.block.R;
@@ -53,6 +56,7 @@ import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
+import com.np.block.core.manager.MessageManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Users;
@@ -105,6 +109,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     TextView social;
     @BindView(R.id.social_notification)
     View socialNotification;
+    @BindView(R.id.talk)
+    ImageButton talk;
     /**左边的排行榜整体*/
     @BindView(R.id.left_linear_rank)
     RelativeLayout leftLinearRank;
@@ -120,6 +126,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private boolean confirmOk = false;
     /**确认进入匹配弹窗的内容*/
     private TextView content;
+    /**社交弹窗*/
+    private AlertDialog socialDialog = null;
     /**好友管理通知*/
     private View managementNotification;
     /**好友管理适配器数据*/
@@ -127,7 +135,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**设置好友管理适配器*/
     private FriendManageAdapter friendManageAdapter = new FriendManageAdapter(R.layout.friend_manage_item, friendManageItems);
     /**Handler接收来自匹配队列消息*/
-    private Handler mHandler = new Handler(msg -> {
+    public Handler mHandler = new Handler(msg -> {
         Object obj = msg.obj;
         switch (msg.what) {
             case ConstUtils.HANDLER_MATCH_SUCCESS: {
@@ -179,11 +187,55 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 startActivityForResult(new Intent(this, SinglePlayerActivity.class), 1);
                 break;
             }
+            case ConstUtils.HANDLER_CHAT_WINDOW: {
+                //关闭社交管理 弹出聊天弹窗
+                if (socialDialog != null) {
+                    socialDialog.dismiss();
+                    socialDialog = null;
+                }
+                Integer toChatUsername = msg.arg1;
+                MessageManager.getInstance().showMessageDialog(this, toChatUsername.toString());
+                break;
+            }
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
         return false;
     });
+    /**环信消息监听*/
+    EMMessageListener msgListener = new EMMessageListener() {
+
+        @Override
+        public void onMessageReceived(List<EMMessage> messages) {
+            MessageManager.getInstance().addMessage(messages);
+            MessageManager.getInstance().refreshMessage(messages);
+            LoggerUtils.i("收到消息=" + messages.toString());
+        }
+
+        @Override
+        public void onCmdMessageReceived(List<EMMessage> messages) {
+            LoggerUtils.i("收到透传消息");
+        }
+
+        @Override
+        public void onMessageRead(List<EMMessage> messages) {
+            LoggerUtils.i("收到已读回执");
+        }
+
+        @Override
+        public void onMessageDelivered(List<EMMessage> message) {
+            LoggerUtils.i("收到已送达回执");
+        }
+        @Override
+        public void onMessageRecalled(List<EMMessage> messages) {
+            LoggerUtils.i("消息被撤回");
+        }
+
+        @Override
+        public void onMessageChanged(EMMessage message, Object change) {
+            LoggerUtils.i("消息状态变动");
+        }
+    };
 
     @Override
     public void init() {
@@ -197,6 +249,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         viewLeaderboards.setText(">");
         viewLeaderboards.setOnClickListener(this);
         social.setOnClickListener(this);
+        talk.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
         //排行榜
@@ -210,13 +263,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //初始化好友
         initFriendCache();
         //检查消息
-        socialNotification();
+        checkNotification();
     }
 
     /**
-     * 社交消息通知
+     * 检查是否存在通知，存在则打开
      */
-    public void socialNotification() {
+    public void checkNotification() {
         if (NpBlockApplication.getInstance().receiveApplication ||
                 NpBlockApplication.getInstance().applicationAgree) {
             socialNotification.setVisibility(View.VISIBLE);
@@ -243,80 +296,96 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.view_leaderboards:
                 rankAnimEvent();
                 break;
-            case R.id.game_chronometer_close:{
-                if (!enterSuccess) {
-                    //防止重复点击
-                    return;
-                }
-                //退出队列
-                ThreadPoolManager.getInstance().execute(() -> {
-                    if (SocketServerManager.getInstance().signOutMatchQueue()) {
-                        runOnUiThread(() -> {
-                            gameChronometer.stop();
-                            FloatWindow.get().hide();
-                            Toast.makeText(context, "退出队列", Toast.LENGTH_SHORT).show();
-                        });
-                        enterSuccess = false;
-                    }
-                });
+            case R.id.game_chronometer_close:
+                initGameChronometerCloseEvent();
                 break;
-            }
             //社交
-            case R.id.social:{
-                AlertDialog socialDialog = DialogUtils.showDialogFull(context, false, true);
-                View inflate = View.inflate(context, R.layout.alert_dialog_social, null);
-                //加载好友管理通知
-                managementNotification = inflate.findViewById(R.id.friend_management_notification);
-                if (NpBlockApplication.getInstance().applicationAgree ||
-                        NpBlockApplication.getInstance().receiveApplication) {
-                    //收到申请或者申请被同意则打开通知
-                    managementNotification.setVisibility(View.VISIBLE);
-                }
-                LinearLayout body = inflate.findViewById(R.id.body);
-                TextView add = inflate.findViewById(R.id.add_friend);
-                TextView management = inflate.findViewById(R.id.friend_management);
-                //back
-                inflate.findViewById(R.id.back).setOnClickListener(v1 -> socialDialog.cancel());
-                //默认首页是添加好友布局
-                body.addView(initSearch());
-                add.setBackgroundColor(Color.BLACK);
-                add.setEnabled(false);
-                //只用下面这一行弹出对话框时需要点击输入框才能弹出软键盘
-                if (socialDialog.getWindow() != null) {
-                    socialDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-                }
-                management.setBackgroundColor(Color.TRANSPARENT);
-                management.setEnabled(true);
-                //添加好友
-                add.setOnClickListener(v12 -> {
-                    body.removeAllViews();
-                    body.addView(initSearch());
-                    add.setBackgroundColor(Color.BLACK);
-                    add.setEnabled(false);
-                    management.setBackgroundColor(Color.TRANSPARENT);
-                    management.setEnabled(true);
-                });
-                //好友管理
-                management.setOnClickListener(v14 -> {
-                    //点击后关闭通知
-                    if (NpBlockApplication.getInstance().applicationAgree) {
-                        managementNotification.setVisibility(View.INVISIBLE);
-                        socialNotification.setVisibility(View.INVISIBLE);
-                        NpBlockApplication.getInstance().applicationAgree = false;
-                    }
-                    //将view添加进入body
-                    body.removeAllViews();
-                    body.addView(initFriendManage());
-                    add.setBackgroundColor(Color.TRANSPARENT);
-                    add.setEnabled(true);
-                    management.setBackgroundColor(Color.BLACK);
-                    management.setEnabled(false);
-                });
-                socialDialog.setContentView(inflate);
+            case R.id.social:
+                initSocialEvent();
+                break;
+            case R.id.talk:{
+                MessageManager.getInstance().showMessageDialog(this, null);
                 break;
             }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 匹配计时器关闭事件
+     */
+    private void initGameChronometerCloseEvent() {
+        if (!enterSuccess) {
+            //防止重复点击
+            return;
+        }
+        //退出队列
+        ThreadPoolManager.getInstance().execute(() -> {
+            if (SocketServerManager.getInstance().signOutMatchQueue()) {
+                runOnUiThread(() -> {
+                    gameChronometer.stop();
+                    FloatWindow.get().hide();
+                    Toast.makeText(context, "退出队列", Toast.LENGTH_SHORT).show();
+                });
+                enterSuccess = false;
+            }
+        });
+    }
+
+    /**
+     * 社交按钮事件
+     */
+    private void initSocialEvent() {
+        socialDialog = DialogUtils.showDialogFull(context, false, true);
+        View inflate = View.inflate(context, R.layout.alert_dialog_social, null);
+        //加载好友管理通知
+        managementNotification = inflate.findViewById(R.id.friend_management_notification);
+        if (NpBlockApplication.getInstance().applicationAgree ||
+                NpBlockApplication.getInstance().receiveApplication) {
+            //收到申请或者申请被同意则打开通知
+            managementNotification.setVisibility(View.VISIBLE);
+        }
+        LinearLayout body = inflate.findViewById(R.id.body);
+        TextView add = inflate.findViewById(R.id.add_friend);
+        TextView management = inflate.findViewById(R.id.friend_management);
+        //back
+        inflate.findViewById(R.id.back).setOnClickListener(v1 -> socialDialog.cancel());
+        //默认首页是添加好友布局
+        body.addView(initSearch());
+        add.setBackgroundColor(Color.BLACK);
+        add.setEnabled(false);
+        //只用下面这一行弹出对话框时需要点击输入框才能弹出软键盘
+        if (socialDialog.getWindow() != null) {
+            socialDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        }
+        management.setBackgroundColor(Color.TRANSPARENT);
+        management.setEnabled(true);
+        //添加好友
+        add.setOnClickListener(v12 -> {
+            body.removeAllViews();
+            body.addView(initSearch());
+            add.setBackgroundColor(Color.BLACK);
+            add.setEnabled(false);
+            management.setBackgroundColor(Color.TRANSPARENT);
+            management.setEnabled(true);
+        });
+        //好友管理
+        management.setOnClickListener(v14 -> {
+            //点击后关闭通知
+            if (NpBlockApplication.getInstance().applicationAgree) {
+                managementNotification.setVisibility(View.INVISIBLE);
+                socialNotification.setVisibility(View.INVISIBLE);
+                NpBlockApplication.getInstance().applicationAgree = false;
+            }
+            //将view添加进入body
+            body.removeAllViews();
+            body.addView(initFriendManage());
+            add.setBackgroundColor(Color.TRANSPARENT);
+            add.setEnabled(true);
+            management.setBackgroundColor(Color.BLACK);
+            management.setEnabled(false);
+        });
+        socialDialog.setContentView(inflate);
     }
 
     /**
@@ -348,7 +417,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.setLayoutParams(
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        //TODO 无法弹出键盘
         EditText edit = view.findViewById(R.id.edit_search);
         RadioGroup radGroup = view.findViewById(R.id.radioGroup);
         //设置查询事件
@@ -483,6 +551,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //销毁消息监听
+        EMClient.getInstance().chatManager().removeMessageListener(msgListener);
+    }
+
     /**
      * 弹出确认进入游戏弹窗
      */
@@ -580,7 +655,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.findViewById(R.id.alert_battle_finish).setOnClickListener(v -> dialog.cancel());
         //设置单人匹配按钮
         view.findViewById(R.id.alert_battle).setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= 23) {
+            int version = 23;
+            if (Build.VERSION.SDK_INT >= version) {
                 if (!Settings.canDrawOverlays(this)) {
                     //若未授权则请求权限
                     Toast.makeText(context, "需要悬浮窗权限", Toast.LENGTH_SHORT).show();
@@ -648,6 +724,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (!enterSuccess && FloatWindow.get() != null) {
             FloatWindow.get().hide();
         }
+        EMClient.getInstance().chatManager().addMessageListener(msgListener);
     }
 
     /**
@@ -813,6 +890,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化好友缓存
      */
     private void initFriendCache() {
+        if (CacheManager.getInstance().containsUsers(ConstUtils.CACHE_USER_FRIEND_INFO)) {
+            return;
+        }
         ThreadPoolManager.getInstance().execute(() -> {
             try {
                 JSONObject params = new JSONObject();

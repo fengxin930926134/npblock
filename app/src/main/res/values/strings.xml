@@ -47,4 +47,10 @@
     <string name="friend_management_text">好友管理</string>
     <string name="add_friend_text">添加好友</string>
     <string name="friend_apply_text">好友申请</string>
+    <string name="task_text">任务</string>
+    <string name="punch_text">签到</string>
+    <string name="talk_text">聊天</string>
+    <string name="send_text">发送</string>
+    <string name="edit_send_text">请输入要发送的内容</string>
+    <string name="none_content_text">没有选择聊天会话</string>
 </resources>

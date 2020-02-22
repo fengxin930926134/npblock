@@ -6,6 +6,7 @@
     <!--  透明色  -->
     <color name="colorTransparent">#00000000</color>
     <color name="colorRed">#FE6072</color>
+    <color name="colorRedDown">#A8424D</color>
     <color name="colorRed_">#FF0000</color>
     <color name="colorGrey">#CFD3DE</color>
     <color name="colorWhite">#FFFFFF</color>

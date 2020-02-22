@@ -11,6 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="false"
-        android:background="@drawable/welcome"
+        android:background="@mipmap/x1006"
         tools:ignore="ContentDescription" />
 </LinearLayout>

@@ -53,8 +53,8 @@ public class WelcomeActivity extends BaseActivity implements Animation.Animation
      */
     @Override
     public void onAnimationEnd(Animation animation) {
-        // 跳转至更新界面
-        startActivity(new Intent(this, GameUpdateActivity.class));
+        // 跳转至登陆界面
+        startActivity(new Intent(this, LoginActivity.class));
         ActivityManager.getInstance().removeActivity(this);
     }
 

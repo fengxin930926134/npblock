@@ -1,6 +1,6 @@
 package com.np.block.adapter;
 
-
+import android.os.Message;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -11,9 +11,10 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.exceptions.HyphenateException;
 import com.np.block.R;
+import com.np.block.activity.MainActivity;
 import com.np.block.core.model.Users;
+import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
-
 import java.util.List;
 
 /**
@@ -70,7 +71,11 @@ public class FriendManageAdapter extends BaseQuickAdapter<Users, BaseViewHolder>
             }
         });
         //设置联系好友事件
-        helper.getView(R.id.contact_user).setOnClickListener(v ->
-                Toast.makeText(mContext, "未实现", Toast.LENGTH_SHORT).show());
+        helper.getView(R.id.contact_user).setOnClickListener(v ->{
+            Message message = new Message();
+            message.what = ConstUtils.HANDLER_CHAT_WINDOW;
+            message.arg1 = item.getId();
+            ((MainActivity) mContext).mHandler.sendMessage(message);
+        });
     }
 }

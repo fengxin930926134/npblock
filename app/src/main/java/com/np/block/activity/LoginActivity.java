@@ -663,6 +663,26 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         // 缓存用户数据
         users = usersResult;
         CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, usersResult);
+        // 缓存用户好友信息
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                JSONObject params = new JSONObject();
+                params.put("id", users.getId());
+                JSONObject response = OkHttpUtils.post("/social/friend", params.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                    JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+                    if (objects != null) {
+                        LoggerUtils.toJson(objects.toJSONString());
+                        //适配器数据
+                        List<Users> users = objects.toJavaList(Users.class);
+                        //加入缓存
+                        CacheManager.getInstance().putUsers(ConstUtils.CACHE_USER_FRIEND_INFO, users);
+                    }
+                }
+            } catch (Exception e) {
+                LoggerUtils.e("好友缓存失败：" + e.getMessage());
+            }
+        });
     }
 
     /**

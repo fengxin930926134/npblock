@@ -1,7 +1,6 @@
 package com.np.block.core.manager;
 
 import com.np.block.core.model.Users;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,10 @@ import java.util.Map;
  * @author fengxin
  */
 public class CacheManager {
+    /**缓存map*/
+    private static Map<String, Object> mMap;
+    /**缓存usersList**/
+    private static Map<String, List<Users>> usersMap;
 
     /**私有化内部类 第一次加载类时初始化CacheManager*/
     private static class Inner {
@@ -23,9 +26,6 @@ public class CacheManager {
         return Inner.instance;
     }
 
-    /**缓存map*/
-    private static Map<String, Object> mMap;
-      
     public void put(String key, Object value){
         mMap.put(key, value);
     }  
@@ -42,9 +42,6 @@ public class CacheManager {
     public boolean containsKey(String key) {
         return mMap.containsKey(key);
     }
-
-    /**缓存usersList**/
-    private static Map<String, List<Users>> usersMap;
 
     public void putUsers(String key, List<Users> value){
         usersMap.put(key, value);

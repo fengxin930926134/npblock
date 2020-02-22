@@ -3,8 +3,10 @@ package com.np.block;
 import android.app.Application;
 import android.widget.Toast;
 import com.hyphenate.EMContactListener;
+import com.hyphenate.chat.EMChatManager;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
+import com.hyphenate.exceptions.HyphenateException;
 import com.np.block.activity.MainActivity;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.CacheManager;
@@ -51,11 +53,15 @@ public class NpBlockApplication extends Application {
         EMClient.getInstance().init(getApplicationContext(), options);
         // 默认好友请求是自动同意的，设置为手动同意
         EMClient.getInstance().getOptions().setAcceptInvitationAlways(false);
-        // 在做打包混淆时，关闭debug模式，避免消耗不必要的资源
-        EMClient.getInstance().setDebugMode(false);
         //初始化LitePal 不用一直传递Context参数，简化API
         LitePal.initialize(this);
         initContactListener();
+        try {
+            //开启接受离线通知  这样就能接收到离线消息了
+            EMClient.getInstance().pushManager().enableOfflinePush();
+        } catch (HyphenateException e) {
+            LoggerUtils.e("开启离线消息失败：" + e.getMessage());
+        }
     }
 
     /**
@@ -76,7 +82,7 @@ public class NpBlockApplication extends Application {
                 //打开社交通知
                 MainActivity activity = (MainActivity) ActivityManager.getInstance().getActivity(MainActivity.class);
                 if (activity != null) {
-                    activity.socialNotification();
+                    activity.checkNotification();
                 }
             }
 
@@ -88,7 +94,7 @@ public class NpBlockApplication extends Application {
                 //打开社交通知
                 MainActivity activity = (MainActivity) ActivityManager.getInstance().getActivity(MainActivity.class);
                 if (activity != null) {
-                    activity.socialNotification();
+                    activity.checkNotification();
                 }
             }
 
