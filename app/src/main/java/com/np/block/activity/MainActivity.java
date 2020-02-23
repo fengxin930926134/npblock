@@ -803,6 +803,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     if (NetUtils.hasNetwork(MainActivity.this)){
                         //连接不到聊天服务器
                         LoggerUtils.i("正在连接聊天服务器");
+                        Toast.makeText(context, "无法连接聊天服务器，请退出重试", Toast.LENGTH_LONG).show();
                     }else {
                         //当前网络不可用，请检查网络设置
                         Toast.makeText(context, "当前网络不可用，请检查网络设置", Toast.LENGTH_SHORT).show();

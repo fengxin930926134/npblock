@@ -84,6 +84,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
         @Override
         public void onFinish() {
             LoggerUtils.e("发送胜利时间完毕...还未收到服务器消息");
+            //停止接收服务器消息
+            SocketServerManager.getInstance().stopSocketServer();
         }
     };
     /** 完成胜利条件 向服务器发送完成信息 计时器 第一个参数，第二个参数间隔时间*/
@@ -98,6 +100,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
         @Override
         public void onFinish() {
             LoggerUtils.e("发送失败消息完毕...还未收到服务器消息");
+            //停止接收服务器消息
+            SocketServerManager.getInstance().stopSocketServer();
         }
     };
     /**接收handler消息*/
@@ -120,6 +124,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 beginGame = false;
                 //关闭定时发送数据
                 scheduledFuture.cancel(true);
+                //停止接收服务器消息
+                SocketServerManager.getInstance().stopSocketServer();
                 //游戏胜利
                 DialogUtils.showTextDialog(context, "游戏胜利", "不错不错，不要骄傲", (dialog, which) -> {
                     dialog.cancel();
@@ -131,6 +137,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 beginGame = false;
                 //关闭定时发送数据
                 scheduledFuture.cancel(true);
+                //停止接收服务器消息
+                SocketServerManager.getInstance().stopSocketServer();
                 //游戏失败
                 DialogUtils.showTextDialog(context, "你输了", "菜鸡，别人比你强", (dialog, which) -> {
                     dialog.cancel();
@@ -142,6 +150,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 beginGame = false;
                 //关闭定时发送数据
                 scheduledFuture.cancel(true);
+                //停止接收服务器消息
+                SocketServerManager.getInstance().stopSocketServer();
                 //对方逃跑
                 DialogUtils.showTextDialog(context, "游戏胜利", "对方屈服于您的淫威, 逃跑了", (dialog, which) -> {
                     dialog.cancel();

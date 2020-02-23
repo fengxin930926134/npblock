@@ -3,7 +3,6 @@ package com.np.block;
 import android.app.Application;
 import android.widget.Toast;
 import com.hyphenate.EMContactListener;
-import com.hyphenate.chat.EMChatManager;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
 import com.hyphenate.exceptions.HyphenateException;

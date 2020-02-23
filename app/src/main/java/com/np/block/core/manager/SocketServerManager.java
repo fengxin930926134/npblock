@@ -193,10 +193,6 @@ public class SocketServerManager {
                 socket.send(sendPacket);
                 try {
                     socket.receive(receiverPacket);
-                    // 检查来源
-                    if (!receiverPacket.getAddress().equals(sendAddress)) {
-                        throw new IOException("未知来源");
-                    }
                     // 处理接收到的消息
                     final String reply = new String(receiverData, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
                     Message receiveMsg = JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
@@ -306,11 +302,6 @@ public class SocketServerManager {
                 if (receiveStop) {
                     break;
                 }
-                // 2.检查来源
-                if (!receiverPacket.getAddress().equals(sendAddress)) {
-                    LoggerUtils.e("未知来源消息，已跳过");
-                    continue;
-                }
                 // 3.读取数据
                 final String reply = new String(receiverData, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
                 Message receiveMsg;
@@ -357,8 +348,6 @@ public class SocketServerManager {
                     case GAME_WIN_MESSAGE_TYPE:{
                         //检查是否发送过
                         if (enterGame) {
-                            //停止接收服务器消息
-                            stopSocketServer();
                             // 重置状态
                             resetState();
                             //发送游戏结束消息
@@ -391,7 +380,7 @@ public class SocketServerManager {
     /**
      * 停止Socket服务
      */
-    private void stopSocketServer() {
+    public void stopSocketServer() {
         if (socket != null && !socket.isClosed()) {
             socket.close();
             sendSocket.close();
