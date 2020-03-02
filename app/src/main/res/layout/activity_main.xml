@@ -11,8 +11,8 @@
         android:id="@+id/head_relativeLayout"
         android:layout_width="match_parent"
         android:padding="4dp"
-        android:layout_height="90dp"
-        android:background="@color/colorGrayTransparent">
+        android:layout_height="70dp"
+        android:background="@color/colorWhiteTransparent_15">
 
         <ImageView
             android:id="@+id/head_img"

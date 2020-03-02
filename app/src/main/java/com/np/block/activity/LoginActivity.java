@@ -65,10 +65,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     Button beginGame;
     /**手机登录按钮*/
     @BindView(R.id.phone_login)
-    Button phoneLogin;
+    ImageView phoneLogin;
     /**QQ登录按钮*/
     @BindView(R.id.qq_login)
-    Button qqLogin;
+    ImageView qqLogin;
     /** 区服 */
     @BindView(R.id.district_service)
     TextView districtService;

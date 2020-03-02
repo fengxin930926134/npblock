@@ -23,6 +23,10 @@ import com.np.block.util.OkHttpUtils;
 import com.np.block.util.VerificationUtils;
 import butterknife.BindView;
 
+/**
+ * 输入名字的界面
+ * @author fengxin
+ */
 public class InputNameActivity extends BaseActivity {
 
     @BindView(R.id.name_input_title)

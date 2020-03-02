@@ -10,14 +10,20 @@
     <color name="colorRed_">#FF0000</color>
     <color name="colorGrey">#CFD3DE</color>
     <color name="colorWhite">#FFFFFF</color>
-    <color name="colorWhiteTransparent">#75FFFFFF</color>
+    <color name="colorWhiteTransparent_15">#26FFFFFF</color>
+    <color name="colorWhiteTransparent_46">#75FFFFFF</color>
+    <color name="colorWhiteTransparent_80">#CCFFFFFF</color>
     <color name="colorBlack">#000000</color>
     <color name="colorDarkBlue">#03314D</color>
     <!--  半透明灰底  -->
-    <color name="colorGrayTransparent">#403D3B3B</color>
+    <color name="colorGrayTransparent_25">#403D3B3B</color>
+    <color name="colorGrayTransparent_50">#993D3B3B</color>
     <color name="black_20">#33000000</color>
     <color name="primary">#3C515C</color>
     <!--社交使用的颜色-->
     <color name="accent">#40C4FF</color>
     <color name="frame_search">#ADAEAD</color>
+    <!--进入游戏按钮-->
+    <color name="login">#A29780</color>
+    <color name="login_down">#79693B</color>
 </resources>
