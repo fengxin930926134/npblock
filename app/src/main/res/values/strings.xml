@@ -53,4 +53,7 @@
     <string name="send_text">发送</string>
     <string name="edit_send_text">请输入要发送的内容</string>
     <string name="none_content_text">没有选择聊天会话</string>
+    <string name="shop_text">商店</string>
+    <string name="knapsack_text">背包</string>
+    <string name="attainment_text">成就</string>
 </resources>

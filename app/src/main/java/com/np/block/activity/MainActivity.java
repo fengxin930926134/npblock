@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,6 +56,7 @@ import com.np.block.adapter.FriendApplyAdapter;
 import com.np.block.adapter.FriendManageAdapter;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.GameTypeEnum;
+import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.MessageManager;
@@ -76,6 +79,8 @@ import com.yhao.floatwindow.FloatWindow;
 import com.yhao.floatwindow.MoveType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import butterknife.BindView;
 
 /**
@@ -89,6 +94,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**头像*/
     @BindView(R.id.head_img)
     ImageView headImg;
+    /**性别*/
+    @BindView(R.id.sex)
+    ImageView sexImg;
     /**主页的用户游戏名字*/
     @BindView(R.id.user_name)
     TextView userName;
@@ -240,13 +248,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void init() {
         users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+        // 初始化性别图标
+        initSexImg(users.getSex());
         // 初始化用户名
         userName.setText(users.getGameName() != null ? users.getGameName(): getResources().getString(R.string.app_name));
         // 初始化点击事件
         classic.setOnClickListener(this);
         battle.setOnClickListener(this);
         interest.setOnClickListener(this);
-        viewLeaderboards.setText(">");
         viewLeaderboards.setOnClickListener(this);
         social.setOnClickListener(this);
         talk.setOnClickListener(this);
@@ -598,8 +607,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 排行榜动画事件
      */
     private void rankAnimEvent() {
-        String e = ">";
-        if (viewLeaderboards.getText().toString().equals(e)) {
+        Drawable background = viewLeaderboards.getBackground();
+        Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.mipmap.rank_left, null);
+        if (drawable == null || drawable.getConstantState() == null) {
+            return;
+        }
+        //判断是否为未点击过状态
+        if (!Objects.equals(background.getConstantState(), drawable.getConstantState())) {
             final int left = leftLinearRank.getLeft();
             final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
             rankAnimator.setDuration(250);
@@ -611,7 +625,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 leftLinearRank.setLayoutParams(layoutParams);
             });
             rankAnimator.start();
-            viewLeaderboards.setText("<");
+            //设置为点击过后状态
+            viewLeaderboards.setBackground(drawable);
         } else {
             final int left = leftLinearRank.getLeft();
             final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
@@ -624,7 +639,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 leftLinearRank.setLayoutParams(layoutParams);
             });
             rankAnimator.start();
-            viewLeaderboards.setText(">");
+            //设置为未点击状态
+            viewLeaderboards.setBackground(ResourcesCompat.getDrawable(getResources(), R.mipmap.rank_right, null));
         }
     }
 
@@ -917,5 +933,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 LoggerUtils.e("好友缓存失败：" + e.getMessage());
             }
         });
+    }
+
+    /**
+     * 初始化性别图标
+     * @param sex 性别
+     */
+    private void initSexImg(Integer sex){
+        //默认男图标 判断是否性别女
+        if (sex != null && SexTypeEnum.getEnumByCode(sex).equals(SexTypeEnum.FEMALE)) {
+            sexImg.setBackground(ResourcesCompat.getDrawable(getResources(), R.mipmap.girl, null));
+        }
     }
 }

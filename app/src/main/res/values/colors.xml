@@ -18,7 +18,7 @@
     <!--  半透明灰底  -->
     <color name="colorGrayTransparent_25">#403D3B3B</color>
     <color name="colorGrayTransparent_50">#993D3B3B</color>
-    <color name="black_20">#33000000</color>
+    <color name="black_20">#80000000</color>
     <color name="primary">#3C515C</color>
     <!--社交使用的颜色-->
     <color name="accent">#40C4FF</color>
@@ -26,4 +26,5 @@
     <!--进入游戏按钮-->
     <color name="login">#A29780</color>
     <color name="login_down">#79693B</color>
+    <color name="blue_bg_40">#66009DDA</color>
 </resources>
