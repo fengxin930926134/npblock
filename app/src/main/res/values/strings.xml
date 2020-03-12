@@ -34,7 +34,7 @@
     <string name="input_name_true_text">创建角色</string>
     <string name="rush_mode_text">闯关模式</string>
     <string name="_2048_mode_text">2048模式</string>
-    <string name="single_player_game_text">单人匹配</string>
+    <string name="single_player_game_text">单人排位</string>
     <string name="battle_score_text">当前分数：</string>
     <string name="zero_initial">0</string>
     <string name="one_initial">1</string>
@@ -56,4 +56,5 @@
     <string name="shop_text">商店</string>
     <string name="knapsack_text">背包</string>
     <string name="attainment_text">成就</string>
+    <string name="two_player_game_text">双人排位</string>
 </resources>

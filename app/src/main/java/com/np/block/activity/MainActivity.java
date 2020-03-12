@@ -615,7 +615,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //判断是否为未点击过状态
         if (!Objects.equals(background.getConstantState(), drawable.getConstantState())) {
             final int left = leftLinearRank.getLeft();
-            final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
+            final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 300));
             rankAnimator.setDuration(250);
             rankAnimator.setInterpolator(new DecelerateInterpolator());
             rankAnimator.addUpdateListener(animation -> {
@@ -629,7 +629,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             viewLeaderboards.setBackground(drawable);
         } else {
             final int left = leftLinearRank.getLeft();
-            final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 200));
+            final ValueAnimator rankAnimator = ValueAnimator.ofInt(1, ResolutionUtils.dp2Px(context, 300));
             rankAnimator.setDuration(250);
             rankAnimator.setInterpolator(new LinearInterpolator());
             rankAnimator.addUpdateListener(animation -> {
@@ -669,8 +669,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         View view = View.inflate(context, R.layout.alert_dialog_battle, null);
         //设置取消按钮
         view.findViewById(R.id.alert_battle_finish).setOnClickListener(v -> dialog.cancel());
-        //设置单人匹配按钮
-        view.findViewById(R.id.alert_battle).setOnClickListener(v -> {
+        //设置单人按钮
+        view.findViewById(R.id.single_player_game).setOnClickListener(v -> {
             int version = 23;
             if (Build.VERSION.SDK_INT >= version) {
                 if (!Settings.canDrawOverlays(this)) {
@@ -700,6 +700,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             });
         });
+        //设置双人游戏
         dialog.setContentView(view);
     }
 
@@ -882,7 +883,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     .setView(gameChronometerLayout)
                     //设置控件初始位置
                     .setX(right)
-                    .setY(10)
+                    .setY(60)
                     //桌面是否显示
                     .setDesktopShow(false)
                     .setMoveType(MoveType.slide)

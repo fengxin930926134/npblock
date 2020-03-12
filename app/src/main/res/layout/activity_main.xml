@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@mipmap/x1002">
 
@@ -12,7 +13,7 @@
         android:layout_width="match_parent"
         android:padding="4dp"
         android:layout_height="70dp"
-        android:background="@color/colorWhiteTransparent_15">
+        android:background="@color/colorBlack_10">
         <!--头像-->
         <ImageView
             android:id="@+id/head_img"
@@ -107,9 +108,9 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_centerInParent="true"
             android:textSize="16pt"
-            android:background="@drawable/bg_1"
             android:text="@string/battle_block_text"/>
 
         <!--中间分割点-->
@@ -125,12 +126,13 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:text="@string/classic_block_text"
-            android:textSize="13pt"
+            android:textSize="10pt"
             android:layout_above="@+id/battle_block"
             android:layout_toEndOf="@+id/middle_content_middle"
             android:layout_alignEnd="@+id/battle_block"
             android:layout_marginBottom="30dp"
-            android:background="@mipmap/lou_ti"/>
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"/>
 
         <!--趣味模式-->
         <Button
@@ -139,13 +141,13 @@
             android:layout_height="120dp"
             android:text="@string/interest_block_text"
             android:textColor="@color/colorWhite"
-            android:textSize="13pt"
+            android:textSize="10pt"
             android:layout_marginEnd="35dp"
             android:layout_above="@+id/battle_block"
             android:layout_toStartOf="@+id/middle_content_middle"
             android:layout_alignStart="@+id/battle_block"
             android:layout_marginBottom="30dp"
-            android:background="@mipmap/tai_yang"/>
+            android:background="@drawable/btn_black"/>
 
         <!--任务-->
         <Button
@@ -153,25 +155,27 @@
             android:layout_width="match_parent"
             android:layout_height="90dp"
             android:text="@string/task_text"
-            android:textSize="15pt"
+            android:textSize="10pt"
             android:layout_below="@+id/battle_block"
             android:layout_alignStart="@+id/battle_block"
             android:layout_toStartOf="@+id/punch"
             android:layout_marginTop="30dp"
-            android:layout_marginEnd="30dp"
-            android:background="@mipmap/lou_ti"/>
+            android:layout_marginEnd="60dp"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"/>
 
-        <!--任务-->
+        <!--签到-->
         <Button
             android:id="@+id/punch"
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:text="@string/punch_text"
             android:textSize="10pt"
+            android:textColor="@color/colorWhite"
             android:layout_below="@+id/battle_block"
             android:layout_alignEnd="@id/battle_block"
             android:layout_marginTop="30dp"
-            android:background="@mipmap/lou_ti"/>
+            android:background="@drawable/btn_black"/>
 
         <!--聊天-->
         <ImageButton
@@ -200,7 +204,7 @@
     <LinearLayout
         android:id="@+id/rear_linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:background="@color/colorGrayTransparent_25"
         android:baselineAligned="false">
@@ -324,22 +328,47 @@
         android:id="@+id/left_linear_rank"
         android:layout_alignParentBottom="true"
         android:background="@color/colorGrayTransparent_50"
-        android:layout_marginStart="-200dp"
-        android:layout_width="200dp"
+        android:layout_marginStart="-300dp"
+        android:layout_width="300dp"
         android:layout_centerVertical="true"
         android:layout_height="400dp">
 
-        <FrameLayout
-            android:id="@+id/tab"
+        <LinearLayout
+            android:id="@+id/header"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primary"/>
+            android:background="@color/primary">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="?attr/actionBarSize"
+                app:title="排行榜"
+                app:titleTextColor="@color/colorWhite"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            </androidx.appcompat.widget.Toolbar>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_20"/>
+
+            <FrameLayout
+                android:id="@+id/tab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/tab"/>
+            android:layout_below="@+id/header"/>
 
     </RelativeLayout>
 
