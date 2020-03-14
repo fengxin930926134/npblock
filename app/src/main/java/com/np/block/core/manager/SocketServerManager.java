@@ -3,11 +3,14 @@ package com.np.block.core.manager;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.text.TextUtils;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.core.enums.GameOverTypeEnum;
 import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.MessageTypeEnum;
 import com.np.block.core.model.Message;
+import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
@@ -18,6 +21,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 对战模式Socket服务管理类
@@ -339,7 +344,7 @@ public class SocketServerManager {
                                 countDownTimer.cancel();
                                 android.os.Message msg = new android.os.Message();
                                 msg.what = ConstUtils.HANDLER_ENTER_THE_GAME;
-                                msg.obj = "当前确认人数: " + message.getConfirmNum() + "人\n即将进入游戏";
+                                msg.obj = "当前确认人数: 2 人\n即将进入游戏";
                                 handler.sendMessage(msg);
                             }
                         }
@@ -389,14 +394,41 @@ public class SocketServerManager {
         }
     }
 
+    /**
+     * 获取对局用户信息保存在缓存中
+     */
+    public void getUserBattleInfo() {
+        ThreadPoolManager.getInstance().execute(() -> {
+            JSONObject param = new JSONObject();
+            param.put("key", message.getKey());
+            try {
+                JSONObject response = OkHttpUtils.post("/match/getMsg", param.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                    JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+                    if (objects != null) {
+                        //用户信息
+                        List<Users> users = objects.toJavaList(Users.class);
+                        //保存到缓存中
+                        CacheManager.getInstance().putUsers(ConstUtils.CACHE_USER_BATTLE_INFO, users);
+                    }
+                } else {
+                    LoggerUtils.e(response.getString(ConstUtils.MSG));
+                }
+            } catch (Exception e) {
+                LoggerUtils.e("获取对局用户信息错误：" + e.getMessage());
+            }
+        });
+    }
+
     private SocketServerManager() {
         try {
             sendAddress = InetAddress.getByName(ConstUtils.HOST);
         } catch (IOException e) {
             LoggerUtils.i(e.getMessage());
         }
+        Users users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         message = new Message();
-        message.setId(RandomUtils.getUUID());
+        message.setId(users.getId().toString());
         receiverData = new byte[RECEIVER_SIZE];
         receiverPort = OkHttpUtils.getNotOccupyPort();
         receiverPacket = new DatagramPacket(receiverData, receiverData.length);

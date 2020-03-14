@@ -117,8 +117,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     TextView social;
     @BindView(R.id.social_notification)
     View socialNotification;
+    /**聊天弹窗*/
     @BindView(R.id.talk)
     ImageButton talk;
+    /**成就*/
+    @BindView(R.id.attainment)
+    TextView attainment;
     /**左边的排行榜整体*/
     @BindView(R.id.left_linear_rank)
     RelativeLayout leftLinearRank;
@@ -259,6 +263,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         viewLeaderboards.setOnClickListener(this);
         social.setOnClickListener(this);
         talk.setOnClickListener(this);
+        attainment.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
         //排行榜
@@ -314,6 +319,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.talk:{
                 MessageManager.getInstance().showMessageDialog(this, null);
+                break;
+            }
+            case R.id.attainment: {
+                startActivity(new Intent(context, GameOverActivity.class));
                 break;
             }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
@@ -555,6 +564,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
+            LoggerUtils.i("初始化接收匹配队列消息的Handler");
             //初始化接收匹配队列消息的Handler
             SocketServerManager.getInstance().setHandler(mHandler);
         }
@@ -796,6 +806,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         headImg.setOnClickListener(v -> {
             //测试
+            Toast.makeText(context, "没实现东西", Toast.LENGTH_SHORT).show();
             LoggerUtils.i(String.valueOf(classicRankAdapter == null));
         });
     }

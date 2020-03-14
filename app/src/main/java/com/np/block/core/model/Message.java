@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 public class Message {
-    /**唯一标识个人 由客户端随机生成*/
+    /**唯一标识个人 userId*/
     private String id;
     /**唯一标识队伍*/
     private String key;

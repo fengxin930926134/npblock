@@ -1,14 +1,19 @@
 package com.np.block.activity;
 
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseGameActivity;
 import com.np.block.base.BaseTetrisView;
+import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
@@ -66,6 +71,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
 
         @Override
         public void onFinish() {
+            //获取对战用户信息
+            SocketServerManager.getInstance().getUserBattleInfo();
             //启动游戏
             startDownThread();
             //启动定时发送数据线程
@@ -129,7 +136,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 //游戏胜利
                 DialogUtils.showTextDialog(context, "游戏胜利", "不错不错，不要骄傲", (dialog, which) -> {
                     dialog.cancel();
-                    ActivityManager.getInstance().removeActivity(this);
+                    startGameSettlement(true);
                 });
                 break;
             }
@@ -142,7 +149,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 //游戏失败
                 DialogUtils.showTextDialog(context, "你输了", "菜鸡，别人比你强", (dialog, which) -> {
                     dialog.cancel();
-                    ActivityManager.getInstance().removeActivity(this);
+                    startGameSettlement(false);
                 });
                 break;
             }
@@ -155,7 +162,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 //对方逃跑
                 DialogUtils.showTextDialog(context, "游戏胜利", "对方屈服于您的淫威, 逃跑了", (dialog, which) -> {
                     dialog.cancel();
-                    ActivityManager.getInstance().removeActivity(this);
+                    startGameSettlement(true);
                 });
                 break;
             }
@@ -251,7 +258,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 (dialog, which) -> dialog.cancel(), (dialog, which) -> {
                     ThreadPoolManager.getInstance().execute(() -> SocketServerManager.getInstance().gameOver());
                     dialog.cancel();
-                    ActivityManager.getInstance().removeActivity(this);
+                    startGameSettlement(false);
                 }
         );
     }
@@ -270,5 +277,36 @@ public class SinglePlayerActivity extends BaseGameActivity {
             // 发送消息
             SocketServerManager.getInstance().sendGameMessage(jsonObject.toJSONString());
         }, 500, GAME_DELAY, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 去往游戏结算界面
+     * @param win 是否胜利
+     */
+    private void startGameSettlement(boolean win) {
+        //0.5秒圆圈
+        AlertDialog dialog = DialogUtils.showDialog(context);
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                Thread.sleep(500);
+                dialog.cancel();
+                Intent intent = new Intent(SinglePlayerActivity.this, GameOverActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString(ConstUtils.GAME_TYPE, GameTypeEnum.SINGLE_PLAYER_GAME.getCode());
+                bundle.putBoolean(ConstUtils.GAME_WIN, win);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 1);
+            } catch (InterruptedException e) {
+                LoggerUtils.e(e.getMessage());
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            ActivityManager.getInstance().removeActivity(this);
+        }
     }
 }

@@ -110,6 +110,11 @@ public class ConstUtils {
     public static final String CACHE_USER_FRIEND_INFO = "cache_user_friend_info";
 
     /**
+     * 缓存 对战信息
+     */
+    public static final String CACHE_USER_BATTLE_INFO = "cache_user_battle_info";
+
+    /**
      * 请求url
      */
     static final String URL = "https://npblock.cn";
@@ -183,6 +188,16 @@ public class ConstUtils {
      * json数据key 敌人成绩
      */
     public static final String JSON_KEY_ENEMY_SCORE = "json_key_enemy_score";
+
+    /**
+     * 游戏类型
+     */
+    public static final String GAME_TYPE = "game_type";
+
+    /**
+     * 游戏是否胜利
+     */
+    public static final String GAME_WIN = "game_win";
 
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

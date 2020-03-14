@@ -57,4 +57,8 @@
     <string name="knapsack_text">背包</string>
     <string name="attainment_text">成就</string>
     <string name="two_player_game_text">双人排位</string>
+    <string name="back_main_page_text">回到主页</string>
+    <string name="another_round_text">再来一局</string>
+    <string name="fail">失败</string>
+    <string name="win_text">胜利</string>
 </resources>
