@@ -15,11 +15,14 @@ import com.np.block.base.BaseGameActivity;
 import com.np.block.base.BaseTetrisView;
 import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.manager.ActivityManager;
+import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
+import com.np.block.util.OkHttpUtils;
 import com.np.block.view.SinglePlayerEnemyView;
 import com.np.block.view.SinglePlayerView;
 import java.util.concurrent.ScheduledFuture;
@@ -56,6 +59,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
     TextView scoreEnemy;
     /**胜利时间 不处理时区*/
     private long winTime;
+    /**游戏时长*/
+    private long gameTime;
     /**定时任务*/
     private ScheduledFuture<?> scheduledFuture;
     /** 开局倒计时 计时器 第一个参数总时间，第二个参数间隔时间*/
@@ -190,6 +195,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
         SocketServerManager.getInstance().setHandler(mHandler);
         //启动倒计时操作
         countDownTimer.start();
+        //记录游戏开始时间
+        gameTime = System.currentTimeMillis();
     }
 
     @Override
@@ -276,7 +283,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
             jsonObject.put(ConstUtils.JSON_KEY_TETRIS_BLOCK, singlePlayerView.getTetrisSmall());
             // 发送消息
             SocketServerManager.getInstance().sendGameMessage(jsonObject.toJSONString());
-        }, 500, GAME_DELAY, TimeUnit.MILLISECONDS);
+        }, 1000, GAME_DELAY, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -284,19 +291,38 @@ public class SinglePlayerActivity extends BaseGameActivity {
      * @param win 是否胜利
      */
     private void startGameSettlement(boolean win) {
+        if (!scheduledFuture.isCancelled()) {
+            scheduledFuture.cancel(true);
+        }
         //0.5秒圆圈
         AlertDialog dialog = DialogUtils.showDialog(context);
+        Users user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         ThreadPoolManager.getInstance().execute(() -> {
             try {
-                Thread.sleep(500);
-                dialog.cancel();
+                gameTime = System.currentTimeMillis() - gameTime;
+                JSONObject params = new JSONObject();
+                params.put(ConstUtils.GAME_TIME, gameTime);
+                params.put("win", win);
+                params.put("recordId", user.getRankId());
+                params.put("id", user.getId());
+                JSONObject response = OkHttpUtils.post("/rank/uploadRank", params.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
+                    throw new Exception(response.getString(ConstUtils.MSG));
+                }
+                JSONObject result = response.getJSONObject(ConstUtils.RESULT);
+                LoggerUtils.toJson(result.toJSONString());
                 Intent intent = new Intent(SinglePlayerActivity.this, GameOverActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString(ConstUtils.GAME_TYPE, GameTypeEnum.SINGLE_PLAYER_GAME.getCode());
                 bundle.putBoolean(ConstUtils.GAME_WIN, win);
+                bundle.putLong(ConstUtils.GAME_TIME, gameTime);
+                bundle.putInt(ConstUtils.GAME_BLOCK, result.getIntValue(ConstUtils.GAME_BLOCK));
+                bundle.putInt(ConstUtils.GAME_RANK, result.getIntValue(ConstUtils.GAME_RANK));
+                bundle.putString(ConstUtils.GAME_RANK_STATE, result.getString(ConstUtils.GAME_RANK_STATE));
                 intent.putExtras(bundle);
+                dialog.cancel();
                 startActivityForResult(intent, 1);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 LoggerUtils.e(e.getMessage());
             }
         });
@@ -306,6 +332,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
+            setResult(resultCode, getIntent());
             ActivityManager.getInstance().removeActivity(this);
         }
     }

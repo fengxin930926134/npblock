@@ -3,7 +3,6 @@ package com.np.block.core.manager;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.text.TextUtils;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.core.enums.GameOverTypeEnum;
@@ -14,7 +13,6 @@ import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
-import com.np.block.util.RandomUtils;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
@@ -69,6 +67,9 @@ public class SocketServerManager {
         @Override
         public void onTick(long millisUntilFinished) {
             long second = millisUntilFinished / 1000 - 1;
+            if (second < 0) {
+                second = 0;
+            }
             String s2 = "倒计时 " + second + " 秒";
             String s1 = "当前确认人数: " + message.getConfirmNum() + "人\n".concat(s2);
             //发送s1
@@ -117,22 +118,20 @@ public class SocketServerManager {
      * @param msg msg
      */
     public void sendGameMessage(String msg) {
-        ThreadPoolManager.getInstance().execute(() -> {
-            if (!TextUtils.isEmpty(msg)) {
-                message.setMsg(msg);
-            } else {
-               return;
-            }
-            message.setMessageType(MessageTypeEnum.GAME_MESSAGE_TYPE);
-            byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
-            DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
-            try {
-                //向服务器端发送数据报
-                sendSocket.send(packet);
-            } catch (Exception e) {
-                LoggerUtils.e("sendGameMessage:" + e.getMessage());
-            }
-        });
+        if (!TextUtils.isEmpty(msg)) {
+            message.setMsg(msg);
+        } else {
+            return;
+        }
+        message.setMessageType(MessageTypeEnum.GAME_MESSAGE_TYPE);
+        byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+        DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
+        try {
+            //向服务器端发送数据报
+            sendSocket.send(packet);
+        } catch (Exception e) {
+            LoggerUtils.e("sendGameMessage:" + e.getMessage());
+        }
     }
 
     /**
@@ -410,6 +409,8 @@ public class SocketServerManager {
                         List<Users> users = objects.toJavaList(Users.class);
                         //保存到缓存中
                         CacheManager.getInstance().putUsers(ConstUtils.CACHE_USER_BATTLE_INFO, users);
+                    } else {
+                        CacheManager.getInstance().putUsers(ConstUtils.CACHE_USER_BATTLE_INFO, new ArrayList<>());
                     }
                 } else {
                     LoggerUtils.e(response.getString(ConstUtils.MSG));

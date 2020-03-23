@@ -126,6 +126,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**左边的排行榜整体*/
     @BindView(R.id.left_linear_rank)
     RelativeLayout leftLinearRank;
+    /**方块币*/
+    @BindView(R.id.block_num)
+    TextView blockNum;
+    /**段位*/
+    @BindView(R.id.rankText)
+    TextView rankText;
     /**计时器*/
     private Chronometer gameChronometer;
     /**经典模式排行榜适配器*/
@@ -251,7 +257,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void init() {
-        users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+        refreshBlockAndRank();
         // 初始化性别图标
         initSexImg(users.getSex());
         // 初始化用户名
@@ -567,6 +573,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             LoggerUtils.i("初始化接收匹配队列消息的Handler");
             //初始化接收匹配队列消息的Handler
             SocketServerManager.getInstance().setHandler(mHandler);
+            if (resultCode == RESULT_OK) {
+                AlertDialog alertDialog = DialogUtils.showDialog(context);
+                ThreadPoolManager.getInstance().execute(() -> {
+                    try {
+                        Thread.sleep(800);
+                    } catch (InterruptedException e) {
+                        LoggerUtils.e(e.getMessage());
+                    }
+                    alertDialog.cancel();
+                    //再来一局
+                    startSinglePlayer();
+                });
+            }
+            refreshBlockAndRank();
         }
     }
 
@@ -681,37 +701,44 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.findViewById(R.id.alert_battle_finish).setOnClickListener(v -> dialog.cancel());
         //设置单人按钮
         view.findViewById(R.id.single_player_game).setOnClickListener(v -> {
-            int version = 23;
-            if (Build.VERSION.SDK_INT >= version) {
-                if (!Settings.canDrawOverlays(this)) {
-                    //若未授权则请求权限
-                    Toast.makeText(context, "需要悬浮窗权限", Toast.LENGTH_SHORT).show();
-                    getOverlayPermission();
-                }
-            }
             dialog.cancel();
-            if (enterSuccess) {
-                return;
-            }
-            enterSuccess = true;
-            //进入匹配
-            ThreadPoolManager.getInstance().execute(() -> {
-                if (SocketServerManager.getInstance().enterMatchQueue(GameTypeEnum.SINGLE_PLAYER_GAME)) {
-                    runOnUiThread(() -> {
-                        FloatWindow.get().show();
-                        gameChronometer.setBase(SystemClock.elapsedRealtime());
-                        //开始计时
-                        gameChronometer.start();
-                        Toast.makeText(context, "进入队列", Toast.LENGTH_SHORT).show();
-                    });
-                } else {
-                    runOnUiThread(() -> Toast.makeText(context, "请检查网络连接是否正常", Toast.LENGTH_SHORT).show());
-                    enterSuccess = false;
-                }
-            });
+            startSinglePlayer();
         });
         //设置双人游戏
         dialog.setContentView(view);
+    }
+
+    /**
+     * 开始单人排位匹配
+     */
+    private void startSinglePlayer() {
+        int version = 23;
+        if (Build.VERSION.SDK_INT >= version) {
+            if (!Settings.canDrawOverlays(this)) {
+                //若未授权则请求权限
+                Toast.makeText(context, "需要悬浮窗权限", Toast.LENGTH_SHORT).show();
+                getOverlayPermission();
+            }
+        }
+        if (enterSuccess) {
+            return;
+        }
+        enterSuccess = true;
+        //进入匹配
+        ThreadPoolManager.getInstance().execute(() -> {
+            if (SocketServerManager.getInstance().enterMatchQueue(GameTypeEnum.SINGLE_PLAYER_GAME)) {
+                runOnUiThread(() -> {
+                    FloatWindow.get().show();
+                    gameChronometer.setBase(SystemClock.elapsedRealtime());
+                    //开始计时
+                    gameChronometer.start();
+                    Toast.makeText(context, "进入队列", Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                runOnUiThread(() -> Toast.makeText(context, "请检查网络连接是否正常", Toast.LENGTH_SHORT).show());
+                enterSuccess = false;
+            }
+        });
     }
 
     @Override
@@ -894,7 +921,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     .setView(gameChronometerLayout)
                     //设置控件初始位置
                     .setX(right)
-                    .setY(60)
+                    .setY(100)
                     //桌面是否显示
                     .setDesktopShow(false)
                     .setMoveType(MoveType.slide)
@@ -956,5 +983,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (sex != null && SexTypeEnum.getEnumByCode(sex).equals(SexTypeEnum.FEMALE)) {
             sexImg.setBackground(ResourcesCompat.getDrawable(getResources(), R.mipmap.girl, null));
         }
+    }
+
+    /**
+     * 刷新方块币和排位成绩
+     */
+    private void refreshBlockAndRank() {
+        users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+        blockNum.setText(users.getWalletBlock() != null ? users.getWalletBlock().toString(): "0");
+        rankText.setText(ConstUtils.getRankName(users.getRankScore()));
     }
 }

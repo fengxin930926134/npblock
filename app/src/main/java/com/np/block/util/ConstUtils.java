@@ -30,6 +30,11 @@ public class ConstUtils {
     public static final int CODE_ERROR = 80007;
 
     /**
+     * 游戏进行的时长
+     */
+    public static final String GAME_TIME = "gameTime";
+
+    /**
      * 状态码 成功
      */
     static final int STATUS_SUCCESS = 200;
@@ -198,6 +203,59 @@ public class ConstUtils {
      * 游戏是否胜利
      */
     public static final String GAME_WIN = "game_win";
+
+    /**
+     * 方块币
+     */
+    public static final String GAME_BLOCK = "block";
+
+    /**
+     * rank状态类型
+     */
+    public static final String GAME_RANK_STATE = "rankStateType";
+
+    /**
+     * rank变化分数
+     */
+    public static final String GAME_RANK = "rank";
+
+    /**
+     * 获取当前段位名称
+     *
+     * @param rankGrade rank分
+     */
+    public static String getRankName(int rankGrade) {
+        int rank = rankGrade;
+        //是否晋级赛
+        if (rank > 1000) {
+            boolean promotion = ((rankGrade % 100) == 0);
+            if (promotion) {
+                rank = rank - 1;
+            }
+        }
+        rank = rank - rank % 100;
+        switch (rank) {
+            case 1000: return "英勇黄铜Ⅲ";
+            case 1100: return "英勇青铜Ⅱ";
+            case 1200: return "英勇青铜Ⅰ";
+            case 1300: return "不屈白银Ⅲ";
+            case 1400: return "不屈白银Ⅱ";
+            case 1500: return "不屈白银Ⅰ";
+            case 1600: return "荣耀黄金Ⅲ";
+            case 1700: return "荣耀黄金Ⅱ";
+            case 1800: return "荣耀黄金Ⅰ";
+            case 1900: return "华贵白金Ⅲ";
+            case 2000: return "华贵白金Ⅱ";
+            case 2100: return "华贵白金Ⅰ";
+            case 2200: return "璀璨钻石Ⅲ";
+            case 2300: return "璀璨钻石Ⅱ";
+            case 2400: return "璀璨钻石Ⅰ";
+            default: {
+                //此时超出限制分数 用逗号分割记录超过的分数
+                return "最强王者，".concat(Integer.valueOf(rankGrade - 2500).toString());
+            }
+        }
+    }
 
     private ConstUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

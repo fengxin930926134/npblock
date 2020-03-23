@@ -17,6 +17,7 @@ import butterknife.BindView;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
@@ -457,13 +458,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 alertDialog = DialogUtils.showDialog(context);
                 //请求login接口  通过线程休眠来保证能获取到name 但并不是一个好的解决办法
                 ThreadPoolManager.getInstance().execute(() -> {
-                    int number = 40;
+                    int number = 60;
                     while (name == null) {
                         number --;
                         try {
-                            Thread.sleep(200);
+                            Thread.sleep(1000);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            LoggerUtils.i("获取用户name失败：" + e.getMessage());
                         }
                         if (number <= 0){
                             break;
@@ -475,6 +476,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         users.setName(name);
                         users.setHeadSculpture(figureUrl);
                         users.setSex("女".equals(gender)? 2: 1);
+                        LoggerUtils.toJson(JSON.toJSONString(users));
                         try {
                             JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
                             //解析返回数据
@@ -500,7 +502,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 alertDialog.dismiss();
                                 alertDialog = null;
                             }
-                            Toast.makeText(context, "请求服务器超时", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "获取用户信息失败，请重试", Toast.LENGTH_SHORT).show();
                         });
                     }
                 });
@@ -650,7 +652,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 登录成功处理数据
      * @param data 数据
      */
-    private void loginSuccess(JSONObject data) {
+    private void loginSuccess(JSONObject data) throws Exception {
         Users usersResult = data.getObject("result", Users.class);
         //登陆环信
         loginEmClient(usersResult.getId(), usersResult.getToken());
@@ -661,8 +663,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         // 更新ui
         updateUiAfterLogin(usersResult.getName());
         // 缓存用户数据
+        JSONObject param = new JSONObject();
+        param.put("rankRecordId", usersResult.getRankId());
+        JSONObject post = OkHttpUtils.post("/rank/record", param.toJSONString());
+        if (post.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
+            throw new Exception(post.getString(ConstUtils.MSG));
+        }
+        JSONObject result = post.getJSONObject(ConstUtils.RESULT);
+        int rankScore = result.getIntValue("rankScore");
+        usersResult.setRankScore(rankScore);
         users = usersResult;
         CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, usersResult);
+        LoggerUtils.i(users.toString());
         // 缓存用户好友信息
         ThreadPoolManager.getInstance().execute(() -> {
             try {

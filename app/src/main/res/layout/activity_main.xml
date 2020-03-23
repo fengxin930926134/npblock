@@ -44,6 +44,15 @@
             android:layout_alignTop="@+id/user_name"
             android:background="@mipmap/man"
             android:contentDescription="@string/app_name" />
+        <TextView
+            android:id="@+id/rankText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/head_img"
+            android:layout_marginStart="5dp"
+            android:layout_marginBottom="5dp"
+            android:textColor="@color/golden"/>
 
         <View
             android:id="@+id/head_half"
