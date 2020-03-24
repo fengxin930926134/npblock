@@ -3,8 +3,10 @@ package com.np.block.activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.np.block.R;
@@ -39,6 +41,17 @@ public class GameOverActivity extends BaseActivity implements View.OnClickListen
     RecyclerView winRecyclerView;
     @BindView(R.id.defeatedRecyclerView)
     RecyclerView defeatedRecyclerView;
+    @BindView(R.id.winning_or_losing)
+    ImageView winningOrLosing;
+    /**进入晋级赛图标*/
+    @BindView(R.id.rankUpgrade)
+    ImageView rankUpgrade;
+    /**掉段图标*/
+    @BindView(R.id.rankDowngrade)
+    ImageView rankDowngrade;
+    /**晋级提示文本 默认失败*/
+    @BindView(R.id.promotion)
+    TextView promotion;
     /**回到主页*/
     @BindView(R.id.back_main_page)
     Button backMainPage;
@@ -69,19 +82,58 @@ public class GameOverActivity extends BaseActivity implements View.OnClickListen
             users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
             int gameRank = extras.getInt(ConstUtils.GAME_RANK, 0);
             int gameBlock = extras.getInt(ConstUtils.GAME_BLOCK, 0);
-            String string = extras.getString(ConstUtils.GAME_RANK_STATE, RankStateTypeEnum.DEFAULT.getCode());
+            //段位状态
+            String rankState = extras.getString(ConstUtils.GAME_RANK_STATE, RankStateTypeEnum.DEFAULT.getCode());
             long gameTime = extras.getLong(ConstUtils.GAME_TIME, 0);
-            //rank分变化情况
-            String zeng = " ";
+            //rank分变化情况文本
+            String symbol = " ";
             if (extras.getBoolean(ConstUtils.GAME_WIN)) {
-                zeng = " +";
+                symbol = " +";
+            } else {
+                //判断是否是掉段
+                boolean isDown = users.getRankScore()%100 + gameRank < 0;
+                if (isDown) {
+                    //显示掉段信息
+                    rankDowngrade.setVisibility(View.VISIBLE);
+                }
             }
-            String rankText = ConstUtils.getRankName(users.getRankScore() + gameRank)
-                    + " (" + users.getRankScore()%100 + zeng + gameRank + ")";
-            if (!RankStateTypeEnum.getEnumByCode(string).equals(RankStateTypeEnum.DEFAULT)) {
-                rankText = rankText + " " + string;
+            StringBuilder rankText = new StringBuilder();
+            //补充排位状态信息
+            switch (RankStateTypeEnum.getEnumByCode(rankState)) {
+                case DEFAULT: {
+                    users.setRiseInRank(false);
+                    rankText.append( ConstUtils.getRankName(users.getRankScore() + gameRank, users.getRiseInRank()))
+                            .append(" (").append(users.getRankScore() % 100).append(symbol)
+                            .append(gameRank).append(")");
+                    break;
+                }
+                case PROMOTION_SUCCESS_TYPE: {
+                    users.setRiseInRank(false);
+                    rankText.append( ConstUtils.getRankName(users.getRankScore() + gameRank, users.getRiseInRank()))
+                            .append(" (0)");
+                    promotion.setVisibility(View.VISIBLE);
+                    //修改提示文本
+                    promotion.setText("晋级成功");
+                    promotion.setTextColor(ResourcesCompat.getColor(getResources(), R.color.colorGreen, null));
+                    break;
+                }
+                case GET_INTO_PROMOTION_TYPE: {
+                    users.setRiseInRank(true);
+                    rankText.append(ConstUtils.getRankName(users.getRankScore() + gameRank, users.getRiseInRank()))
+                            .append(" (").append(users.getRankScore() % 100).append(symbol).append(gameRank).append(")");
+                    rankUpgrade.setVisibility(View.VISIBLE);
+                    break;
+                }
+                case PROMOTION_DEFEATED_TYPE: {
+                    users.setRiseInRank(false);
+                    rankText.append(ConstUtils.getRankName(users.getRankScore() + gameRank, users.getRiseInRank()))
+                            .append(" (100").append(symbol).append(gameRank).append(")");
+                    promotion.setVisibility(View.VISIBLE);
+                    break;
+                }
+                    default:
             }
-            rankIncreaseDecrease.setText(rankText);
+            rankIncreaseDecrease.setText(rankText.toString());
             //金币变化情况
             String blockText = "方块币 +" + gameBlock;
             blockIncrease.setText(blockText);
@@ -97,6 +149,7 @@ public class GameOverActivity extends BaseActivity implements View.OnClickListen
                 }
                 if (extras.getBoolean(ConstUtils.GAME_WIN)) {
                     //胜利
+                    winningOrLosing.setBackground(ResourcesCompat.getDrawable(getResources(), R.mipmap.win, null));
                     winUsers.add(users);
                     defeatedUsers.add(enemy);
                 } else {

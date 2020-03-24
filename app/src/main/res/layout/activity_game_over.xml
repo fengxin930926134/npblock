@@ -11,6 +11,7 @@
         android:background="@color/colorBlack"
         android:layout_weight="2.2">
         <ImageView
+            android:id="@+id/winning_or_losing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
@@ -26,7 +27,40 @@
             android:layout_marginBottom="5dp"
             android:textColor="@color/golden"/>
         <TextView
-            android:id="@+id/blockIncrease"
+            android:id="@+id/promotion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/rankIncreaseDecrease"
+            android:layout_alignTop="@+id/rankIncreaseDecrease"
+            android:layout_alignBottom="@+id/rankIncreaseDecrease"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/colorRed_"
+            android:text="@string/promotionFailure_text"
+            android:visibility="invisible"/>
+        <ImageView
+            android:id="@+id/rankUpgrade"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/rankIncreaseDecrease"
+            android:layout_alignTop="@+id/rankIncreaseDecrease"
+            android:layout_alignBottom="@+id/rankIncreaseDecrease"
+            android:layout_marginStart="5dp"
+            android:background="@mipmap/upgrade"
+            android:visibility="invisible"
+            android:contentDescription="@string/app_name" />
+        <ImageView
+            android:id="@+id/rankDowngrade"
+            android:layout_width="28dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/rankIncreaseDecrease"
+            android:layout_alignTop="@+id/rankIncreaseDecrease"
+            android:layout_alignBottom="@+id/rankIncreaseDecrease"
+            android:layout_marginStart="5dp"
+            android:background="@mipmap/downgrade"
+            android:visibility="invisible"
+            android:contentDescription="@string/app_name" />
+        <TextView
+            android:id="@+id/gameTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -36,13 +70,13 @@
             android:textColor="@color/golden"
             tools:ignore="RelativeOverlap" />
         <TextView
-            android:id="@+id/gameTime"
+            android:id="@+id/blockIncrease"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_above="@+id/gameTime"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:textColor="@color/golden"
             tools:ignore="RelativeOverlap" />
     </RelativeLayout>

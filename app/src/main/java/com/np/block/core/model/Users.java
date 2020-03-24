@@ -35,6 +35,8 @@ public class Users {
     /**中间变量*/
     private Integer classicScore;
     private Integer rankScore;
+    /**是否晋级赛*/
+    private Boolean riseInRank;
     /**申请理由， 只在客户端存在*/
     private String reason;
 }

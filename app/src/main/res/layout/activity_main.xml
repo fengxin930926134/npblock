@@ -52,7 +52,18 @@
             android:layout_toEndOf="@+id/head_img"
             android:layout_marginStart="5dp"
             android:layout_marginBottom="5dp"
+            android:text="@string/app_name"
             android:textColor="@color/golden"/>
+        <ImageView
+            android:id="@+id/upgrade"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/upgrade"
+            android:layout_toEndOf="@+id/rankText"
+            android:layout_alignTop="@+id/rankText"
+            android:layout_alignBottom="@+id/rankText"
+            android:visibility="invisible"
+            android:contentDescription="@string/app_name" />
 
         <View
             android:id="@+id/head_half"

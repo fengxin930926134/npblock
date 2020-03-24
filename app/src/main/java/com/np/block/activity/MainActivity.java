@@ -94,6 +94,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**头像*/
     @BindView(R.id.head_img)
     ImageView headImg;
+    /**是否晋级赛*/
+    @BindView(R.id.upgrade)
+    ImageView upgrade;
     /**性别*/
     @BindView(R.id.sex)
     ImageView sexImg;
@@ -991,6 +994,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void refreshBlockAndRank() {
         users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
         blockNum.setText(users.getWalletBlock() != null ? users.getWalletBlock().toString(): "0");
-        rankText.setText(ConstUtils.getRankName(users.getRankScore()));
+        String text = ConstUtils.getRankName(users.getRankScore(), users.getRiseInRank());
+        if (users.getRiseInRank()) {
+            upgrade.setVisibility(View.VISIBLE);
+            text = text + " (100)";
+        } else {
+            upgrade.setVisibility(View.INVISIBLE);
+            text = text + " (" + users.getRankScore()%100 + ")";
+        }
+        rankText.setText(text);
     }
 }

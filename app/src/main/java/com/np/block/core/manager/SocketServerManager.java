@@ -185,6 +185,8 @@ public class SocketServerManager {
         message.setGameType(gameTypeEnum.getCode());
         message.setMsg("npblock");
         int tries = 0;
+        //请求未被占用端口
+        receiverPort = OkHttpUtils.getNotOccupyPort();
         try (DatagramSocket socket = new DatagramSocket(receiverPort)){
             //1.构造数据包（加入游戏类型, 消息类型，请求端口和ip）
             byte[] bytes = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
@@ -431,7 +433,6 @@ public class SocketServerManager {
         message = new Message();
         message.setId(users.getId().toString());
         receiverData = new byte[RECEIVER_SIZE];
-        receiverPort = OkHttpUtils.getNotOccupyPort();
         receiverPacket = new DatagramPacket(receiverData, receiverData.length);
     }
 }

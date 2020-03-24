@@ -224,12 +224,11 @@ public class ConstUtils {
      *
      * @param rankGrade rank分
      */
-    public static String getRankName(int rankGrade) {
+    public static String getRankName(int rankGrade, boolean isPromotion) {
         int rank = rankGrade;
         //是否晋级赛
         if (rank > 1000) {
-            boolean promotion = ((rankGrade % 100) == 0);
-            if (promotion) {
+            if (isPromotion) {
                 rank = rank - 1;
             }
         }

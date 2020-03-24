@@ -121,5 +121,6 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void exitApp() {
         ActivityManager.getInstance().finishAll();
+        System.exit(0);
     }
 }

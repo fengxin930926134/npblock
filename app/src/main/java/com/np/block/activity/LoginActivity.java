@@ -671,7 +671,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
         JSONObject result = post.getJSONObject(ConstUtils.RESULT);
         int rankScore = result.getIntValue("rankScore");
+        boolean riseInRank = result.getBoolean("riseInRank");
         usersResult.setRankScore(rankScore);
+        usersResult.setRiseInRank(riseInRank);
         users = usersResult;
         CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, usersResult);
         LoggerUtils.i(users.toString());
