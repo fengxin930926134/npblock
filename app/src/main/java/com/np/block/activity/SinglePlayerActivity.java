@@ -6,15 +6,14 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.Nullable;
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseGameActivity;
 import com.np.block.base.BaseTetrisView;
 import com.np.block.core.enums.GameTypeEnum;
-import com.np.block.core.manager.ActivityManager;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
@@ -65,17 +64,30 @@ public class SinglePlayerActivity extends BaseGameActivity {
     private ScheduledFuture<?> scheduledFuture;
     /** 开局倒计时 计时器 第一个参数总时间，第二个参数间隔时间*/
     private CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+        /**倒计时弹窗*/
+        private AlertDialog timeDialog = null;
 
         @Override
         public void onTick(long millisUntilFinished) {
-            long second = millisUntilFinished / 1000;
-            String text = "倒计时 " + second + " 秒\n后续改弹窗防止瞎点";
-            //后续改弹窗
-            Toast.makeText(SinglePlayerActivity.this, text, Toast.LENGTH_SHORT).show();
+            int second = (int) (millisUntilFinished / 1000);
+            if (timeDialog != null) {
+                timeDialog.cancel();
+            }
+            //倒计时弹窗
+            timeDialog = DialogUtils.showDialogDefault(context);
+            timeDialog.setCancelable(false);
+            View inflate = View.inflate(context, R.layout.alert_dialog_time, null);
+            TextView timeText = inflate.findViewById(R.id.time);
+            String text = Integer.toString(second);
+            timeText.setText(text);
+            timeDialog.setContentView(inflate);
         }
 
         @Override
         public void onFinish() {
+            if (timeDialog != null) {
+                timeDialog.cancel();
+            }
             //获取对战用户信息
             SocketServerManager.getInstance().getUserBattleInfo();
             //启动游戏
@@ -333,7 +345,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             setResult(resultCode, getIntent());
-            ActivityManager.getInstance().removeActivity(this);
+            exitGame();
         }
     }
 }

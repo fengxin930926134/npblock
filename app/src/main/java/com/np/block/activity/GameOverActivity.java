@@ -113,7 +113,7 @@ public class GameOverActivity extends BaseActivity implements View.OnClickListen
                             .append(" (0)");
                     promotion.setVisibility(View.VISIBLE);
                     //修改提示文本
-                    promotion.setText("晋级成功");
+                    promotion.setText(RankStateTypeEnum.PROMOTION_SUCCESS_TYPE.getDes());
                     promotion.setTextColor(ResourcesCompat.getColor(getResources(), R.color.colorGreen, null));
                     break;
                 }
