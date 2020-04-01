@@ -1,6 +1,9 @@
 package com.np.block;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.widget.Toast;
 import com.hyphenate.EMContactListener;
 import com.hyphenate.chat.EMClient;
@@ -12,6 +15,7 @@ import com.np.block.core.manager.CacheManager;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
+import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +33,27 @@ public class NpBlockApplication extends Application {
     public boolean applicationAgree = false;
     /**好友申请*/
     public List<Users> receiveApplyData = new ArrayList<>();
+    /**全局mHandler*/
+    public Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NotNull Message msg) {
+            super.handleMessage(msg);
+            mListener.handleMessage(msg);
+        }
+    };
+    /**全局mHandler监听器*/
+    public HandlerListener mListener;
+    public void setOnHandlerListener(HandlerListener listener) {
+        mListener = listener;
+    }
+
+    public interface HandlerListener {
+        /**
+         * 接收消息
+         * @param msg msg
+         */
+        void handleMessage(Message msg);
+    }
 
     public static NpBlockApplication getInstance() {
         return app;

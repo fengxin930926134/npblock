@@ -10,7 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -155,8 +155,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private List<Users> friendManageItems = new ArrayList<>();
     /**设置好友管理适配器*/
     private FriendManageAdapter friendManageAdapter = new FriendManageAdapter(R.layout.friend_manage_item, friendManageItems);
-    /**Handler接收来自匹配队列消息*/
-    public Handler mHandler = new Handler(msg -> {
+    /**结束弹窗*/
+    private boolean isExitDialog = false;
+
+    @Override
+    public void myHandleMessage(Message msg) {
         Object obj = msg.obj;
         switch (msg.what) {
             case ConstUtils.HANDLER_MATCH_SUCCESS: {
@@ -214,15 +217,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     socialDialog.dismiss();
                     socialDialog = null;
                 }
-                Integer toChatUsername = msg.arg1;
-                MessageManager.getInstance().showMessageDialog(this, toChatUsername.toString());
+                int toChatUsername;
+                toChatUsername = msg.arg1;
+                MessageManager.getInstance().showMessageDialog(this, Integer.toString(toChatUsername));
+                break;
+            }
+            //邀请游戏
+            case ConstUtils.HANDLER_INVITE_GAME: {
+
+                break;
+            }
+            case ConstUtils.HANDLER_OFFLINE_WINDOW: {
+                if (!isExitDialog) {
+                    exitDialog();
+                    isExitDialog = true;
+                }
                 break;
             }
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
-        return false;
-    });
+    }
+
     /**环信消息监听*/
     EMMessageListener msgListener = new EMMessageListener() {
 
@@ -279,14 +295,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         initRank();
         //注册一个监听连接状态的listener
         EMClient.getInstance().addConnectionListener(new EmClientConnectionListener());
-        //初始化接收匹配队列消息的Handler
-        SocketServerManager.getInstance().setHandler(mHandler);
         //初始化悬浮窗
         initFloatWindow();
         //初始化好友
         initFriendCache();
         //检查消息
         checkNotification();
+        //直接用线程调用会导致在初始化单例类时发生奇怪问题 所以提前初始化单例类
+        SocketServerManager.getInstance().init();
+        //初始化功能性Socket
+        ThreadPoolManager.getInstance().execute(() ->
+                SocketServerManager.getInstance().initFunctionSocketConnect());
     }
 
     /**
@@ -573,9 +592,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
-            LoggerUtils.i("初始化接收匹配队列消息的Handler");
-            //初始化接收匹配队列消息的Handler
-            SocketServerManager.getInstance().setHandler(mHandler);
             if (resultCode == RESULT_OK) {
                 AlertDialog alertDialog = DialogUtils.showDialog(context);
                 ThreadPoolManager.getInstance().execute(() -> {
@@ -853,10 +869,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             runOnUiThread( ()-> {
                 if(error == EMError.USER_REMOVED){
                     // 显示帐号已经被移除
-                    Toast.makeText(context, "垃圾东西，滚", Toast.LENGTH_SHORT).show();
+                    exitDialog();
+                    Toast.makeText(context, "帐号已经被移除", Toast.LENGTH_SHORT).show();
                 }else if (error == EMError.USER_LOGIN_ANOTHER_DEVICE) {
                     // 显示帐号在其他设备登录 做弹窗强制下线
-                    Toast.makeText(context, "其他地方登陆，马上给我滚", Toast.LENGTH_SHORT).show();
+                    if (!isExitDialog) {
+                        exitDialog();
+                        isExitDialog = true;
+                    }
                 } else {
                     if (NetUtils.hasNetwork(MainActivity.this)){
                         //连接不到聊天服务器
@@ -924,7 +944,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     .setView(gameChronometerLayout)
                     //设置控件初始位置
                     .setX(right)
-                    .setY(100)
+                    .setY(200)
                     //桌面是否显示
                     .setDesktopShow(false)
                     .setMoveType(MoveType.slide)

@@ -265,7 +265,7 @@ public class DialogUtils {
         // 设置点击dialog的外部能否取消弹窗
         dialog.setCanceledOnTouchOutside(false);
         // 设置能不能返回键取消弹窗
-        dialog.setCancelable(true);
+        dialog.setCancelable(false);
         View view = View.inflate(context, R.layout.alert_dialog_text, null);
         //标题
         TextView tvTitle = view.findViewById(R.id.tv_alert_title);

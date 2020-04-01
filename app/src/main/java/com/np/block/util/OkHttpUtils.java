@@ -84,6 +84,7 @@ public class OkHttpUtils {
         final int portBegin = 8900;
         final int portEnd = 9000;
         for (int i = portBegin; i < portEnd; i++) {
+            LoggerUtils.i("正在尝试" + i + "端口");
             try {
                 DatagramSocket socket = new DatagramSocket(i);
                 socket.close();

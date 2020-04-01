@@ -10,8 +10,8 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.exceptions.HyphenateException;
+import com.np.block.NpBlockApplication;
 import com.np.block.R;
-import com.np.block.activity.MainActivity;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
@@ -75,7 +75,7 @@ public class FriendManageAdapter extends BaseQuickAdapter<Users, BaseViewHolder>
             Message message = new Message();
             message.what = ConstUtils.HANDLER_CHAT_WINDOW;
             message.arg1 = item.getId();
-            ((MainActivity) mContext).mHandler.sendMessage(message);
+            NpBlockApplication.getInstance().mHandler.sendMessage(message);
         });
     }
 }

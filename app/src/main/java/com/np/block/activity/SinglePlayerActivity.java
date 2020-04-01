@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
+import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -129,7 +129,8 @@ public class SinglePlayerActivity extends BaseGameActivity {
         }
     };
     /**接收handler消息*/
-    private Handler mHandler = new Handler(msg -> {
+    @Override
+    public void myHandleMessage(Message msg) {
         switch (msg.what) {
             case ConstUtils.HANDLER_GAME_DATA:{
                 //处理服务器游戏消息
@@ -185,8 +186,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
             }
             default: LoggerUtils.e("未知handler消息");
         }
-        return false;
-    });
+    }
 
     @Override
     public void gameOver() {
@@ -203,8 +203,6 @@ public class SinglePlayerActivity extends BaseGameActivity {
     @Override
     public void initData() {
         speed = GAME_SPEED;
-        //初始化接收匹配队列消息的Handler
-        SocketServerManager.getInstance().setHandler(mHandler);
         //启动倒计时操作
         countDownTimer.start();
         //记录游戏开始时间

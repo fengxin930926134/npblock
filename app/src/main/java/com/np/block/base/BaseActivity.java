@@ -3,15 +3,20 @@ package com.np.block.base;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import com.hyphenate.chat.EMClient;
+import com.np.block.NpBlockApplication;
 import com.np.block.core.manager.ActivityManager;
+import com.np.block.core.manager.SocketServerManager;
+import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
+import com.np.block.util.LoggerUtils;
+
 import butterknife.ButterKnife;
 
 /**
@@ -45,6 +50,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         ActivityManager.getInstance().addActivity(this);
         // Butter Knife 初始化
         ButterKnife.bind(this);
+        setHandlerListener();
         init();
     }
 
@@ -74,6 +80,12 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @return view
      */
     public abstract int getContentView ();
+
+    /**
+     * 处理HandleMessage
+     * @param msg msg
+     */
+    public void myHandleMessage (Message msg) {}
 
     /**
      * 退出时的方法
@@ -117,10 +129,30 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     /**
+     * 强制退出弹窗
+     */
+    public void exitDialog() {
+        DialogUtils.showTextDialog(context, "下线提示", "已在其他地方登录",
+                (dialog, which) -> {
+                    dialog.cancel();
+                    exitApp();
+                });
+    }
+
+    /**
+     * 设置HandlerListener
+     */
+    private void setHandlerListener() {
+        LoggerUtils.i("setHandlerListener");
+        NpBlockApplication.getInstance().setOnHandlerListener(this::myHandleMessage);
+    }
+
+    /**
      * 退出app需要做的事
      */
-    public void exitApp() {
+    private void exitApp() {
+        ThreadPoolManager.getInstance().execute(() ->
+                SocketServerManager.getInstance().closeFunctionSocketConnect());
         ActivityManager.getInstance().finishAll();
-        System.exit(0);
     }
 }

@@ -180,6 +180,15 @@ public class ConstUtils {
     public static final int HANDLER_CHAT_WINDOW = 0x18;
 
     /**
+     * Handler 消息类型 离线弹窗
+     */
+    public static final int HANDLER_OFFLINE_WINDOW = 0x19;
+    /**
+     * Handler 消息类型 邀请好友游戏
+     */
+    public static final int HANDLER_INVITE_GAME = 0x20;
+
+    /**
      * json数据key 所有方块坐标
      */
     public static final String JSON_KEY_ALL_BLOCK = "json_key_all_block";

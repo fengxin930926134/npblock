@@ -1,10 +1,10 @@
 package com.np.block.core.manager;
 
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.text.TextUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.np.block.NpBlockApplication;
 import com.np.block.core.enums.GameOverTypeEnum;
 import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.MessageTypeEnum;
@@ -14,10 +14,10 @@ import com.np.block.util.ConstUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +45,9 @@ public class SocketServerManager {
     private static byte[] receiverData;
     /**接收服务器数据包*/
     private static DatagramPacket receiverPacket;
-    /**当前调用的activity中的handler*/
-    private static Handler handler;
     /**是否停止接收消息*/
     private static boolean receiveStop = false;
+    private static boolean functionSocketStop = false;
     /**接收Socket*/
     private static DatagramSocket socket;
     /**发送Socket*/
@@ -76,13 +75,13 @@ public class SocketServerManager {
             android.os.Message msg = new android.os.Message();
             msg.what = ConstUtils.HANDLER_TIME_STRING;
             msg.obj = s1;
-            handler.sendMessage(msg);
+            NpBlockApplication.getInstance().mHandler.sendMessage(msg);
         }
 
         @Override
         public void onFinish() {
             //发送有人未确认的消息
-            handler.sendEmptyMessage(ConstUtils.HANDLER_MATCH_FAILURE);
+            NpBlockApplication.getInstance().mHandler.sendEmptyMessage(ConstUtils.HANDLER_MATCH_FAILURE);
             ThreadPoolManager.getInstance().execute(() -> {
                 //延迟重置状态 防止服务器重复消息
                 try {
@@ -103,14 +102,6 @@ public class SocketServerManager {
     /**提供一个共有的可以返回类对象的方法*/
     public static SocketServerManager getInstance(){
         return Inner.instance;
-    }
-
-    /**
-     * 设置handler
-     * @param handler handler
-     */
-    public void setHandler(Handler handler) {
-        SocketServerManager.handler = handler;
     }
 
     /**
@@ -181,12 +172,11 @@ public class SocketServerManager {
         boolean receivedResponse = false;
         //设置消息类型
         message.setMessageType(MessageTypeEnum.MATCH_MESSAGE_TYPE);
-        //设置进入的队列类型
-        message.setGameType(gameTypeEnum.getCode());
         message.setMsg("npblock");
         int tries = 0;
         //请求未被占用端口
         receiverPort = OkHttpUtils.getNotOccupyPort();
+        LoggerUtils.i("使用端口接收" + receiverPort);
         try (DatagramSocket socket = new DatagramSocket(receiverPort)){
             //1.构造数据包（加入游戏类型, 消息类型，请求端口和ip）
             byte[] bytes = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
@@ -195,9 +185,9 @@ public class SocketServerManager {
             // 设置阻塞时间
             socket.setSoTimeout(TIMEOUT);
             do {
-                //3.从此套接字发送数据报包。
-                socket.send(sendPacket);
                 try {
+                    //3.从此套接字发送数据报包。
+                    socket.send(sendPacket);
                     socket.receive(receiverPacket);
                     // 处理接收到的消息
                     final String reply = new String(receiverData, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
@@ -207,13 +197,13 @@ public class SocketServerManager {
                     // not stop
                     receiveStop = false;
                     receivedResponse = true;
-                } catch (InterruptedIOException e) {
+                } catch (Exception e) {
                     tries ++;
                     LoggerUtils.i("进入匹配队列超时, 倒数第" + (MAX_TRIES - tries) + "次尝试...");
                 }
             } while (!receivedResponse && tries < MAX_TRIES);
         } catch (IOException e) {
-            LoggerUtils.e(e.getMessage());
+            LoggerUtils.e("enterMatchQueue" + e.getMessage());
         }
         if (receivedResponse) {
             // 进入队列 开启接收服务器消息
@@ -324,7 +314,7 @@ public class SocketServerManager {
                         android.os.Message msg = new android.os.Message();
                         msg.what = ConstUtils.HANDLER_GAME_DATA;
                         msg.obj = receiveMsg.getMsg();
-                        handler.sendMessage(msg);
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
                         break;
                     }
                     case SEND_KEY_TYPE:{
@@ -336,7 +326,7 @@ public class SocketServerManager {
                             android.os.Message msg = new android.os.Message();
                             msg.what = ConstUtils.HANDLER_MATCH_SUCCESS;
                             msg.obj = matchWaitTime;
-                            handler.sendMessage(msg);
+                            NpBlockApplication.getInstance().mHandler.sendMessage(msg);
                             countDownTimer.start();
                         } else {
                             if (message.getConfirmNum() == 2 && !enterGame) {
@@ -346,7 +336,7 @@ public class SocketServerManager {
                                 android.os.Message msg = new android.os.Message();
                                 msg.what = ConstUtils.HANDLER_ENTER_THE_GAME;
                                 msg.obj = "当前确认人数: 2 人\n即将进入游戏";
-                                handler.sendMessage(msg);
+                                NpBlockApplication.getInstance().mHandler.sendMessage(msg);
                             }
                         }
                         break;
@@ -359,15 +349,15 @@ public class SocketServerManager {
                             //发送游戏结束消息
                             switch (GameOverTypeEnum.getEnumByCode(receiveMsg.getMsg())){
                                 case GAME_OVER_WIN_TYPE:{
-                                    handler.sendEmptyMessage(ConstUtils.HANDLER_GAME_WIN);
+                                    NpBlockApplication.getInstance().mHandler.sendEmptyMessage(ConstUtils.HANDLER_GAME_WIN);
                                     break;
                                 }
                                 case GAME_OVER_LOSE_TYPE:{
-                                    handler.sendEmptyMessage(ConstUtils.HANDLER_LOSE_GAME);
+                                    NpBlockApplication.getInstance().mHandler.sendEmptyMessage(ConstUtils.HANDLER_LOSE_GAME);
                                     break;
                                 }
                                 case GAME_OVER_ESCAPE_TYPE:{
-                                    handler.sendEmptyMessage(ConstUtils.HANDLER_ESCAPE_GAME);
+                                    NpBlockApplication.getInstance().mHandler.sendEmptyMessage(ConstUtils.HANDLER_ESCAPE_GAME);
                                     break;
                                 }
                                 default: LoggerUtils.e("未知游戏结束类型");
@@ -391,6 +381,7 @@ public class SocketServerManager {
             socket.close();
             sendSocket.close();
             socket.disconnect();
+            sendSocket.disconnect();
             receiveStop = true;
         }
     }
@@ -423,6 +414,104 @@ public class SocketServerManager {
         });
     }
 
+    /**
+     * 初始化功能性Socket
+     */
+    public void initFunctionSocketConnect() {
+        //当前使用的端口
+        int notOccupyPort = OkHttpUtils.getNotOccupyPort();
+        try (DatagramSocket socket = new DatagramSocket(notOccupyPort)){
+            //1.构造数据体
+            message.setMessageType(MessageTypeEnum.LOGIN_SUCCESS_TYPE);
+            //2.发送数据包
+            sendMessage(message, socket);
+            while (!functionSocketStop) {
+                Message message = receiveMessage(socket);
+                //处理消息
+                if (message == null) {
+                    LoggerUtils.i("收到一条空信息");
+                    continue;
+                } else {
+                    LoggerUtils.i(message.toString());
+                }
+                switch (MessageTypeEnum.getEnumByCode(message.getMessageType().getCode())) {
+                    case LOGOUT_SUCCESS_TYPE: {
+                        //弹出离线弹窗
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_OFFLINE_WINDOW;
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
+                        break;
+                    }
+                    case INVITE_GAMES_TYPE: {
+                        //邀请好友游戏
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_INVITE_GAME;
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
+                        break;
+                    }
+                    case LOGIN_SUCCESS_TYPE: {
+                        LoggerUtils.i("initFunctionSocketConnect成功");
+                        break;
+                    }
+                    default: LoggerUtils.e("initFunctionSocketConnect:未知消息");
+                }
+            }
+        } catch (IOException e) {
+            LoggerUtils.e("initFunctionSocketConnect:" + e.getMessage());
+        }
+    }
+
+    /**
+     * 关闭功能性Socket
+     */
+    public void closeFunctionSocketConnect() {
+        functionSocketStop = true;
+        message.setMessageType(MessageTypeEnum.LOGOUT_SUCCESS_TYPE);
+        try {
+            sendMessage(message, new DatagramSocket());
+        } catch (SocketException e) {
+            LoggerUtils.e("closeFunctionSocketConnect:" + e.getMessage());
+        }
+    }
+
+    /**
+     * 发送单个消息
+     * @param message message消息体
+     * @param socket 使用的socket对象
+     */
+    private void sendMessage(Message message, DatagramSocket socket) {
+        try {
+            // 1.创建数据
+            byte[] data = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+            // 2.创建数据包
+            DatagramPacket packet = new DatagramPacket(data, data.length, sendAddress,
+                    ConstUtils.SOCKET_SEND_PORT);
+            // 3.发送数据包
+            socket.send(packet);
+        } catch (IOException e) {
+            LoggerUtils.e("错误信息:" + e.getMessage() + "\nMessage:" + message);
+        }
+    }
+
+    /**
+     * 接收单个消息
+     * @param socket 使用的socket对象
+     * @return message消息体
+     */
+    private Message receiveMessage(DatagramSocket socket) {
+        try {
+            byte[] receiverData = new byte[RECEIVER_SIZE];
+            DatagramPacket receiverPacket = new DatagramPacket(receiverData, receiverData.length);
+            socket.receive(receiverPacket);
+            // 处理接收到的消息
+            final String reply = new String(receiverData, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
+            return JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
+        } catch (IOException e) {
+            LoggerUtils.e("错误信息:" + e.getMessage());
+        }
+        return null;
+    }
+
     private SocketServerManager() {
         try {
             sendAddress = InetAddress.getByName(ConstUtils.HOST);
@@ -435,4 +524,9 @@ public class SocketServerManager {
         receiverData = new byte[RECEIVER_SIZE];
         receiverPacket = new DatagramPacket(receiverData, receiverData.length);
     }
+
+    /**
+     * 用作初始化
+     */
+    public void init() {}
 }
