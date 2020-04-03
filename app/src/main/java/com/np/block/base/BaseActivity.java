@@ -11,12 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.np.block.NpBlockApplication;
 import com.np.block.core.manager.ActivityManager;
-import com.np.block.core.manager.SocketServerManager;
-import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
-import com.np.block.util.LoggerUtils;
-
 import butterknife.ButterKnife;
 
 /**
@@ -140,10 +136,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * 设置HandlerListener
+     * 新进入activity时自动设置HandlerListener
+     * 后续重进则需要自己调用
      */
-    private void setHandlerListener() {
-        LoggerUtils.i("setHandlerListener");
+    public void setHandlerListener() {
         NpBlockApplication.getInstance().setOnHandlerListener(this::myHandleMessage);
     }
 
@@ -151,8 +147,6 @@ public abstract class BaseActivity extends AppCompatActivity {
      * 退出app需要做的事
      */
     private void exitApp() {
-        ThreadPoolManager.getInstance().execute(() ->
-                SocketServerManager.getInstance().closeFunctionSocketConnect());
         ActivityManager.getInstance().finishAll();
     }
 }

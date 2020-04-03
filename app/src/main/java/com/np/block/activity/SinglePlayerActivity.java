@@ -85,15 +85,17 @@ public class SinglePlayerActivity extends BaseGameActivity {
 
         @Override
         public void onFinish() {
-            if (timeDialog != null) {
-                timeDialog.cancel();
-            }
             //获取对战用户信息
             SocketServerManager.getInstance().getUserBattleInfo();
             //启动游戏
             startDownThread();
             //启动定时发送数据线程
             taskSendCoordinate();
+            //记录游戏开始时间
+            gameTime = System.currentTimeMillis();
+            if (timeDialog != null) {
+                timeDialog.cancel();
+            }
         }
     };
     /** 完成胜利条件 向服务器发送完成信息 计时器 第一个参数，第二个参数间隔时间*/
@@ -149,8 +151,6 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 beginGame = false;
                 //关闭定时发送数据
                 scheduledFuture.cancel(true);
-                //停止接收服务器消息
-                SocketServerManager.getInstance().stopSocketServer();
                 //游戏胜利
                 DialogUtils.showTextDialog(context, "游戏胜利", "不错不错，不要骄傲", (dialog, which) -> {
                     dialog.cancel();
@@ -162,8 +162,6 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 beginGame = false;
                 //关闭定时发送数据
                 scheduledFuture.cancel(true);
-                //停止接收服务器消息
-                SocketServerManager.getInstance().stopSocketServer();
                 //游戏失败
                 DialogUtils.showTextDialog(context, "你输了", "菜鸡，别人比你强", (dialog, which) -> {
                     dialog.cancel();
@@ -175,8 +173,6 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 beginGame = false;
                 //关闭定时发送数据
                 scheduledFuture.cancel(true);
-                //停止接收服务器消息
-                SocketServerManager.getInstance().stopSocketServer();
                 //对方逃跑
                 DialogUtils.showTextDialog(context, "游戏胜利", "对方屈服于您的淫威, 逃跑了", (dialog, which) -> {
                     dialog.cancel();
@@ -205,8 +201,6 @@ public class SinglePlayerActivity extends BaseGameActivity {
         speed = GAME_SPEED;
         //启动倒计时操作
         countDownTimer.start();
-        //记录游戏开始时间
-        gameTime = System.currentTimeMillis();
     }
 
     @Override

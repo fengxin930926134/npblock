@@ -1,11 +1,16 @@
 package com.np.block;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.np.block.base.BaseTetrisView;
 import com.np.block.core.enums.TetrisTypeEnum;
+import com.np.block.core.manager.CacheManager;
+import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.UnitBlock;
 import com.np.block.core.model.Users;
+import com.np.block.util.ConstUtils;
+import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 
 import org.junit.Test;
@@ -17,8 +22,11 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -34,9 +42,39 @@ public class ExampleUnitTest {
 //        String response = OkHttpUtils.get("/hello");
 //        System.out.println(response);
 
-        System.out.println(BaseTetrisView.BEGIN_LEN_X + BaseTetrisView.COLUMN_NUM / 2 * UnitBlock.BLOCK_SIZE);
-        System.out.println(BaseTetrisView.BEGIN_LEN_Y);
+        Map<String, Integer> map= new Hashtable<>();
+        map.put("test", 2);
+        Integer test = map.get("test");
+        System.out.println( test);
+        test = test + 1;
+        map.put("test", test);
+        System.out.println(test);
+        System.out.println(map.get("test"));
+//        JSONObject param = new JSONObject();
+//        param.put("key", "27298457-92f9-41b9-b3b8-9f3a88063f2b");
+//        try {
+//            JSONObject response = OkHttpUtils.post("/match/getMsg", param.toString());
+//            System.out.println(response.toJSONString());
+//            if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+//                JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+//                if (objects != null) {
+//                    //用户信息
+//                    List<Users> users = objects.toJavaList(Users.class);
+//                    System.out.println(users.toString());
+//                    //保存到缓存中
+//                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_USER_BATTLE_INFO, users);
+//                } else {
+//                    System.out.println("空数据");
+//                }
+//            }
+//        } catch (Exception e) {
+//            System.out.println("获取对局用户信息错误：" + e.getMessage());
+//        }
 
+        long l = System.currentTimeMillis();
+        long l2 = System.currentTimeMillis();
+        long i = l2-l;
+        System.out.println(i);
 //        JSONObject jsonObject = new JSONObject();
 //        JSONObject jsonObject1 = new JSONObject();
 //        jsonObject1.put("phone","admin");

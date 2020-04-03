@@ -1,8 +1,15 @@
 package com.np.block.activity;
 
+import android.os.Message;
+import android.view.View;
+import android.widget.Button;
+
+import com.np.block.NpBlockApplication;
 import com.np.block.R;
+import com.np.block.base.BaseActivity;
 import com.np.block.base.BaseGameActivity;
 import com.np.block.base.BaseTetrisView;
+import com.np.block.util.LoggerUtils;
 import com.np.block.view.SinglePlayerEnemyView;
 import com.np.block.view.SinglePlayerView;
 import butterknife.BindView;
@@ -13,23 +20,20 @@ import butterknife.BindView;
  *
  * @author fengxin
  */
-public class TestActivity extends BaseGameActivity {
+public class TestActivity extends BaseActivity {
 
-    @BindView(R.id.single_player_tetris)
-    SinglePlayerView singlePlayerView;
-    @BindView(R.id.single_player_tetris_enemy)
-    SinglePlayerEnemyView singlePlayerEnemyView;
+    @BindView(R.id.test)
+    Button button;
+    int i = 0;
 
-    @Override
-    public BaseTetrisView getTetrisView() {
-        return singlePlayerView;
-    }
 
     @Override
-    public void initData() {
-//        startDownThread();
+    public void init() {
+        button.setOnClickListener(v -> {
+            NpBlockApplication.getInstance().mHandler.sendEmptyMessage(i);
+            i++;
+        });
     }
-
 
     @Override
     public int getContentView() {

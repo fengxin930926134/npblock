@@ -55,7 +55,6 @@ import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.adapter.FriendApplyAdapter;
 import com.np.block.adapter.FriendManageAdapter;
 import com.np.block.base.BaseActivity;
-import com.np.block.core.enums.GameTypeEnum;
 import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
@@ -80,7 +79,6 @@ import com.yhao.floatwindow.MoveType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import butterknife.BindView;
 
 /**
@@ -222,18 +220,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 MessageManager.getInstance().showMessageDialog(this, Integer.toString(toChatUsername));
                 break;
             }
-            //邀请游戏
-            case ConstUtils.HANDLER_INVITE_GAME: {
-
-                break;
-            }
-            case ConstUtils.HANDLER_OFFLINE_WINDOW: {
-                if (!isExitDialog) {
-                    exitDialog();
-                    isExitDialog = true;
-                }
-                break;
-            }
             default:
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
@@ -303,9 +289,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         checkNotification();
         //直接用线程调用会导致在初始化单例类时发生奇怪问题 所以提前初始化单例类
         SocketServerManager.getInstance().init();
-        //初始化功能性Socket
-        ThreadPoolManager.getInstance().execute(() ->
-                SocketServerManager.getInstance().initFunctionSocketConnect());
     }
 
     /**
@@ -591,6 +574,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //因为是重回主页 设置handler
+        super.setHandlerListener();
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 AlertDialog alertDialog = DialogUtils.showDialog(context);
@@ -745,7 +730,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         enterSuccess = true;
         //进入匹配
         ThreadPoolManager.getInstance().execute(() -> {
-            if (SocketServerManager.getInstance().enterMatchQueue(GameTypeEnum.SINGLE_PLAYER_GAME)) {
+            if (SocketServerManager.getInstance().enterMatchQueue()) {
                 runOnUiThread(() -> {
                     FloatWindow.get().show();
                     gameChronometer.setBase(SystemClock.elapsedRealtime());

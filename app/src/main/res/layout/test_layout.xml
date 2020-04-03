@@ -3,62 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<!--    <com.np.block.view.SinglePlayerEnemyView-->
-<!--        android:id="@+id/single_player_tetris"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_centerVertical="true"/>-->
-
-    <com.np.block.view.SinglePlayerView
-        android:id="@+id/single_player_tetris"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_x="18dp"
-        android:layout_y="125dp" />
-
-    <com.np.block.view.SinglePlayerEnemyView
-        android:id="@+id/single_player_tetris_enemy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="11dp"
-        android:layout_x="245dp"
-        android:layout_y="121dp" />
-
-    <com.np.block.view.NextTetrisView
-        android:id="@+id/nextTetrisView"
-        android:layout_width="75dp"
-        android:layout_height="69dp"
-        android:layout_marginTop="50dp"
-        android:layout_x="240dp"
-        android:layout_y="353dp" />
-
     <Button
-        android:id="@+id/left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="26dp"
-        android:layout_y="547dp"
-        android:text="@string/left_text" />
-
-    <Button
-        android:id="@+id/right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="142dp"
-        android:layout_y="548dp"
-        android:text="@string/right_text" />
-
-    <Button
-        android:id="@+id/rotate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="285dp"
-        android:layout_y="580dp"
-        android:text="@string/rotate_text" />
-
-    <Button
-        android:id="@+id/down"
+        android:id="@+id/test"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_x="81dp"
