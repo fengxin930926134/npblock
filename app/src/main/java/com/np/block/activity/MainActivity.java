@@ -133,6 +133,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**段位*/
     @BindView(R.id.rankText)
     TextView rankText;
+    @BindView(R.id.talk_notification)
+    TextView talkNotification;
     /**计时器*/
     private Chronometer gameChronometer;
     /**经典模式排行榜适配器*/
@@ -231,7 +233,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         @Override
         public void onMessageReceived(List<EMMessage> messages) {
             MessageManager.getInstance().addMessage(messages);
-            MessageManager.getInstance().refreshMessage(messages);
+            runOnUiThread(() -> MessageManager.getInstance().refreshMessage(messages));
+            //显示通知
+            if (!MessageManager.getInstance().isShow()) {
+                runOnUiThread(() -> talkNotification.setVisibility(View.VISIBLE));
+            }
             LoggerUtils.i("收到消息=" + messages.toString());
         }
 
@@ -330,6 +336,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.talk:{
                 MessageManager.getInstance().showMessageDialog(this, null);
+                talkNotification.setVisibility(View.INVISIBLE);
                 break;
             }
             case R.id.attainment: {

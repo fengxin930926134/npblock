@@ -38,8 +38,6 @@ import java.util.Map;
 public class MessageManager {
     /**当前user*/
     private Users user;
-    /**未读消息数量*/
-    private int unreadMessageCount;
     /**聊天消息RecyclerView*/
     private RecyclerView talkRecyclerView;
     /**消息弹窗*/
@@ -54,6 +52,11 @@ public class MessageManager {
     private Map<String, Users> friendMap = new HashMap<>();
     /**当前选中id*/
     private String userId = null;
+
+    /**判断弹窗是否打开*/
+    public boolean isShow() {
+        return messageDialog != null && messageDialog.isShowing();
+    }
 
     /**
      * 刷新聊天消息
@@ -98,7 +101,7 @@ public class MessageManager {
                 Users users = friendMap.get(from);
                 String headSculpture = "";
                 if (users != null && users.getHeadSculpture() != null) {
-                    headSculpture = user.getHeadSculpture();
+                    headSculpture = users.getHeadSculpture();
                 }
                 talkItem = new TalkItem(headSculpture, txtBody.getMessage(), TalkItem.TYPE_LEFT);
             } else {
@@ -295,7 +298,6 @@ public class MessageManager {
 
     private MessageManager(){
         user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
-        unreadMessageCount = EMClient.getInstance().chatManager().getUnreadMessageCount();
         //初始化好友信息map
         initFriendMap();
         //初始化已存在会话

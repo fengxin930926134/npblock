@@ -216,6 +216,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:textSize="6pt"
+            android:visibility="invisible"
             android:background="@drawable/notification_spot_red"/>
     </RelativeLayout>
     <!--中间结束-->

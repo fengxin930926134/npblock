@@ -32,22 +32,6 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:orientation="horizontal">
-<!--            <include layout="@layout/talk_tab_item"/>-->
-<!--            <View-->
-<!--                android:layout_width="10dp"-->
-<!--                android:layout_height="match_parent"/>-->
-<!--            <include layout="@layout/talk_tab_item"/>-->
-<!--            <View-->
-<!--                android:layout_width="10dp"-->
-<!--                android:layout_height="match_parent"/>-->
-<!--            <include layout="@layout/talk_tab_item"/>-->
-<!--            <View-->
-<!--                android:layout_width="10dp"-->
-<!--                android:layout_height="match_parent"/>-->
-<!--            <include layout="@layout/talk_tab_item"/>-->
-<!--            <View-->
-<!--                android:layout_width="10dp"-->
-<!--                android:layout_height="match_parent"/>-->
         </LinearLayout>
     </HorizontalScrollView>
 
