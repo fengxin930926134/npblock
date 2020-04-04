@@ -23,6 +23,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -54,6 +55,7 @@ import com.np.block.adapter.AddFriendAdapter;
 import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.adapter.FriendApplyAdapter;
 import com.np.block.adapter.FriendManageAdapter;
+import com.np.block.adapter.PassAdapter;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
@@ -61,6 +63,7 @@ import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.MessageManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Stage;
 import com.np.block.core.model.Users;
 import com.np.block.fragment.ClassicRankFragment;
 import com.np.block.fragment.RankingRankFragment;
@@ -70,12 +73,14 @@ import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import com.np.block.util.ResolutionUtils;
+import com.np.block.util.SharedPreferencesUtils;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 import com.yhao.floatwindow.FloatWindow;
 import com.yhao.floatwindow.MoveType;
+import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -316,12 +321,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.classic_block:
+                if (enterSuccess) {
+                    Toast.makeText(context, "已在游戏队列中", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 startActivity(new Intent(MainActivity.this, ClassicBlockActivity.class));
                 break;
             case R.id.battle_block:
+                if (enterSuccess) {
+                    Toast.makeText(context, "已在游戏队列中", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 battleDialog();
                 break;
             case R.id.interest_block:
+                if (enterSuccess) {
+                    Toast.makeText(context, "已在游戏队列中", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 interestDialog();
                 break;
             case R.id.view_leaderboards:
@@ -340,7 +357,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             }
             case R.id.attainment: {
-                startActivity(new Intent(context, GameOverActivity.class));
+                Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
                 break;
             }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
@@ -694,11 +711,48 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.findViewById(R.id.alert_interest_finish).setOnClickListener(v -> dialog.cancel());
         dialog.setContentView(view);
         Button rushMode = view.findViewById(R.id.rush_mode_button);
+        //闯关模式
         rushMode.setOnClickListener(v -> {
             dialog.cancel();
-            // 缓存选择的关卡
-            CacheManager.getInstance().put(ConstUtils.CACHE_RUSH_STAGE_TYPE, StageTypeEnum.FIRST_PASS.getCode());
-            startActivity(new Intent(MainActivity.this, RushBlockActivity.class));
+            rushSelectDialog();
+        });
+        Button button2048 = view.findViewById(R.id._2048_mode_button);
+        button2048.setOnClickListener(v ->
+                Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * 趣味弹窗中挑战模式选择关卡弹窗
+     */
+    private void rushSelectDialog() {
+        AlertDialog dialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_pass, null);
+        view.findViewById(R.id.alert_finish).setOnClickListener(v -> dialog.cancel());
+        dialog.setContentView(view);
+        GridView passGrid = view.findViewById(R.id.pass_grid);
+        //构建数据
+        List<Stage> stageList = new ArrayList<>();
+        for (StageTypeEnum stageTypeEnum: StageTypeEnum.values()) {
+            Stage stage = LitePal.select("name", "icoPath", "stageType")
+                    .where("stageType = ?", stageTypeEnum.getCode())
+                    .findLast(Stage.class);
+            if (stage != null) {
+                stageList.add(stage);
+            }
+        }
+        //获取用户当前关卡
+        int pass = SharedPreferencesUtils.readPass();
+        passGrid.setAdapter(new PassAdapter(context, stageList, pass));
+        passGrid.setOnItemClickListener((parent, view1, position, id) -> {
+            if (position >= pass) {
+                Toast.makeText(context, "此关尚未解锁！", Toast.LENGTH_SHORT).show();
+            } else {
+                // 缓存选择的关卡
+                CacheManager.getInstance().put(ConstUtils.CACHE_RUSH_STAGE_TYPE,
+                        stageList.get(position).getStageType());
+                dialog.cancel();
+                startActivity(new Intent(MainActivity.this, RushBlockActivity.class));
+            }
         });
     }
 
@@ -730,9 +784,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 Toast.makeText(context, "需要悬浮窗权限", Toast.LENGTH_SHORT).show();
                 getOverlayPermission();
             }
-        }
-        if (enterSuccess) {
-            return;
         }
         enterSuccess = true;
         //进入匹配

@@ -1,5 +1,6 @@
 package com.np.block.core.db;
 
+import com.np.block.R;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.enums.TetrisTypeEnum;
 import com.np.block.core.model.Stage;
@@ -22,12 +23,17 @@ public class DefaultDataBase {
      */
     public static void generateBasicDatabase() {
         LitePal.getDatabase();
+        Tetris.isSave = true;
+        UnitBlock.isSave = true;
         // 循环创建关卡数据
         for (StageTypeEnum stageTypeEnum: StageTypeEnum.values()) {
             if (!LitePal.isExist(Stage.class, String.format("stageType = '%s'", stageTypeEnum.getCode()))) {
                 createStage(stageTypeEnum);
             }
         }
+        UnitBlock.isSave = false;
+        Tetris.isSave = false;
+        LoggerUtils.i("db: 数据库导入数据完成...");
     }
 
     /**
@@ -36,36 +42,118 @@ public class DefaultDataBase {
      * @param stageType 关卡类型
      */
     private static void createStage(StageTypeEnum stageType) {
-        Tetris.isSave = true;
-        UnitBlock.isSave = true;
-        Stage stage = new Stage();
         //设置第一关
-        if (stageType == StageTypeEnum.FIRST_PASS) {
-            //设置下落速度
-            stage.setSpeed(1000);
-            //设置过关消除行数
-            stage.setComplete(3);
-            //关卡名字
-            stage.setName(stageType.getDes());
-            //关卡类型
-            stage.setStageType(stageType.getCode());
-            //设置阻碍用的方块
-            stage.getHinderTetris().add(new Tetris(
-                    RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 2,
-                    RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 5,
-                    TetrisTypeEnum.LINE_SHAPE, -1,
-                    RushTetrisView.BLOCK_SIZE
-            ));
-            stage.getHinderTetris().add(new Tetris(
-                    RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * (RushTetrisView.COLUMN_NUM - 2),
-                    RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 16,
-                    TetrisTypeEnum.LINE_SHAPE, -1,
-                    RushTetrisView.BLOCK_SIZE
-            ));
-            stage.save();
+        switch (stageType) {
+            case FIRST_PASS: createFirstPass(); break;
+            case SECOND_PASS: createSecondPass(); break;
+            case THIRD_PASS: createThreePass(); break;
+            default:
+                LoggerUtils.e("创建关卡类型错误：" + stageType.toString());
         }
-        UnitBlock.isSave = false;
-        Tetris.isSave = false;
-        LoggerUtils.i("db: 数据库导入数据完成...");
+    }
+
+    /**
+     * 创建第三关
+     */
+    private static void createThreePass() {
+        Stage stage = new Stage();
+        //设置下落速度
+        stage.setSpeed(1000);
+        //设置过关消除行数
+        stage.setComplete(3);
+        //设置关卡图标路径
+        stage.setIcoPath("ico_3");
+        //关卡名字
+        stage.setName(StageTypeEnum.THIRD_PASS.getDes());
+        //关卡类型
+        stage.setStageType(StageTypeEnum.THIRD_PASS.getCode());
+        //设置阻碍用的方块
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 5,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 12,
+                TetrisTypeEnum.LINE_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 18,
+                TetrisTypeEnum.FIELD_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 9,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 18,
+                TetrisTypeEnum.FIELD_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.save();
+    }
+
+    /**
+     * 创建第二关
+     */
+    private static void createSecondPass() {
+        Stage stage = new Stage();
+        //设置下落速度
+        stage.setSpeed(1000);
+        //设置过关消除行数
+        stage.setComplete(3);
+        //设置关卡图标路径
+        stage.setIcoPath("ico_2");
+        //关卡名字
+        stage.setName(StageTypeEnum.SECOND_PASS.getDes());
+        //关卡类型
+        stage.setStageType(StageTypeEnum.SECOND_PASS.getCode());
+        //设置阻碍用的方块
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 5,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 12,
+                TetrisTypeEnum.LINE_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 18,
+                TetrisTypeEnum.FIELD_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 9,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 18,
+                TetrisTypeEnum.FIELD_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.save();
+    }
+
+    /**
+     * 创建第一关
+     */
+    private static void createFirstPass() {
+        Stage stage = new Stage();
+        //设置下落速度
+        stage.setSpeed(1000);
+        //设置过关消除行数
+        stage.setComplete(3);
+        //设置关卡图标路径
+        stage.setIcoPath("ico_1");
+        //关卡名字
+        stage.setName(StageTypeEnum.FIRST_PASS.getDes());
+        //关卡类型
+        stage.setStageType(StageTypeEnum.FIRST_PASS.getCode());
+        //设置阻碍用的方块
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * 2,
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 5,
+                TetrisTypeEnum.LINE_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.getHinderTetris().add(new Tetris(
+                RushTetrisView.BEGIN_LEN_X + RushTetrisView.BLOCK_SIZE * (RushTetrisView.COLUMN_NUM - 2),
+                RushTetrisView.BEGIN_LEN_Y + RushTetrisView.BLOCK_SIZE * 16,
+                TetrisTypeEnum.LINE_SHAPE, -1,
+                RushTetrisView.BLOCK_SIZE
+        ));
+        stage.save();
     }
 }

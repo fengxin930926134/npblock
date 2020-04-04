@@ -665,13 +665,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         // 缓存用户数据
         JSONObject param = new JSONObject();
         param.put("rankRecordId", usersResult.getRankId());
+        param.put("rushRecordId", usersResult.getRushId());
+        param.put("classicRecordId", usersResult.getClassicId());
         JSONObject post = OkHttpUtils.post("/rank/record", param.toJSONString());
         if (post.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
             throw new Exception(post.getString(ConstUtils.MSG));
         }
+        //result 包括排位 挑战 经典 三种模式的成绩
         JSONObject result = post.getJSONObject(ConstUtils.RESULT);
-        int rankScore = result.getIntValue("rankScore");
-        boolean riseInRank = result.getBoolean("riseInRank");
+        saveRushAndClassic(result);
+        JSONObject rankRecord = result.getJSONObject("rankRecord");
+        int rankScore = rankRecord.getIntValue("rankScore");
+        boolean riseInRank = rankRecord.getBoolean("riseInRank");
         usersResult.setRankScore(rankScore);
         usersResult.setRiseInRank(riseInRank);
         users = usersResult;
@@ -697,6 +702,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 LoggerUtils.e("好友缓存失败：" + e.getMessage());
             }
         });
+    }
+
+    /**
+     * 保存挑战模式和经典模式成绩
+     * @param object json
+     */
+    private void saveRushAndClassic(JSONObject object) {
+        JSONObject classicRecord = object.getJSONObject("classicRecord");
+        JSONObject rushRecord = object.getJSONObject("rushRecord");
+        int maxPass = rushRecord.getIntValue("maxPass");
+        int maxScore = classicRecord.getIntValue("maxScore");
+        if (SharedPreferencesUtils.saveScore(maxScore)) {
+            LoggerUtils.e("[SP] 保存成绩失败");
+        }
+        if (SharedPreferencesUtils.savePass(maxPass)) {
+            LoggerUtils.e("[SP] 保存关卡信息失败");
+        }
     }
 
     /**

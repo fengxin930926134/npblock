@@ -22,6 +22,8 @@ public class Stage extends LitePalSupport {
     private String stageType;
     /**关卡名*/
     private String name;
+    /**关卡图标路径*/
+    private String icoPath;
     /**阻碍用的俄罗斯方块*/
     private List<Tetris> hinderTetris = new ArrayList<>();
     /**消除行数（过关条件）*/

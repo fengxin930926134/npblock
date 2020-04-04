@@ -20,8 +20,11 @@ public class SharedPreferencesUtils {
     /**token sp文件名*/
     private static final String SP_TOKEN = "np_token";
 
-    /**游戏分数 sp文件名*/
+    /**经典分数 sp文件名*/
     private static final String SP_SCORE = "np_score";
+
+    /**挑战关卡 sp文件名*/
+    private static final String SP_PASS = "np_pass";
 
     /**
      * 保存token信息
@@ -81,19 +84,44 @@ public class SharedPreferencesUtils {
         sp = NpBlockApplication.getInstance().getApplicationContext()
                 .getSharedPreferences(SP_SCORE, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = sp.edit();
-        edit.putInt(ConstUtils.SP_SCORE, score);
+        edit.putInt(SP_SCORE, score);
         return !edit.commit();
     }
 
     /**
-     * 读取token信息
+     * 读取Score信息
      *
-     * @return map
+     * @return int
      */
     public static int readScore() {
         sp = NpBlockApplication.getInstance().getApplicationContext()
                 .getSharedPreferences(SP_SCORE, Context.MODE_PRIVATE);
-        return sp.getInt(ConstUtils.SP_SCORE, 0);
+        return sp.getInt(SP_SCORE, 0);
+    }
+
+    /**
+     * 保存关卡信息
+     *
+     * @param pass 关卡
+     * @return boolean
+     */
+    public static boolean savePass(int pass) {
+        sp = NpBlockApplication.getInstance().getApplicationContext()
+                .getSharedPreferences(SP_PASS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putInt(SP_PASS, pass);
+        return !edit.commit();
+    }
+
+    /**
+     * 读取PASS信息
+     *
+     * @return int
+     */
+    public static int readPass() {
+        sp = NpBlockApplication.getInstance().getApplicationContext()
+                .getSharedPreferences(SP_PASS, Context.MODE_PRIVATE);
+        return sp.getInt(SP_PASS, 0);
     }
 
     /**私有化构造方法*/

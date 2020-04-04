@@ -21,6 +21,7 @@
     <!--  半透明灰底  -->
     <color name="colorGrayTransparent_25">#403D3B3B</color>
     <color name="colorGrayTransparent_50">#993D3B3B</color>
+    <color name="colorGray">#3D3B3B</color>
     <color name="black_20">#80000000</color>
     <color name="primary">#3C515C</color>
     <!--社交使用的颜色-->
