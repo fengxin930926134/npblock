@@ -243,16 +243,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             try {
                 Users user = new Users();
                 user.setToken(users.getToken());
-                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(user));
+                JSONObject response = OkHttpUtils.post("/rank/getRank", JSONObject.toJSONString(user));
                 if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                    //TODO 暂时为一个排行榜 后面在这个地方获取3个排行榜数据
-                    List<Users> result = JSONObject.parseArray(response.getString("result"), Users.class);
+                    JSONObject result = response.getJSONObject("result");
+                    List<Users> classicRank = JSONObject.parseArray(result.getString("classicRank"), Users.class);
+                    List<Users> rushRank = JSONObject.parseArray(result.getString("rushRank"), Users.class);
+                    List<Users> rankRank = JSONObject.parseArray(result.getString("rankRank"), Users.class);
                     //保存进缓存中
-                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE, result);
-                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_RANKING_MODE, result);
-                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE, result);
+                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE, classicRank);
+                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_RANKING_MODE, rankRank);
+                    CacheManager.getInstance().putUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE, rushRank);
                     //判断是新用户还是老用户
-                    if (!TextUtils.isEmpty(users.getGameName())) {
+                    if (!TextUtils.isEmpty(this.users.getGameName())) {
                         startActivity(new Intent(context, MainActivity.class));
                     } else {
                         startActivity(new Intent(context, InputNameActivity.class));

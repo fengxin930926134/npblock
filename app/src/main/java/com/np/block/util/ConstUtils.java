@@ -24,10 +24,10 @@ public class ConstUtils {
      */
     public static final int CODE_SUCCESS = 80000;
 
-    /**
-     * 执行接口成功 但是要达成的条件失败
-     */
-    public static final int CODE_ERROR = 80007;
+//    /**
+//     * 执行接口成功 但是要达成的条件失败
+//     */
+//    public static final int CODE_ERROR = 80007;
 
     /**
      * 游戏进行的时长
@@ -78,11 +78,6 @@ public class ConstUtils {
      * 缓存 用户信息数据的KEY
      */
     public static final String CACHE_USER_INFO = "userInfo";
-
-    /**
-     * 缓存 用户等待上传的经典模式分数的KEY
-     */
-    public static final String CACHE_WAIT_UPLOAD_CLASSIC_SCORE = "waitUploadClassicScore";
 
     /**
      * 缓存 经典模式排行榜的key
@@ -174,14 +169,14 @@ public class ConstUtils {
      */
     public static final int HANDLER_CHAT_WINDOW = 0x18;
 
-    /**
-     * Handler 消息类型 离线弹窗
-     */
-    public static final int HANDLER_OFFLINE_WINDOW = 0x19;
-    /**
-     * Handler 消息类型 邀请好友游戏
-     */
-    public static final int HANDLER_INVITE_GAME = 0x20;
+//    /**
+//     * Handler 消息类型 离线弹窗
+//     */
+//    public static final int HANDLER_OFFLINE_WINDOW = 0x19;
+//    /**
+//     * Handler 消息类型 邀请好友游戏
+//     */
+//    public static final int HANDLER_INVITE_GAME = 0x20;
 
     /**
      * json数据key 所有方块坐标
@@ -231,7 +226,8 @@ public class ConstUtils {
     public static String getRankName(int rankGrade, boolean isPromotion) {
         int rank = rankGrade;
         //是否晋级赛
-        if (rank > 1000) {
+        int initRank = 1000;
+        if (rank > initRank) {
             if (isPromotion) {
                 rank = rank - 1;
             }

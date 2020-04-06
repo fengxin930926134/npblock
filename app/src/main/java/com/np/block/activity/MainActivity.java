@@ -56,6 +56,8 @@ import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.adapter.FriendApplyAdapter;
 import com.np.block.adapter.FriendManageAdapter;
 import com.np.block.adapter.PassAdapter;
+import com.np.block.adapter.RankingRankAdapter;
+import com.np.block.adapter.RushRankAdapter;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
@@ -143,7 +145,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**计时器*/
     private Chronometer gameChronometer;
     /**经典模式排行榜适配器*/
-    public ClassicRankAdapter classicRankAdapter = null;
+    private ClassicRankAdapter classicRankAdapter = null;
+    /**挑战模式排行榜适配器*/
+    private RushRankAdapter rushRankAdapter = null;
+    /**排位模式排行榜适配器*/
+    private RankingRankAdapter rankingRankAdapter = null;
     /**是否进入匹配 防止多次点击*/
     private boolean enterSuccess = false;
     /**确认进入匹配弹窗*/
@@ -162,6 +168,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private FriendManageAdapter friendManageAdapter = new FriendManageAdapter(R.layout.friend_manage_item, friendManageItems);
     /**结束弹窗*/
     private boolean isExitDialog = false;
+
+    public ClassicRankAdapter getClassicRankAdapter() {
+        return classicRankAdapter;
+    }
+
+    public RushRankAdapter getRushRankAdapter() {
+        return rushRankAdapter;
+    }
+
+    public RankingRankAdapter getRankingRankAdapter() {
+        return rankingRankAdapter;
+    }
 
     @Override
     public void myHandleMessage(Message msg) {
@@ -814,63 +832,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onResume() {
-        // 判断是否存在未上传成绩
-        if (CacheManager.getInstance().containsKey(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE)) {
-            final int score = (int) CacheManager.getInstance().get(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
-            ThreadPoolManager.getInstance().execute(() -> {
-                try {
-                    JSONObject params = new JSONObject();
-                    params.put("classicScore", score);
-                    params.put("token", users.getToken());
-                    JSONObject response = OkHttpUtils.post("/rank/uploadClassic", params.toJSONString());
-                    //解析返回数据
-                    if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                        refreshRankData();
-                        // 清缓存
-                        CacheManager.getInstance().remove(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE);
-                    } else {
-                        throw new Exception(response.getString(ConstUtils.MSG));
-                    }
-                } catch (Exception e) {
-                    LoggerUtils.e(e.getMessage());
-                }
-            });
-        }
         super.onResume();
+        //刷新排行榜数据
+        refreshData();
         if (!enterSuccess && FloatWindow.get() != null) {
             FloatWindow.get().hide();
         }
         EMClient.getInstance().chatManager().addMessageListener(msgListener);
-    }
-
-    /**
-     * 刷新排行榜数据 TODO 存在bug
-     */
-    private void refreshRankData(){
-        ThreadPoolManager.getInstance().execute(() -> {
-            // 获取最新排行榜数据
-            try {
-                Users user = new Users();
-                user.setToken(users.getToken());
-                JSONObject response = OkHttpUtils.post("/rank/classic", JSONObject.toJSONString(user));
-                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
-                    List<Users> usersList = JSONObject.parseArray(response.getString("result"), Users.class);
-                    CacheManager.getInstance().put(ConstUtils.CACHE_RANK_CLASSICAL_MODE, usersList);
-                    runOnUiThread(() -> {
-                        // 刷新数据
-                        if (classicRankAdapter != null) {
-                            classicRankAdapter.notifyDataSetChanged();
-                            LoggerUtils.i("执行刷新了");
-                        }
-                    });
-                }else {
-                    //获取失败
-                    LoggerUtils.toJson(response.toJSONString());
-                }
-            } catch (Exception e) {
-                LoggerUtils.e(e.getMessage());
-            }
-        });
     }
 
     /**
@@ -896,7 +864,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         headImg.setOnClickListener(v -> {
             //测试
             Toast.makeText(context, "没实现东西", Toast.LENGTH_SHORT).show();
-            LoggerUtils.i(String.valueOf(classicRankAdapter == null));
         });
     }
 
@@ -938,6 +905,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化排行榜
      */
     private void initRank() {
+        initRankData();
         //创建标签组
         ViewGroup tab = findViewById(R.id.tab);
         //添加标签组的子视图
@@ -961,6 +929,67 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         viewPager.setAdapter(adapter);
         //设置tab组件关联的viewPage
         viewPagerTab.setViewPager(viewPager);
+    }
+
+    /**
+     * 初始化排行榜数据
+     */
+    private void initRankData() {
+        //适配器数据
+        List<Users> classicList;
+        if (CacheManager.getInstance().containsUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE)) {
+            classicList = CacheManager.getInstance().getUsers(ConstUtils.CACHE_RANK_CLASSICAL_MODE);
+        } else {
+            classicList = new ArrayList<>();
+        }
+        List<Users> rushList;
+        if (CacheManager.getInstance().containsUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE)) {
+            rushList = CacheManager.getInstance().getUsers(ConstUtils.CACHE_RANK_BREAKTHROUGH_MODE);
+        } else {
+            rushList = new ArrayList<>();
+        }
+        List<Users> rankList;
+        if (CacheManager.getInstance().containsUsers(ConstUtils.CACHE_RANK_RANKING_MODE)) {
+            rankList = CacheManager.getInstance().getUsers(ConstUtils.CACHE_RANK_RANKING_MODE);
+        } else {
+            rankList = new ArrayList<>();
+        }
+        // 设置adapter适配器
+        classicRankAdapter = new ClassicRankAdapter(R.layout.rank_item, classicList);
+        rushRankAdapter = new RushRankAdapter(R.layout.rank_item, rushList);
+        rankingRankAdapter = new RankingRankAdapter(R.layout.rank_item, rankList);
+    }
+
+    /**
+     * 刷新排行榜适配器数据
+     */
+    private void refreshData() {
+        ThreadPoolManager.getInstance().execute(() -> {
+            // 获取最新排行榜数据
+            try {
+                Users user = new Users();
+                user.setToken(users.getToken());
+                JSONObject response = OkHttpUtils.post("/rank/getRank", JSONObject.toJSONString(user));
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS){
+                    JSONObject result = response.getJSONObject("result");
+                    List<Users> classicRank = JSONObject.parseArray(result.getString("classicRank"), Users.class);
+                    List<Users> rushRank = JSONObject.parseArray(result.getString("rushRank"), Users.class);
+                    List<Users> rankRank = JSONObject.parseArray(result.getString("rankRank"), Users.class);
+                    runOnUiThread(() -> {
+                        classicRankAdapter.setNewData(classicRank);
+                        classicRankAdapter.notifyDataSetChanged();
+                        rushRankAdapter.setNewData(rushRank);
+                        rushRankAdapter.notifyDataSetChanged();
+                        rankingRankAdapter.setNewData(rankRank);
+                        rankingRankAdapter.notifyDataSetChanged();
+                    });
+                }else {
+                    throw new Exception(response.getString(ConstUtils.MSG));
+                }
+            } catch (Exception e) {
+                LoggerUtils.e(e.getMessage());
+            }
+        });
     }
 
     /**

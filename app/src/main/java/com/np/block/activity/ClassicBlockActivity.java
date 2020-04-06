@@ -4,15 +4,19 @@ import android.app.AlertDialog;
 import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseGameActivity;
 import com.np.block.base.BaseTetrisView;
 import com.np.block.core.manager.CacheManager;
+import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Tetris;
 import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
+import com.np.block.util.OkHttpUtils;
 import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.view.ClassicTetrisView;
 import butterknife.BindView;
@@ -41,6 +45,7 @@ public class ClassicBlockActivity extends BaseGameActivity {
     private int maxScore;
     /**暂停对话框*/
     private AlertDialog pauseDialog = null;
+    private Users user;
 
     @Override
     public BaseTetrisView getTetrisView() {
@@ -49,16 +54,16 @@ public class ClassicBlockActivity extends BaseGameActivity {
 
     @Override
     public void initData() {
-        // 初始化最高分 当本地数据没有的时候读取缓存数据
-        if ((maxScore = SharedPreferencesUtils.readScore()) == 0) {
-            Users user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
-            if (user != null && user.getClassicScore() != null && user.getClassicScore() > 0) {
-                maxScore = user.getClassicScore();
-                // 保存本地
-                if (SharedPreferencesUtils.saveScore(maxScore)) {
-                    LoggerUtils.i("[SP] 保存成绩失败");
-                }
+        // 初始化最高分
+        user = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+        if (user != null && user.getClassicScore() != null && user.getClassicScore() > 0) {
+            maxScore = user.getClassicScore();
+            // 保存本地
+            if (SharedPreferencesUtils.saveScore(maxScore)) {
+                LoggerUtils.i("[SP] 保存成绩失败");
             }
+        } else {
+            maxScore = SharedPreferencesUtils.readScore();
         }
         maxScoreText.setText(String.valueOf(maxScore));
         // 启动下落线程  咳咳  游戏启动
@@ -164,30 +169,53 @@ public class ClassicBlockActivity extends BaseGameActivity {
     public void gameOver() {
         super.gameOver();
         int maxScoreNew = Integer.parseInt(score.getText().toString());
-        final String textContent;
         // 判断成绩是否需要保存
         if (maxScoreNew > maxScore) {
-            textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
+            String textContent = "恭喜您打破记录，目前的成绩为：" + maxScoreNew + " 分";
             // 保存本地
             if (SharedPreferencesUtils.saveScore(maxScoreNew)) {
                 LoggerUtils.i("[SP] 保存成绩失败");
             }
             // 上传游戏分数
-            CacheManager.getInstance().put(ConstUtils.CACHE_WAIT_UPLOAD_CLASSIC_SCORE, maxScoreNew);
+            uploadClassic(maxScoreNew);
+            // 弹出弹窗
+            runOnUiThread(() -> DialogUtils.showDialog(context, "游戏结束", textContent,
+                    "回到主页", "重来", false, false,
+                    (dialog, which) -> {
+                        dialog.cancel();
+                        exitGame();
+                    },
+                    (dialog, which) -> {
+                        dialog.cancel();
+                        refreshGame();
+                    }));
         } else {
-            textContent = "别灰心，再来一次就突破！";
+            exitGame();
         }
-        // 弹出弹窗
-        runOnUiThread(() -> DialogUtils.showDialog(context, "游戏结束", textContent,
-                "回到主页", "重来", false, false,
-                (dialog, which) -> {
-                    dialog.cancel();
-                    exitGame();
-                },
-                (dialog, which) -> {
-                    dialog.cancel();
-                    refreshGame();
-                }));
+    }
+
+    /**
+     * 上传经典模式成绩
+     * @param maxScoreNew 新的最大成绩
+     */
+    private void uploadClassic(int maxScoreNew) {
+        AlertDialog alertDialog = DialogUtils.showDialog(context);
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                JSONObject params = new JSONObject();
+                params.put("classicScore", maxScoreNew);
+                params.put("token", user.getToken());
+                JSONObject response = OkHttpUtils.post("/rank/uploadClassic", params.toJSONString());
+                //解析返回数据
+                if (response.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS){
+                    throw new Exception(response.getString(ConstUtils.MSG));
+                }
+                runOnUiThread(alertDialog::cancel);
+            } catch (Exception e) {
+                LoggerUtils.e("uploadClassic" + e.getMessage());
+                runOnUiThread(alertDialog::cancel);
+            }
+        });
     }
 
     /**
@@ -197,11 +225,11 @@ public class ClassicBlockActivity extends BaseGameActivity {
         // 暂停下落
         runningStatus = false;
         pauseDialog = DialogUtils.showDialog(context, "游戏暂停", "客官，继续玩呗~！",
-                "回到主页", "重来", "继续", false, true,
+                "结束游戏", "重来", "继续", false, true,
                 //回到主页
                 (dialog, which) -> {
                     dialog.cancel();
-                    exitGame();
+                    gameOver();
                 },
                 //刷新重来
                 (dialog, which) -> {

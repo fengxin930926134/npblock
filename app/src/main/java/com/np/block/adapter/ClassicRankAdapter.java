@@ -1,9 +1,14 @@
 package com.np.block.adapter;
 
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -50,10 +55,10 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
     protected void convert(@NonNull BaseViewHolder helper, Users item) {
         //设置成绩
         helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
-        helper.setText(R.id.rank_item_score, item.getClassicScore() != null ? item.getClassicScore()+"": "0");
+        helper.setText(R.id.rank_item_score, item.getClassicScore() != null ? item.getClassicScore()+" 分": "0 分");
         //如果token是登陆用户
         if (users.getToken().equals(item.getToken())) {
-            helper.setBackgroundColor(R.id.rank_item_background, Color.GRAY);
+            helper.setBackgroundRes(R.id.rank_item_background, R.color.colorTransparent);
             //防止刚更新名字时 排行榜不存在名字
             helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
         }
@@ -65,6 +70,12 @@ public class ClassicRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
                 .into(rankItemImg);
         //设置事件
         final int position = helper.getLayoutPosition();
+        TextView rankNum = helper.getView(R.id.rankNum);
+        rankNum.setText(String.valueOf(position + 1));
+        if (position == 0) {
+            rankNum.setTextSize(32);
+            rankNum.setTextColor(ResourcesCompat.getColor(mContext.getResources(), R.color.golden, null));
+        }
         rankItemImg.setOnClickListener(v -> Toast.makeText(mContext, "亚麻跌, 不要，不要点_"
                 + position, Toast.LENGTH_SHORT).show());
     }

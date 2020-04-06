@@ -1,7 +1,9 @@
 package com.np.block.adapter;
 
 import android.graphics.Color;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -13,6 +15,7 @@ import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import java.util.List;
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 
 /**
  * 排行榜适配器
@@ -48,12 +51,19 @@ public class RankingRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, Users item) {
-        //设置成绩
         helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
-        helper.setText(R.id.rank_item_score, item.getClassicScore() != null ? item.getClassicScore()+"": "0");
+        //设置成绩
+        String rankText = ConstUtils.getRankName(item.getRankScore(), item.getRiseInRank());
+        if (item.getRiseInRank()) {
+            rankText = rankText + " (100)";
+        } else {
+            rankText = rankText + " (" + item.getRankScore()%100 + ")";
+        }
+        helper.setText(R.id.rank_item_score, (item.getRankScore() != null && item.getRiseInRank() != null)
+                ? rankText : "英勇黄铜Ⅲ (0)");
         //如果token是登陆用户
         if (users.getToken().equals(item.getToken())) {
-            helper.setBackgroundColor(R.id.rank_item_background, Color.GRAY);
+            helper.setBackgroundRes(R.id.rank_item_background, R.color.colorTransparent);
             //防止刚更新名字时 排行榜不存在名字
             helper.setText(R.id.rank_item_name, item.getGameName() != null ? item.getGameName() : "");
         }
@@ -65,6 +75,12 @@ public class RankingRankAdapter extends BaseQuickAdapter<Users, BaseViewHolder> 
                 .into(rankItemImg);
         //设置事件
         final int position = helper.getLayoutPosition();
+        TextView rankNum = helper.getView(R.id.rankNum);
+        rankNum.setText(String.valueOf(position + 1));
+        if (position == 0) {
+            rankNum.setTextSize(32);
+            rankNum.setTextColor(ResourcesCompat.getColor(mContext.getResources(), R.color.golden, null));
+        }
         rankItemImg.setOnClickListener(v -> Toast.makeText(mContext, "亚麻跌, 不要，不要点_"
                 + position, Toast.LENGTH_SHORT).show());
     }
