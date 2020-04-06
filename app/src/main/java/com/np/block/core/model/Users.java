@@ -41,4 +41,12 @@ public class Users {
     private Boolean riseInRank;
     /**申请理由， 只在客户端存在*/
     private String reason;
+
+    public Users() {}
+
+    public Users(String gameName, String headSculpture, Integer walletBlock) {
+        this.gameName = gameName;
+        this.headSculpture = headSculpture;
+        this.walletBlock = walletBlock;
+    }
 }

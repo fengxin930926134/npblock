@@ -58,6 +58,7 @@ import com.np.block.adapter.FriendManageAdapter;
 import com.np.block.adapter.PassAdapter;
 import com.np.block.adapter.RankingRankAdapter;
 import com.np.block.adapter.RushRankAdapter;
+import com.np.block.adapter.WealthRankAdapter;
 import com.np.block.base.BaseActivity;
 import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
@@ -70,6 +71,7 @@ import com.np.block.core.model.Users;
 import com.np.block.fragment.ClassicRankFragment;
 import com.np.block.fragment.RankingRankFragment;
 import com.np.block.fragment.RushRankFragment;
+import com.np.block.fragment.WealthRankFragment;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
@@ -84,6 +86,7 @@ import com.yhao.floatwindow.FloatWindow;
 import com.yhao.floatwindow.MoveType;
 import org.litepal.LitePal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import butterknife.BindView;
@@ -150,6 +153,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private RushRankAdapter rushRankAdapter = null;
     /**排位模式排行榜适配器*/
     private RankingRankAdapter rankingRankAdapter = null;
+    /**财富榜适配器*/
+    private WealthRankAdapter wealthRankAdapter = null;
     /**是否进入匹配 防止多次点击*/
     private boolean enterSuccess = false;
     /**确认进入匹配弹窗*/
@@ -179,6 +184,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     public RankingRankAdapter getRankingRankAdapter() {
         return rankingRankAdapter;
+    }
+
+    public WealthRankAdapter getWealthRankAdapter() {
+        return wealthRankAdapter;
     }
 
     @Override
@@ -920,6 +929,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         pages.add(FragmentPagerItem.of(getString(R.string.classic_block_text), ClassicRankFragment.class));
         pages.add(FragmentPagerItem.of(getString(R.string.battle_block_text), RankingRankFragment.class));
         pages.add(FragmentPagerItem.of(getString(R.string.interest_block_text), RushRankFragment.class));
+        pages.add(FragmentPagerItem.of(getString(R.string.wealth_rank_text), WealthRankFragment.class));
 
         //创建页面切换组件的适配器（pages类似于list，类似页面的集合）
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
@@ -954,10 +964,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         } else {
             rankList = new ArrayList<>();
         }
+        List<Users> wealthList = new ArrayList<>();
+        for (Users users: rankList) {
+            wealthList.add(new Users(users.getGameName(), users.getHeadSculpture(), users.getWalletBlock()));
+        }
+        Collections.sort(wealthList, (o1, o2) -> o1.getWalletBlock() - o2.getWalletBlock());
+        List<Users> wealth = new ArrayList<>();
+        for (int i = wealthList.size() - 1; i >= 0; i--) {
+            wealth.add(wealthList.get(i));
+        }
         // 设置adapter适配器
         classicRankAdapter = new ClassicRankAdapter(R.layout.rank_item, classicList);
         rushRankAdapter = new RushRankAdapter(R.layout.rank_item, rushList);
         rankingRankAdapter = new RankingRankAdapter(R.layout.rank_item, rankList);
+        wealthRankAdapter = new WealthRankAdapter(R.layout.rank_item, wealth);
     }
 
     /**
@@ -975,6 +995,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     List<Users> classicRank = JSONObject.parseArray(result.getString("classicRank"), Users.class);
                     List<Users> rushRank = JSONObject.parseArray(result.getString("rushRank"), Users.class);
                     List<Users> rankRank = JSONObject.parseArray(result.getString("rankRank"), Users.class);
+                    List<Users> wealthList = new ArrayList<>();
+                    for (Users users: rankRank) {
+                        wealthList.add(new Users(users.getGameName(), users.getHeadSculpture(), users.getWalletBlock()));
+                    }
+                    Collections.sort(wealthList, (o1, o2) -> o1.getWalletBlock() - o2.getWalletBlock());
+                    List<Users> wealth = new ArrayList<>();
+                    for (int i = wealthList.size() - 1; i >= 0; i--) {
+                        wealth.add(wealthList.get(i));
+                    }
                     runOnUiThread(() -> {
                         classicRankAdapter.setNewData(classicRank);
                         classicRankAdapter.notifyDataSetChanged();
@@ -982,6 +1011,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         rushRankAdapter.notifyDataSetChanged();
                         rankingRankAdapter.setNewData(rankRank);
                         rankingRankAdapter.notifyDataSetChanged();
+                        wealthRankAdapter.setNewData(wealth);
+                        wealthRankAdapter.notifyDataSetChanged();
                     });
                 }else {
                     throw new Exception(response.getString(ConstUtils.MSG));
