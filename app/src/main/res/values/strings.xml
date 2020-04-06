@@ -62,4 +62,6 @@
     <string name="fail">失败</string>
     <string name="win_text">胜利</string>
     <string name="promotionFailure_text">晋级失败</string>
+    <string name="tips_text">过关消除行数</string>
+    <string name="tips_current_text">当前消除行数</string>
 </resources>

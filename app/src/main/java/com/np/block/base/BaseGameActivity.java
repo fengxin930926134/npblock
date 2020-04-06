@@ -1,5 +1,6 @@
 package com.np.block.base;
 
+import android.content.Intent;
 import android.widget.Button;
 import com.np.block.R;
 import com.np.block.core.manager.ActivityManager;
@@ -141,12 +142,16 @@ public abstract class BaseGameActivity extends BaseActivity{
 
     /**
      * 刷新游戏
-     * 调用recreate方法重新创建Activity会比正常启动Activity多调用了onSaveInstanceState()和
-     * onRestoreInstanceState()两个方法，onSaveInstanceState()会在onCreate方法之前调用。
-     * 所以可以在onCreate()方法中获取onSaveInstanceState()保存的Theme数据
      */
     public void refreshGame() {
-        recreate();
+        beginGame = false;
+        isLongClick = false;
+        runningStatus = false;
+        Intent intent = getIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        overridePendingTransition(0, 0);
+        ActivityManager.getInstance().removeActivity(this);
+        startActivity(intent);
     }
 
     /**

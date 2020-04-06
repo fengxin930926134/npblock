@@ -38,6 +38,56 @@
             android:textSize="30sp"
             tools:ignore="RelativeOverlap" />
 
+        <TextView
+            android:id="@+id/tips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/left_and_right"
+            android:layout_below="@+id/rush_mode_name"
+            android:layout_marginTop="20dp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            android:text="@string/tips_text"/>
+
+        <TextView
+            android:id="@+id/tips_num"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/left_and_right"
+            android:layout_alignEnd="@+id/tips"
+            android:layout_below="@+id/tips"
+            android:layout_marginTop="5dp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/tips_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/left_and_right"
+            android:layout_below="@+id/tips_num"
+            android:layout_marginTop="15dp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            android:text="@string/tips_current_text"/>
+
+        <TextView
+            android:id="@+id/tips_current_num"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/left_and_right"
+            android:layout_alignEnd="@+id/tips_current"
+            android:layout_below="@+id/tips_current"
+            android:layout_marginTop="5dp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:textSize="20sp"/>
+
         <com.np.block.view.NextTetrisView
             android:id="@+id/nextTetrisView"
             android:layout_toEndOf="@+id/left_and_right"

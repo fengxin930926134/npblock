@@ -3,14 +3,20 @@ package com.np.block.activity;
 import android.app.AlertDialog;
 import android.view.KeyEvent;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.alibaba.fastjson.JSONObject;
 import com.np.block.R;
 import com.np.block.base.BaseGameActivity;
 import com.np.block.base.BaseTetrisView;
+import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
+import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Stage;
+import com.np.block.core.model.Users;
 import com.np.block.util.ConstUtils;
 import com.np.block.util.DialogUtils;
+import com.np.block.util.LoggerUtils;
+import com.np.block.util.OkHttpUtils;
+import com.np.block.util.SharedPreferencesUtils;
 import com.np.block.view.RushTetrisView;
 import org.litepal.LitePal;
 import butterknife.BindView;
@@ -27,6 +33,12 @@ public class RushBlockActivity extends BaseGameActivity {
     /**关卡名称*/
     @BindView(R.id.rush_mode_name)
     TextView rushModeName;
+    /**过关行数*/
+    @BindView(R.id.tips_num)
+    TextView tipsNum;
+    /**当前消除行数*/
+    @BindView(R.id.tips_current_num)
+    TextView tipsCurrentNum;
     /**暂停对话框*/
     private AlertDialog pauseDialog = null;
     /**关卡属性*/
@@ -48,6 +60,8 @@ public class RushBlockActivity extends BaseGameActivity {
                 .findLast(Stage.class);
         // 设置关卡名称
         rushModeName.setText(stage.getName());
+        tipsNum.setText(String.valueOf(stage.getComplete()));
+        updateRowNum();
         // 游戏启动
         startDownThread();
     }
@@ -84,6 +98,7 @@ public class RushBlockActivity extends BaseGameActivity {
             gamePassDialog();
         } else {
             rowNum = rowNum + newSum;
+            updateRowNum();
         }
     }
 
@@ -98,6 +113,7 @@ public class RushBlockActivity extends BaseGameActivity {
                 //回到主页
                 (dialog, which) -> {
                     dialog.cancel();
+                    uploadRush();
                     exitGame();
                 },
                 //刷新重来
@@ -107,11 +123,44 @@ public class RushBlockActivity extends BaseGameActivity {
                 },
                 //开始下一关
                 (dialog, which) -> {
-                    Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
                     dialog.cancel();
-                    exitGame();
+                    //上传成绩
+                    uploadRush();
+                    beginNextRush();
                 },
                 null));
+    }
+
+    /**
+     * 开始下一关卡
+     */
+    private void beginNextRush() {
+        // 缓存下一关卡
+        boolean isNext = false;
+        // 最大关卡
+        int pass = SharedPreferencesUtils.readPass();
+        // 遍历关卡num
+        int i = 1;
+        for (StageTypeEnum stageTypeEnum:StageTypeEnum.values()) {
+            if (isNext) {
+                CacheManager.getInstance().put(ConstUtils.CACHE_RUSH_STAGE_TYPE,
+                        stageTypeEnum.getCode());
+                //判断是否是以前未进入的关卡
+                if (pass < i) {
+                    //保存新关卡num
+                    if (!SharedPreferencesUtils.savePass(i)) {
+                        LoggerUtils.e("beginNextRush：保存关卡num失败");
+                    }
+                }
+                break;
+            }
+            if (stageTypeEnum.getCode().equals(CacheManager.getInstance().get(ConstUtils.CACHE_RUSH_STAGE_TYPE))) {
+                isNext = true;
+            }
+            i ++;
+        }
+        //刷新当前关卡
+        refreshGame();
     }
 
     /**
@@ -125,6 +174,7 @@ public class RushBlockActivity extends BaseGameActivity {
                 "回到主页", "重来", false, false,
                 (dialog, which) -> {
                     dialog.cancel();
+                    uploadRush();
                     exitGame();
                 },
                 (dialog, which) -> {
@@ -144,6 +194,7 @@ public class RushBlockActivity extends BaseGameActivity {
                 //回到主页
                 (dialog, which) -> {
                     dialog.cancel();
+                    uploadRush();
                     exitGame();
                 },
                 //刷新重来
@@ -171,6 +222,44 @@ public class RushBlockActivity extends BaseGameActivity {
     }
 
     /**
+     * 上传挑战成绩
+     */
+    private void uploadRush() {
+        AlertDialog alertDialog = DialogUtils.showDialogDefault(context);
+        Users users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);
+        ThreadPoolManager.getInstance().execute(() -> {
+            int pass = 0;
+            for (StageTypeEnum stageTypeEnum:StageTypeEnum.values()) {
+                pass++;
+                if (stageTypeEnum.getCode().equals(stage.getStageType())) {
+                    break;
+                }
+            }
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("num", rowNum);
+                jsonObject.put("pass", pass);
+                jsonObject.put("id", users.getRushId());
+                JSONObject post = OkHttpUtils.post("/rank/uploadRush", jsonObject.toString());
+                if (post.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
+                   throw new Exception(post.getString("msg"));
+                }
+                runOnUiThread(alertDialog::cancel);
+            } catch (Exception e) {
+                LoggerUtils.e("挑战成绩上传失败:" + e.getMessage());
+                runOnUiThread(alertDialog::cancel);
+            }
+        });
+    }
+
+    /**
+     * 更新当前消除行数
+     */
+    private void updateRowNum() {
+        runOnUiThread(() -> tipsCurrentNum.setText(String.valueOf(rowNum)));
+    }
+
+   /**
      * 返回时触发
      */
     @Override
