@@ -112,7 +112,7 @@ public class ConstUtils {
     /**
      * 请求url
      */
-    static final String URL = "https://npblock.cn";
+    public static final String URL = "https://npblock.cn";
 
     /**
      * 服务器主机地址

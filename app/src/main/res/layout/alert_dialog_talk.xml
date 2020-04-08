@@ -3,7 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="500dp"
     android:layout_gravity="center"
-    android:background="@drawable/shape_radian_dialog_white"
+    android:background="@color/colorGrey"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -37,11 +37,12 @@
 
     <View
         android:layout_width="match_parent"
-        android:background="@color/accent"
+        android:background="@color/colorGray"
         android:layout_height="2dp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:background="@drawable/shape_radian_dialog_white"
         android:layout_height="360dp">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/talk_recyclerView"
@@ -58,7 +59,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:background="@color/accent"
+        android:background="@color/colorGray"
         android:layout_height="2dp"/>
 
     <LinearLayout
@@ -83,8 +84,11 @@
 
         <Button
             android:id="@+id/send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="70dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/btn_white"
+            android:layout_height="38dp"
             android:text="@string/send_text"/>
     </LinearLayout>
 

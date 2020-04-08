@@ -55,17 +55,21 @@ import com.np.block.adapter.AddFriendAdapter;
 import com.np.block.adapter.ClassicRankAdapter;
 import com.np.block.adapter.FriendApplyAdapter;
 import com.np.block.adapter.FriendManageAdapter;
+import com.np.block.adapter.GoodsAdapter;
+import com.np.block.adapter.PackAdapter;
 import com.np.block.adapter.PassAdapter;
 import com.np.block.adapter.RankingRankAdapter;
 import com.np.block.adapter.RushRankAdapter;
 import com.np.block.adapter.WealthRankAdapter;
 import com.np.block.base.BaseActivity;
+import com.np.block.core.enums.GoodsEnum;
 import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.MessageManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
+import com.np.block.core.model.Goods;
 import com.np.block.core.model.Stage;
 import com.np.block.core.model.Users;
 import com.np.block.fragment.ClassicRankFragment;
@@ -131,6 +135,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**聊天弹窗*/
     @BindView(R.id.talk)
     ImageButton talk;
+    @BindView(R.id.talk_notification)
+    TextView talkNotification;
     /**成就*/
     @BindView(R.id.attainment)
     TextView attainment;
@@ -143,8 +149,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**段位*/
     @BindView(R.id.rankText)
     TextView rankText;
-    @BindView(R.id.talk_notification)
-    TextView talkNotification;
+    /**商店*/
+    @BindView(R.id.shop)
+    TextView shop;
+    /**背包*/
+    @BindView(R.id.knapsack)
+    TextView knapsack;
     /**计时器*/
     private Chronometer gameChronometer;
     /**经典模式排行榜适配器*/
@@ -155,6 +165,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private RankingRankAdapter rankingRankAdapter = null;
     /**财富榜适配器*/
     private WealthRankAdapter wealthRankAdapter = null;
+    /**背包适配器*/
+    private PackAdapter packAdapter = null;
+    /**背包适配器数据*/
+    private List<Goods> packList = new ArrayList<>();
     /**是否进入匹配 防止多次点击*/
     private boolean enterSuccess = false;
     /**确认进入匹配弹窗*/
@@ -313,6 +327,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         social.setOnClickListener(this);
         talk.setOnClickListener(this);
         attainment.setOnClickListener(this);
+        shop.setOnClickListener(this);
+        knapsack.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
         //排行榜
@@ -336,6 +352,40 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (NpBlockApplication.getInstance().receiveApplication ||
                 NpBlockApplication.getInstance().applicationAgree) {
             socialNotification.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * 更新方块币
+     * @param changeNum 变化数量
+     */
+    public void updateBlockCoinNum(int changeNum) {
+        int block = users.getWalletBlock() + changeNum;
+        users.setWalletBlock(block);
+        String text = Integer.toString(block);
+        blockNum.setText(text);
+    }
+
+    /**
+     * 使用商品
+     * @param goodsId goodsId
+     * @param position position
+     */
+    public void useGoods(int goodsId, int position) {
+        switch (GoodsEnum.getEnumByCode(goodsId)) {
+            case RENAME_CARD: {
+                //改名卡
+                packAdapter.remove(position);
+                packAdapter.notifyItemRemoved(position);
+                packAdapter.notifyItemRangeChanged(position, packList.size() - position);
+                Toast.makeText(context, "使用了改名卡", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case DEFAULT: {
+                Toast.makeText(context, "占位置使用", Toast.LENGTH_SHORT).show();break;
+            }
+            default:
+                Toast.makeText(context, "未知商品", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -387,8 +437,108 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
                 break;
             }
+            case R.id.shop: {
+                initShop();
+                break;
+            }
+            case R.id.knapsack: {
+                initKnapsack();
+                break;
+            }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 初始化背包
+     */
+    private void initKnapsack() {
+        AlertDialog dialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_pack, null);
+        //设置取消按钮
+        view.findViewById(R.id.alert_finish).setOnClickListener(v -> dialog.cancel());
+        RecyclerView recyclerView = view.findViewById(R.id.pack_recyclerView);
+        // 设置布局管理器
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        // 设置adapter适配器
+        packAdapter = new PackAdapter(R.layout.pack_item, packList);
+        //开启动画效果
+        packAdapter.openLoadAnimation();
+        //设置动画效果
+        packAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
+        //添加分割线
+        recyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(packAdapter);
+        //查询数据
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                JSONObject params = new JSONObject();
+                params.put("userId", users.getId());
+                JSONObject response = OkHttpUtils.post("/business/pack", params.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                    JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+                    if (objects != null) {
+                        //适配器数据
+                        List<Goods> goods = objects.toJavaList(Goods.class);
+                        packList.clear();
+                        packList.addAll(goods);
+                        //更新
+                        runOnUiThread(packAdapter::notifyDataSetChanged);
+                    }
+                }
+            } catch (Exception e) {
+                LoggerUtils.e("查询失败：" + e.getMessage());
+                Toast.makeText(context, "获取背包失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.setContentView(view);
+    }
+
+    /**
+     * 初始化商店
+     */
+    private void initShop() {
+        AlertDialog dialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_dialog_goods, null);
+        //设置取消按钮
+        view.findViewById(R.id.alert_finish).setOnClickListener(v -> dialog.cancel());
+        //设置商品列表
+        List<Goods> goodsList = new ArrayList<>();
+        RecyclerView recyclerView = view.findViewById(R.id.goods_recyclerView);
+        // 设置布局管理器
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        // 设置adapter适配器
+        GoodsAdapter mAdapter = new GoodsAdapter(R.layout.goods_item, goodsList);
+        //开启动画效果
+        mAdapter.openLoadAnimation();
+        //设置动画效果
+        mAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
+        //添加分割线
+        recyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(mAdapter);
+        //查询数据
+        ThreadPoolManager.getInstance().execute(() -> {
+            try {
+                JSONObject params = new JSONObject();
+                params.put("token", users.getToken());
+                JSONObject response = OkHttpUtils.post("/business/goods", params.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                    JSONArray objects = JSONObject.parseArray(response.getString(ConstUtils.RESULT));
+                    if (objects != null) {
+                        //适配器数据
+                        List<Goods> goods = objects.toJavaList(Goods.class);
+                        goodsList.clear();
+                        goodsList.addAll(goods);
+                        //更新
+                        runOnUiThread(mAdapter::notifyDataSetChanged);
+                    }
+                }
+            } catch (Exception e) {
+                LoggerUtils.e("查询失败：" + e.getMessage());
+                Toast.makeText(context, "查询商品失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.setContentView(view);
     }
 
     /**
@@ -554,7 +704,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         RecyclerView userList = view.findViewById(R.id.user_recycler_view);
         // 设置布局管理器
         userList.setLayoutManager(new LinearLayoutManager(view.getContext()));
-
         //开启动画效果
         friendManageAdapter.openLoadAnimation();
         //设置动画效果

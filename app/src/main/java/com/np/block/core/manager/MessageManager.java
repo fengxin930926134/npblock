@@ -124,6 +124,9 @@ public class MessageManager {
      * @param toChatUsername 环信username 即usersId 不为空则默认按下此idTab
      */
     public void showMessageDialog(Activity context, String toChatUsername) {
+        if (isShow()) {
+            return;
+        }
         if (toChatUsername != null && !multiItemEntityMap.containsKey(toChatUsername)) {
             //此时是增加一条会话
             multiItemEntityMap.put(toChatUsername, new ArrayList<>());
