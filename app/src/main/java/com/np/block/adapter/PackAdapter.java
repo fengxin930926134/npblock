@@ -1,5 +1,6 @@
 package com.np.block.adapter;
 
+import android.app.AlertDialog;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -13,6 +14,7 @@ import com.np.block.activity.MainActivity;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Goods;
 import com.np.block.util.ConstUtils;
+import com.np.block.util.DialogUtils;
 import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import java.util.List;
@@ -24,7 +26,6 @@ import java.util.List;
  */
 public class PackAdapter extends BaseQuickAdapter<Goods, BaseViewHolder> {
 
-    private boolean click = false;
     /**头像属性配置*/
     private RequestOptions options =new RequestOptions()
             //加载成功之前占位图
@@ -59,30 +60,28 @@ public class PackAdapter extends BaseQuickAdapter<Goods, BaseViewHolder> {
                 + position, Toast.LENGTH_SHORT).show());
         //设置使用事件
         helper.getView(R.id.pack_use).setOnClickListener(v -> {
-            if (!click) {
-                click = true;
-                ThreadPoolManager.getInstance().execute(() -> {
-                    try {
-                        JSONObject params = new JSONObject();
-                        params.put("recordId", item.getRecordId());
-                        JSONObject response = OkHttpUtils.post("/business/useGoods", params.toJSONString());
-                        if (response.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
-                            throw new Exception(response.getString(ConstUtils.MSG));
-                        } else {
-                            ((MainActivity) mContext).runOnUiThread(() -> {
-                                Toast.makeText(mContext, "使用成功", Toast.LENGTH_SHORT).show();
-                                ((MainActivity) mContext).useGoods(item.getId(), position);
-                            });
-                        }
-                    } catch (Exception e) {
-                        LoggerUtils.e("使用成功：" + e.getMessage());
-                        ((MainActivity) mContext).runOnUiThread(() ->
-                                Toast.makeText(mContext, "使用成功", Toast.LENGTH_SHORT).show());
-                    } finally {
-                        click = false;
+            AlertDialog alertDialog = DialogUtils.showDialog(mContext);
+            ThreadPoolManager.getInstance().execute(() -> {
+                try {
+                    JSONObject params = new JSONObject();
+                    params.put("recordId", item.getRecordId());
+                    JSONObject response = OkHttpUtils.post("/business/useGoods", params.toJSONString());
+                    if (response.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
+                        throw new Exception(response.getString(ConstUtils.MSG));
+                    } else {
+                        ((MainActivity) mContext).runOnUiThread(() -> {
+                            Toast.makeText(mContext, "使用成功", Toast.LENGTH_SHORT).show();
+                            ((MainActivity) mContext).useGoods(item.getId(), position);
+                        });
                     }
-                });
-            }
+                } catch (Exception e) {
+                    LoggerUtils.e("使用成功：" + e.getMessage());
+                    ((MainActivity) mContext).runOnUiThread(() ->
+                            Toast.makeText(mContext, "使用成功", Toast.LENGTH_SHORT).show());
+                } finally {
+                    ((MainActivity) mContext).runOnUiThread(alertDialog::cancel);
+                }
+            });
         });
     }
 }
