@@ -82,6 +82,7 @@ import com.np.block.util.LoggerUtils;
 import com.np.block.util.OkHttpUtils;
 import com.np.block.util.ResolutionUtils;
 import com.np.block.util.SharedPreferencesUtils;
+import com.np.block.util.VerificationUtils;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItem;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
@@ -368,17 +369,65 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     /**
      * 使用商品
+     * @param recordId recordId
      * @param goodsId goodsId
      * @param position position
      */
-    public void useGoods(int goodsId, int position) {
+    public void useGoods(int recordId, int goodsId, int position) {
         switch (GoodsEnum.getEnumByCode(goodsId)) {
             case RENAME_CARD: {
-                //改名卡
-                packAdapter.remove(position);
-                packAdapter.notifyItemRemoved(position);
-                packAdapter.notifyItemRangeChanged(position, packList.size() - position);
-                Toast.makeText(context, "使用了改名卡", Toast.LENGTH_SHORT).show();
+                //改名弹窗
+                AlertDialog dialog = DialogUtils.showDialogDefault(context);
+                View inflate = View.inflate(context, R.layout.update_game_name, null);
+                inflate.findViewById(R.id.alert_finish).setOnClickListener(v -> dialog.cancel());
+                inflate.findViewById(R.id.btn_alert_cancel).setOnClickListener(v -> dialog.cancel());
+                //输入框
+                EditText userName = inflate.findViewById(R.id.input_game_name);
+                userName.setText(users.getGameName());
+                userName.setOnClickListener(v -> userName.setText(""));
+                //修改昵称按钮事件
+                TextView updateTips = inflate.findViewById(R.id.update_tips);
+                inflate.findViewById(R.id.update_name).setOnClickListener(v -> {
+                    updateTips.setText("");
+                    //判断名字格式
+                    if (VerificationUtils.validateGameName(userName.getText().toString())) {
+                        AlertDialog alertDialog = DialogUtils.showDialog(context);
+                        ThreadPoolManager.getInstance().execute(() -> {
+                            try {
+                                JSONObject params = new JSONObject();
+                                params.put("recordId", recordId);
+                                params.put("token", users.getToken());
+                                params.put("gameName", userName.getText().toString());
+                                JSONObject response = OkHttpUtils.post("/social/update", params.toJSONString());
+                                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                                    JSONObject jsonObject = OkHttpUtils.post("/business/useGoods", params.toJSONString());
+                                    if (jsonObject.getIntValue(ConstUtils.CODE) != ConstUtils.CODE_SUCCESS) {
+                                        throw new Exception(jsonObject.getString(ConstUtils.MSG));
+                                    }
+                                    runOnUiThread(() -> {
+                                        dialog.cancel();
+                                        packAdapter.remove(position);
+                                        packAdapter.notifyItemRemoved(position);
+                                        packAdapter.notifyItemRangeChanged(position, packList.size() - position);
+                                        users.setGameName(userName.getText().toString());
+                                        userName.setText(users.getGameName() != null ? users.getGameName(): getResources().getString(R.string.app_name));
+                                    });
+                                    CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, users);
+                                } else {
+                                    throw new Exception(response.getString(ConstUtils.MSG));
+                                }
+                            } catch (Exception e) {
+                                LoggerUtils.e("修改名称失败：" + e.getMessage());
+                                runOnUiThread(() -> updateTips.setText(e.getMessage()));
+                            } finally {
+                                runOnUiThread(alertDialog::cancel);
+                            }
+                        });
+                    } else {
+                        updateTips.setText("昵称格式不正确");
+                    }
+                });
+                dialog.setContentView(inflate);
                 break;
             }
             case DEFAULT: {

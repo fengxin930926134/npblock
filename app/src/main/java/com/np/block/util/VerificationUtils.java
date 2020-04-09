@@ -72,7 +72,9 @@ public class VerificationUtils {
     public static boolean validateGameName(String gameName) {
         if (TextUtils.isEmpty(gameName)){
             return false;
-        }else return !gameName.contains(" ");
+        }else {
+            return !gameName.contains(" ");
+        }
     }
 
     private VerificationUtils() {}

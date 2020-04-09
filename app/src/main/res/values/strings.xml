@@ -69,4 +69,7 @@
     <string name="pack_text">背包</string>
     <string name="goods_buy_text">购买</string>
     <string name="pack_use_text">使用</string>
+    <string name="update_text">修改</string>
+    <string name="update_name">修改昵称</string>
+    <string name="cancel_text">取消</string>
 </resources>
