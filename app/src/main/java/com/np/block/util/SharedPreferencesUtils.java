@@ -26,6 +26,9 @@ public class SharedPreferencesUtils {
     /**挑战关卡 sp文件名*/
     private static final String SP_PASS = "np_pass";
 
+    /**挑战关卡 音乐开关*/
+    private static final String SP_MUSIC = "sp_music";
+
     /**
      * 保存token信息
      *
@@ -122,6 +125,33 @@ public class SharedPreferencesUtils {
         sp = NpBlockApplication.getInstance().getApplicationContext()
                 .getSharedPreferences(SP_PASS, Context.MODE_PRIVATE);
         return sp.getInt(SP_PASS, 0);
+    }
+
+    /**
+     * 保存背景音乐开关配置
+     *
+     * @param b 开关
+     */
+    public static void saveMusic(boolean b) {
+        sp = NpBlockApplication.getInstance().getApplicationContext()
+                .getSharedPreferences(SP_MUSIC, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putBoolean(SP_MUSIC, b);
+        edit.apply();
+    }
+
+    /**
+     * 读取背景音乐开关配置
+     *
+     * @return boolean
+     */
+    public static boolean readMusic() {
+        sp = NpBlockApplication.getInstance().getApplicationContext()
+                .getSharedPreferences(SP_MUSIC, Context.MODE_PRIVATE);
+        if (!sp.contains(SP_MUSIC)) {
+            return true;
+        }
+        return sp.getBoolean(SP_MUSIC, true);
     }
 
     /**私有化构造方法*/

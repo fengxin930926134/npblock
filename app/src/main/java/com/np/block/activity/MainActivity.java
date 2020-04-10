@@ -30,6 +30,8 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
@@ -67,6 +69,7 @@ import com.np.block.core.enums.SexTypeEnum;
 import com.np.block.core.enums.StageTypeEnum;
 import com.np.block.core.manager.CacheManager;
 import com.np.block.core.manager.MessageManager;
+import com.np.block.core.manager.MusicManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Goods;
@@ -156,6 +159,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**背包*/
     @BindView(R.id.knapsack)
     TextView knapsack;
+    @BindView(R.id.set_up)
+    ImageButton setUp;
     /**计时器*/
     private Chronometer gameChronometer;
     /**经典模式排行榜适配器*/
@@ -330,6 +335,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         attainment.setOnClickListener(this);
         shop.setOnClickListener(this);
         knapsack.setOnClickListener(this);
+        setUp.setOnClickListener(this);
         // 加载头像
         loadHeadImg();
         //排行榜
@@ -344,6 +350,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         checkNotification();
         //直接用线程调用会导致在初始化单例类时发生奇怪问题 所以提前初始化单例类
         SocketServerManager.getInstance().init();
+        //播放背景音乐
+        MusicManager.getInstance().startBackgroundMusic();
     }
 
     /**
@@ -494,8 +502,45 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 initKnapsack();
                 break;
             }
+            case R.id.set_up: {
+                initSetUp();
+                break;
+            }
             default: Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 启动设置弹窗
+     */
+    private void  initSetUp() {
+        AlertDialog dialog = DialogUtils.showDialogDefault(context);
+        View view = View.inflate(context, R.layout.alert_set_up, null);
+        //设置取消按钮
+        view.findViewById(R.id.alert_finish).setOnClickListener(v -> dialog.cancel());
+        Switch aSwitch = view.findViewById(R.id.swh_status);
+        aSwitch.setChecked(SharedPreferencesUtils.readMusic());
+        aSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                MusicManager.getInstance().configurationSwitch(isChecked));
+        SeekBar seekBar = view.findViewById(R.id.seek_bar);
+        seekBar.setProgress((int) (MusicManager.getInstance().getVolume()*100));
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                MusicManager.getInstance().adjustVolume((float)progress/100);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        dialog.setContentView(view);
     }
 
     /**
@@ -1034,7 +1079,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             //如果是队列中退出游戏则自动退出队列
             ThreadPoolManager.getInstance().execute(() -> SocketServerManager.getInstance().signOutMatchQueue());
         }
+        MusicManager.getInstance().stopBackgroundMusic();
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        MusicManager.getInstance().stopBackgroundMusic();
     }
 
     @Override
@@ -1045,6 +1097,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (!enterSuccess && FloatWindow.get() != null) {
             FloatWindow.get().hide();
         }
+        MusicManager.getInstance().startBackgroundMusic();
         EMClient.getInstance().chatManager().addMessageListener(msgListener);
     }
 
