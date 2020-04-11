@@ -106,7 +106,6 @@ public class MusicManager {
     private MusicManager(){
        if (mp == null) {
            mp = MediaPlayer.create(NpBlockApplication.getInstance().getApplicationContext(), R.raw.bgmp3);
-           mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
        }
     }
 }

@@ -45,7 +45,7 @@ public class NextTetrisView extends View {
             //设置画笔空心
             paintWall.setStyle(Paint.Style.STROKE);
             //设置画笔颜色
-            paintWall.setColor(Color.LTGRAY);
+            paintWall.setColor(Color.BLACK);
             //设置线宽
             paintWall.setStrokeWidth(BOUND_WIDTH_OF_WALL);
         }

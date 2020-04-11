@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_3">
+    android:background="@mipmap/x10003">
 
     <!--上半部分-->
     <RelativeLayout
@@ -24,7 +24,7 @@
             android:id="@+id/left_and_right"
             android:layout_width="5dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="50dp"
+            android:layout_marginEnd="40dp"
             android:layout_centerHorizontal="true"/>
 
         <!--分数-->
@@ -39,15 +39,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="10pt"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
                 android:text="@string/score_text" />
 
             <TextView
                 android:id="@+id/score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
                 android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
@@ -65,15 +67,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="10pt"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
                 android:text="@string/grade_text" />
 
             <TextView
                 android:id="@+id/grade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
                 android:text="@string/one_initial"
                 style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
@@ -92,14 +96,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorWhite"
+                android:textSize="10pt"
+                android:textColor="@color/colorBlack"
                 android:text="@string/row_num_text" />
 
             <TextView
                 android:id="@+id/row_num"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
                 android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
@@ -117,7 +123,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
                 style="@style/TextAppearance.AppCompat.Button"
                 android:text="@string/max_score_text" />
 
@@ -125,7 +132,8 @@
                 android:id="@+id/max_score"
                 style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
@@ -148,6 +156,8 @@
             android:id="@+id/left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_above="@id/rotate_and_down"
             android:text="@string/left_text"
             android:layout_toStartOf="@id/right"
@@ -157,6 +167,8 @@
             android:id="@+id/right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_above="@id/rotate_and_down"
             android:layout_toStartOf="@+id/rotate_and_down"
             android:text="@string/right_text" />
@@ -165,6 +177,8 @@
             android:id="@+id/down"
             android:layout_width="wrap_content"
             android:layout_marginEnd="50dp"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/rotate_and_down"
             android:layout_below="@+id/rotate_and_down"
@@ -179,6 +193,8 @@
 
         <Button
             android:id="@+id/rotate"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_alignTop="@+id/rotate_and_down"
             android:layout_toEndOf="@+id/rotate_and_down"
             android:layout_marginStart="50dp"

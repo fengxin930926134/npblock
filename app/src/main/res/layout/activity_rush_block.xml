@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_3">
+    android:background="@mipmap/x10003">
 
     <!--上半部分-->
     <RelativeLayout
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorBlack"
             android:textSize="30sp"
             tools:ignore="RelativeOverlap" />
 
@@ -46,7 +46,7 @@
             android:layout_below="@+id/rush_mode_name"
             android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorBlack"
             android:textSize="20sp"
             android:text="@string/tips_text"/>
 
@@ -57,9 +57,9 @@
             android:layout_toEndOf="@id/left_and_right"
             android:layout_alignEnd="@+id/tips"
             android:layout_below="@+id/tips"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorBlack"
             android:gravity="center"
             android:textSize="20sp"/>
 
@@ -69,9 +69,9 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/left_and_right"
             android:layout_below="@+id/tips_num"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorBlack"
             android:textSize="20sp"
             android:text="@string/tips_current_text"/>
 
@@ -82,9 +82,9 @@
             android:layout_toEndOf="@id/left_and_right"
             android:layout_alignEnd="@+id/tips_current"
             android:layout_below="@+id/tips_current"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorBlack"
             android:gravity="center"
             android:textSize="20sp"/>
 
@@ -105,6 +105,8 @@
             android:id="@+id/left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_above="@id/rotate_and_down"
             android:text="@string/left_text"
             android:layout_toStartOf="@id/right"
@@ -114,6 +116,8 @@
             android:id="@+id/right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_above="@id/rotate_and_down"
             android:layout_toStartOf="@+id/rotate_and_down"
             android:text="@string/right_text" />
@@ -123,6 +127,8 @@
             android:layout_width="wrap_content"
             android:layout_marginEnd="50dp"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_toStartOf="@+id/rotate_and_down"
             android:layout_below="@+id/rotate_and_down"
             android:text="@string/down_text"
@@ -139,6 +145,8 @@
             android:layout_alignTop="@+id/rotate_and_down"
             android:layout_toEndOf="@+id/rotate_and_down"
             android:layout_marginStart="50dp"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/rotate_text" />

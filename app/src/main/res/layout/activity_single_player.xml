@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/bg_3"
+    android:background="@mipmap/x10001"
     android:baselineAligned="false">
 
     <!--左边-->
@@ -18,20 +18,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="80dp">
+            android:orientation="vertical"
+            android:layout_marginTop="50dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14pt"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
                 android:text="@string/battle_score_text" />
 
             <TextView
                 android:id="@+id/score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="14pt"
                 android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
@@ -40,7 +43,7 @@
             android:id="@+id/single_player_tetris"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="25dp"
             android:layout_below="@+id/score_layout"
             android:layout_centerHorizontal="true"/>
 
@@ -48,6 +51,8 @@
             android:id="@+id/left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_toStartOf="@+id/left_and_right"
             android:layout_alignTop="@+id/left_and_right"
             android:text="@string/left_text"
@@ -58,13 +63,15 @@
             android:layout_width="10dp"
             android:layout_height="50dp"
             android:layout_below="@+id/single_player_tetris"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="50dp"
             android:layout_centerHorizontal="true"/>
 
         <Button
             android:id="@+id/right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_toEndOf="@+id/left_and_right"
             android:layout_alignTop="@+id/left_and_right"
             android:text="@string/right_text" />
@@ -72,6 +79,8 @@
         <Button
             android:id="@+id/down"
             android:layout_width="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/left_and_right"
@@ -89,19 +98,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="80dp">
+            android:orientation="vertical"
+            android:layout_marginTop="50dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14pt"
                 style="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
                 android:text="@string/enemy_score_text" />
 
             <TextView
                 android:id="@+id/enemy_score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorBlack"
+                android:textSize="14pt"
                 android:text="@string/zero_initial"
                 style="@style/TextAppearance.AppCompat.Caption" />
         </LinearLayout>
@@ -111,7 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/score_layout_enemy"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="25dp"
             android:layout_centerHorizontal="true"/>
 
         <com.np.block.view.NextTetrisView
@@ -127,7 +139,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="100dp"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
+            android:layout_marginTop="50dp"
             android:layout_below="@+id/nextTetrisView"
             android:text="@string/rotate_text" />
     </RelativeLayout>

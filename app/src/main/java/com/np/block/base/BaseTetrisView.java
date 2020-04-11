@@ -99,7 +99,7 @@ public abstract class BaseTetrisView extends View {
             // 设置画笔空心
             paintWall.setStyle(Paint.Style.STROKE);
             // 设置画笔颜色
-            paintWall.setColor(Color.GRAY);
+            paintWall.setColor(Color.BLACK);
             // 设置线宽
             paintWall.setStrokeWidth(BOUND_WIDTH_OF_WALL);
         }
