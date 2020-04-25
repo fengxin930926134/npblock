@@ -69,6 +69,7 @@ public class InputNameActivity extends BaseActivity {
                             //保存游戏名称成功 更新缓存
                             users.setGameName(name);
                             CacheManager.getInstance().put(ConstUtils.CACHE_USER_INFO, users);
+                            runOnUiThread(dialog::cancel);
                             startActivity(new Intent(context, MainActivity.class));
                         } else {
                             throw new Exception(response.getString(ConstUtils.MSG));

@@ -90,7 +90,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static String figureUrl;
     /**获取QQ登录的openId*/
     private static String openId;
-    private static String gender;
+    private static Integer gender;
     /**是否取消登录 false取消*/
     private static boolean flag = true;
     /**注册弹窗*/
@@ -477,7 +477,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         users.setOpenId(openId);
                         users.setName(name);
                         users.setHeadSculpture(figureUrl);
-                        users.setSex("女".equals(gender)? 2: 1);
+                        users.setSex(gender != null? gender: 1);
                         LoggerUtils.toJson(JSON.toJSONString(users));
                         try {
                             JSONObject response = OkHttpUtils.post("/user/login", JSONObject.toJSONString(users));
@@ -610,9 +610,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     public void onComplete(Object o) {
                         //获取用户信息
                         JSONObject jsonObject = JSONObject.parseObject(JSONObject.parse(o.toString()).toString());
+                        LoggerUtils.toJson(jsonObject.toJSONString());
                         name = jsonObject.getString("nickname");
                         figureUrl = jsonObject.getString("figureurl_qq_2");
-                        gender = jsonObject.getString("gender");
+                        gender = jsonObject.getInteger("gender_type");
                     }
 
                     @Override
