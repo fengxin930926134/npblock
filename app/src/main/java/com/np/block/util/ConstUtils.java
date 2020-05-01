@@ -8,6 +8,10 @@ import android.graphics.Color;
  * @author fengxin
  */
 public class ConstUtils {
+    /**
+     * 群号：这个方块贼牛皮(753857139) 的 key 为： kB_Ss8F5X29JHJ1DJf-Khc_Z0RvbkhCw
+     */
+    public static final String QQ_GROUP = "kB_Ss8F5X29JHJ1DJf-Khc_Z0RvbkhCw";
 
     /**
      * 腾讯appID

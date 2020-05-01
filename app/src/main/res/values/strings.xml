@@ -74,4 +74,6 @@
     <string name="cancel_text">取消</string>
     <string name="set_up_text">设置</string>
     <string name="swh_text">背景音乐</string>
+    <string name="stand_alone_text">单机</string>
+    <string name="add_group_text">QQ群</string>
 </resources>

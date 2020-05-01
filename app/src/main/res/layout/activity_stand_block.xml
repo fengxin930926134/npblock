@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@mipmap/x10003">
+
+    <!--上半部分-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_weight="6.6"
+        android:layout_height="0dp">
+
+        <com.np.block.view.StanAloneTetrisView
+            android:id="@+id/stanAloneTetrisView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/left_and_right"
+            android:layout_centerInParent="true"/>
+
+        <!--中间分割-->
+        <TextView
+            android:id="@+id/left_and_right"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="40dp"
+            android:layout_centerHorizontal="true"/>
+
+        <!--分数-->
+        <LinearLayout
+            android:id="@+id/score_layout"
+            android:layout_width="match_parent"
+            android:layout_alignTop="@+id/stanAloneTetrisView"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10pt"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:textColor="@color/colorBlack"
+                android:text="@string/score_text" />
+
+            <TextView
+                android:id="@+id/score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
+                android:text="@string/zero_initial"
+                style="@style/TextAppearance.AppCompat.Caption" />
+        </LinearLayout>
+
+        <!--等级-->
+        <LinearLayout
+            android:id="@+id/grade_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:orientation="horizontal"
+            android:layout_below="@+id/score_layout"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10pt"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:textColor="@color/colorBlack"
+                android:text="@string/grade_text" />
+
+            <TextView
+                android:id="@+id/grade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
+                android:text="@string/one_initial"
+                style="@style/TextAppearance.AppCompat.Caption"/>
+        </LinearLayout>
+
+        <!--消除行数-->
+        <LinearLayout
+            android:id="@+id/row_num_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_below="@+id/grade_layout"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:textSize="10pt"
+                android:textColor="@color/colorBlack"
+                android:text="@string/row_num_text" />
+
+            <TextView
+                android:id="@+id/row_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
+                android:text="@string/zero_initial"
+                style="@style/TextAppearance.AppCompat.Caption"/>
+        </LinearLayout>
+
+        <!--最高分-->
+        <LinearLayout
+            android:id="@+id/max_score_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_below="@+id/row_num_layout"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
+                style="@style/TextAppearance.AppCompat.Button"
+                android:text="@string/max_score_text" />
+
+            <TextView
+                android:id="@+id/max_score"
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="10pt"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <com.np.block.view.NextTetrisView
+            android:id="@+id/nextTetrisView"
+            android:layout_toEndOf="@+id/left_and_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/stanAloneTetrisView"/>
+    </RelativeLayout>
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3.4">
+
+        <Button
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
+            android:layout_above="@id/rotate_and_down"
+            android:text="@string/left_text"
+            android:layout_toStartOf="@id/right"
+            tools:ignore="RelativeOverlap" />
+
+        <Button
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
+            android:layout_above="@id/rotate_and_down"
+            android:layout_toStartOf="@+id/rotate_and_down"
+            android:text="@string/right_text" />
+
+        <Button
+            android:id="@+id/down"
+            android:layout_width="wrap_content"
+            android:layout_marginEnd="50dp"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/rotate_and_down"
+            android:layout_below="@+id/rotate_and_down"
+            android:text="@string/down_text"
+            tools:ignore="RelativeOverlap" />
+
+        <TextView
+            android:id="@+id/rotate_and_down"
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+        <Button
+            android:id="@+id/rotate"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/btn_black"
+            android:layout_alignTop="@+id/rotate_and_down"
+            android:layout_toEndOf="@+id/rotate_and_down"
+            android:layout_marginStart="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rotate_text" />
+
+    </RelativeLayout>
+
+</LinearLayout>

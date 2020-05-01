@@ -4,7 +4,54 @@
     android:layout_height="match_parent">
     <!--动态背景-->
     <include layout="@layout/login_background"/>
-    <!--需要判断情况是否存在token-->
+    <!--加QQ群-->
+    <ImageButton
+        android:id="@+id/add_group"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@mipmap/group"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/user_name"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="10dp"
+        android:contentDescription="@string/app_name" />
+    <TextView
+        android:id="@+id/add_group_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/add_group"
+        android:layout_alignStart="@id/add_group"
+        android:textColor="@color/colorWhite"
+        android:layout_alignEnd="@+id/add_group"
+        android:gravity="center"
+        android:layout_marginEnd="10dp"
+        android:text="@string/add_group_text"/>
+
+    <!--单机-->
+    <ImageButton
+        android:id="@+id/stand_alone"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@mipmap/danji"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/add_group_text"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:contentDescription="@string/app_name" />
+
+    <TextView
+        android:id="@+id/stand_alone_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/stand_alone"
+        android:layout_alignStart="@id/stand_alone"
+        android:textColor="@color/colorWhite"
+        android:layout_alignEnd="@+id/stand_alone"
+        android:gravity="center"
+        android:layout_marginEnd="10dp"
+        android:text="@string/stand_alone_text"/>
 
     <!--  手机登陆  -->
     <ImageView

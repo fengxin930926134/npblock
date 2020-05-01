@@ -2,21 +2,21 @@ package com.np.block.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import butterknife.BindView;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -73,6 +73,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     /** 区服 */
     @BindView(R.id.district_service)
     TextView districtService;
+    /** 加群 */
+    @BindView(R.id.add_group)
+    ImageButton addGroup;
+    /** 单机 */
+    @BindView(R.id.stand_alone)
+    ImageButton standAlone;
     /**腾讯服务*/
     private Tencent mTencent;
     private IUiListener qqLoginListener;
@@ -159,6 +165,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         cancellation.setOnClickListener(this);
         qqLogin.setOnClickListener(this);
         beginGame.setOnClickListener(this);
+        addGroup.setOnClickListener(this);
+        standAlone.setOnClickListener(this);
     }
 
     /**
@@ -228,6 +236,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 //QQ登陆
                 loginforqq();
                 break;
+            case R.id.add_group:{
+                if (!joinQQGroup()){
+                    Toast.makeText(context, "未安装手Q或安装的版本不支持", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case R.id.stand_alone:{
+                startActivity(new Intent(LoginActivity.this, StandAloneBlockActivity.class));
+                break;
+            }
                 default:
                     Toast.makeText(context, "尚未实现", Toast.LENGTH_SHORT).show();
         }
@@ -748,4 +766,25 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             }
         });
     }
+
+    /****************
+     *
+     * 发起添加群流程。群号：这个方块贼牛皮(753857139) 的 key 为： kB_Ss8F5X29JHJ1DJf-Khc_Z0RvbkhCw
+     * 调用 joinQQGroup(kB_Ss8F5X29JHJ1DJf-Khc_Z0RvbkhCw) 即可发起手Q客户端申请加群 这个方块贼牛皮(753857139)
+     *
+     * @return 返回true表示呼起手Q成功，返回fals表示呼起失败
+     ******************/
+    private boolean joinQQGroup() {
+        Intent intent = new Intent();
+        intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + ConstUtils.QQ_GROUP));
+        // 此Flag可根据具体产品需要自定义，如设置，则在加群界面按返回，返回手Q主界面，不设置，按返回会返回到呼起产品界面    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            // 未安装手Q或安装的版本不支持
+            return false;
+        }
+    }
+
 }
