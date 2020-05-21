@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.content.res.ResourcesCompat;
@@ -80,7 +81,10 @@ public class GameOverActivity extends BaseActivity implements View.OnClickListen
         if (getIntent().getIntExtra("type", ConstUtils.HANDLER_ENTER_THE_GAME)
                 == ConstUtils.HANDLER_START_CUSTOMIZATION) {
             //TODO 后期需要更改
+            //设置权重为0
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0f);
             anotherRound.setVisibility(View.INVISIBLE);
+            anotherRound.setLayoutParams(lp);
         }
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
