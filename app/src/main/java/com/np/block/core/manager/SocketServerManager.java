@@ -152,6 +152,65 @@ public class SocketServerManager {
     }
 
     /**
+     * 进入房间
+     * @param roomMessage 房间信息, 用户信息
+     * @param join 是否是加入 否则为创建
+     * @return 如果是创建返回房间号，加入返回用户信息
+     */
+    public synchronized JSONObject joinRoom(JSONObject roomMessage, boolean join) {
+        JSONObject receivedResponse = null;
+        message.setMsg(roomMessage.toJSONString());
+        //设置消息类型
+        if (join) {
+            message.setMessageType(MessageTypeEnum.JOIN_ROOM_TYPE);
+        } else {
+            message.setMessageType(MessageTypeEnum.CREATE_ROOM_TYPE);
+        }
+        int num = 0;
+        //请求未被占用端口
+        receiverPort = OkHttpUtils.getNotOccupyPort();
+        try (DatagramSocket socket = new DatagramSocket(receiverPort)){
+            //1.构造数据包（加入游戏类型, 消息类型，请求端口和ip）
+            byte[] bytes = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
+            DatagramPacket sendPacket = new DatagramPacket(bytes,
+                    bytes.length, sendAddress, ConstUtils.SOCKET_SEND_PORT);
+            // 设置阻塞时间
+            socket.setSoTimeout(TIMEOUT);
+            do {
+                try {
+                    //3.从此套接字发送数据报包。
+                    socket.send(sendPacket);
+                    socket.receive(receiverPacket);
+                    // 处理接收到的消息
+                    final String reply = new String(receiverData, 0, receiverPacket.getLength(), StandardCharsets.UTF_8);
+                    Message receiveMsg = JSONObject.toJavaObject(JSONObject.parseObject(reply), Message.class);
+                    if (receiveMsg != null) {
+                        //判断是创建房间还是加入
+                        if (!join) {
+                            receivedResponse = new JSONObject();
+                            receivedResponse.put("roomNum", receiveMsg.getKey());
+                        } else {
+                            receivedResponse = JSONObject.parseObject(receiveMsg.getMsg());
+                        }
+                    }
+                    // not stop
+                    receiveStop = false;
+                } catch (Exception e) {
+                    num ++;
+                    LoggerUtils.i("进入房间超时, 倒数第" + (MAX_TRIES - num) + "次尝试...");
+                }
+            } while (receivedResponse == null && num < MAX_TRIES);
+        } catch (IOException e) {
+            LoggerUtils.e("joinRoom" + e.getMessage());
+        }
+        if (receivedResponse != null) {
+            // 进入房间 开启接收服务器消息
+            ThreadPoolManager.getInstance().execute(this::startSocketReceiverServer);
+        }
+        return receivedResponse;
+    }
+
+    /**
      * 进入匹配队列
      * 发送本机ip和端口到服务器
      *
@@ -268,7 +327,7 @@ public class SocketServerManager {
     }
 
     /**
-     * 开启接收服务器匹配消息的SocketServer
+     * 开启接收服务器消息的SocketServer
      */
     private void startSocketReceiverServer() {
         try {
@@ -349,6 +408,40 @@ public class SocketServerManager {
                                 default: LoggerUtils.e("未知游戏结束类型");
                             }
                         }
+                        break;
+                    }
+                    case PREPARE_TYPE: {
+                        //收到则变为已准备
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_PREPARE;
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
+                        break;
+                    }
+                    case CANCEL_TYPE: {
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_PREPARE_CANCEL;
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
+                        break;
+                    }
+                    case START_CUSTOMIZATION_TYPE: {
+                        enterGame = true;
+                        SocketServerManager.message.setKey(receiveMsg.getKey());
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_START_CUSTOMIZATION;
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
+                        break;
+                    }
+                    case EXIT_ROOM_TYPE: {
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_EXIT_ROOM;
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
+                        break;
+                    }
+                    case JOIN_ROOM_TYPE: {
+                        android.os.Message msg = new android.os.Message();
+                        msg.what = ConstUtils.HANDLER_JOIN_ROOM;
+                        msg.obj = receiveMsg.getMsg();
+                        NpBlockApplication.getInstance().mHandler.sendMessage(msg);
                         break;
                     }
                     default:LoggerUtils.e("未实现类型");

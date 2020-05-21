@@ -19,7 +19,12 @@ public enum MessageTypeEnum {
     MATCH_MESSAGE_TYPE("MATCH_MESSAGE_TYPE", "匹配消息类型"),
     LOGIN_SUCCESS_TYPE("LOGIN_SUCCESS_TYPE", "登录游戏类型"),
     LOGOUT_SUCCESS_TYPE("LOGOUT_SUCCESS_TYPE", "退出游戏类型"),
-    INVITE_GAMES_TYPE("INVITE_GAMES_TYPE", "邀请共同游戏类型");
+    CREATE_ROOM_TYPE("CREATE_ROOM_TYPE", "创建房间类型"),
+    EXIT_ROOM_TYPE("EXIT_ROOM_TYPE", "退出房间类型"),
+    PREPARE_TYPE("PREPARE_TYPE", "准备类型"),
+    CANCEL_TYPE("CANCEL_TYPE", "取消准备类型"),
+    START_CUSTOMIZATION_TYPE("START_CUSTOMIZATION_TYPE", "开始自定义游戏类型"),
+    JOIN_ROOM_TYPE("JOIN_ROOM_TYPE", "加入房间类型");
 
     private final String code;
     private final String des;

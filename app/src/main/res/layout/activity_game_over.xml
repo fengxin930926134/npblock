@@ -126,24 +126,29 @@
         android:background="@color/black_20"
         android:padding="5dp"
         android:layout_weight="0.8">
-        <Button
-            android:id="@+id/back_main_page"
+        <LinearLayout
             android:layout_width="match_parent"
+            android:orientation="horizontal"
             android:layout_height="match_parent"
-            android:layout_toStartOf="@+id/view"
-            android:background="@drawable/btn_white"
-            android:text="@string/back_main_page_text"/>
-        <View
-            android:id="@+id/view"
-            android:layout_width="5dp"
-            android:layout_height="5dp"
-            android:layout_centerInParent="true"/>
-        <Button
-            android:id="@+id/another_round"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toEndOf="@+id/view"
-            android:background="@drawable/btn_white"
-            android:text="@string/another_round_text"/>
+            tools:ignore="UselessParent">
+            <Button
+                android:id="@+id/back_main_page"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_white"
+                android:text="@string/back_main_page_text"
+                tools:ignore="ButtonStyle" />
+            <Button
+                android:id="@+id/another_round"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_white"
+                android:text="@string/another_round_text"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

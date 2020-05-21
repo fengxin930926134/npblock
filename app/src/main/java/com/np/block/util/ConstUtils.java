@@ -129,6 +129,31 @@ public class ConstUtils {
     public static final int SOCKET_SEND_PORT = 65535;
 
     /**
+     * Handler 消息类型 开始游戏
+     */
+    public static final int HANDLER_START_CUSTOMIZATION = 0x5;
+
+    /**
+     * Handler 消息类型 有人加入房间
+     */
+    public static final int HANDLER_JOIN_ROOM = 0x6;
+
+    /**
+     * Handler 消息类型 退出房间
+     */
+    public static final int HANDLER_EXIT_ROOM = 0x7;
+
+    /**
+     * Handler 消息类型 取消准备
+     */
+    public static final int HANDLER_PREPARE_CANCEL = 0x8;
+
+    /**
+     * Handler 消息类型 准备
+     */
+    public static final int HANDLER_PREPARE = 0x9;
+
+    /**
      * Handler 消息类型 游戏数据消息
      */
     public static final int HANDLER_GAME_DATA = 0x10;

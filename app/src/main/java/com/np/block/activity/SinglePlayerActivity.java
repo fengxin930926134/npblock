@@ -316,6 +316,7 @@ public class SinglePlayerActivity extends BaseGameActivity {
                 JSONObject result = response.getJSONObject(ConstUtils.RESULT);
                 LoggerUtils.toJson(result.toJSONString());
                 Intent intent = new Intent(SinglePlayerActivity.this, GameOverActivity.class);
+                intent.putExtra("type", getIntent().getIntExtra("type", ConstUtils.HANDLER_ENTER_THE_GAME));
                 Bundle bundle = new Bundle();
                 bundle.putString(ConstUtils.GAME_TYPE, GameTypeEnum.SINGLE_PLAYER_GAME.getCode());
                 bundle.putBoolean(ConstUtils.GAME_WIN, win);

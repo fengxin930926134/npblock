@@ -77,6 +77,11 @@ public class GameOverActivity extends BaseActivity implements View.OnClickListen
         //判断胜负分别加入适配器数据
         List<Users> winUsers = new ArrayList<>();
         List<Users> defeatedUsers = new ArrayList<>();
+        if (getIntent().getIntExtra("type", ConstUtils.HANDLER_ENTER_THE_GAME)
+                == ConstUtils.HANDLER_START_CUSTOMIZATION) {
+            //TODO 后期需要更改
+            anotherRound.setVisibility(View.INVISIBLE);
+        }
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             users = (Users) CacheManager.getInstance().get(ConstUtils.CACHE_USER_INFO);

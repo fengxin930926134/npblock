@@ -61,6 +61,7 @@ import com.np.block.adapter.GoodsAdapter;
 import com.np.block.adapter.PackAdapter;
 import com.np.block.adapter.PassAdapter;
 import com.np.block.adapter.RankingRankAdapter;
+import com.np.block.adapter.RoomAdapter;
 import com.np.block.adapter.RushRankAdapter;
 import com.np.block.adapter.WealthRankAdapter;
 import com.np.block.base.BaseActivity;
@@ -73,6 +74,7 @@ import com.np.block.core.manager.MusicManager;
 import com.np.block.core.manager.SocketServerManager;
 import com.np.block.core.manager.ThreadPoolManager;
 import com.np.block.core.model.Goods;
+import com.np.block.core.model.RoomItem;
 import com.np.block.core.model.Stage;
 import com.np.block.core.model.Users;
 import com.np.block.fragment.ClassicRankFragment;
@@ -183,6 +185,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private boolean confirmOk = false;
     /**确认进入匹配弹窗的内容*/
     private TextView content;
+    /**准备按钮自己*/
+    private Button buttonMy;
+    /**准备按钮别人*/
+    private Button buttonYou;
+    /**房间别人的头像*/
+    private ImageView youHead;
+    /**房间别人的名字*/
+    private TextView youName;
+    /**房间别人的信息*/
+    private Users youUser;
     /**社交弹窗*/
     private AlertDialog socialDialog = null;
     /**好友管理通知*/
@@ -193,6 +205,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private FriendManageAdapter friendManageAdapter = new FriendManageAdapter(R.layout.friend_manage_item, friendManageItems);
     /**结束弹窗*/
     private boolean isExitDialog = false;
+    /**已选择房间号*/
+    public int roomNum = 0;
+    /**房间弹窗*/
+    private AlertDialog alertDialog;
+    /**准备按钮是否可以点击*/
+    private boolean prepareClick = true;
+    /**准备按钮点击次数*/
+    private int prepareNum = 2;
+    /**房间列表*/
+    private List<RoomItem> roomItems = new ArrayList<>();
+    /**房间列表适配器*/
+    private RoomAdapter roomAdapter = new RoomAdapter(R.layout.room_list_item, roomItems);
+    /**房间头像属性配置*/
+    private RequestOptions options = new RequestOptions()
+            //加载成功之前占位图
+            .placeholder(R.mipmap.np_block_launcher)
+            //加载错误之后的错误图
+            .error(R.mipmap.np_block_launcher)
+            //指定图片的尺寸
+            .override(46,46)
+            //指定图片的缩放类型为fitCenter （等比例缩放图片，宽或者是高等于ImageView的宽或者是高。）
+            .fitCenter()
+            //指定图片的缩放类型为centerCrop （等比例缩放图片，直到图片的狂高都大于等于ImageView的宽度，然后截取中间的显示。）
+            .centerCrop();
 
     public ClassicRankAdapter getClassicRankAdapter() {
         return classicRankAdapter;
@@ -260,7 +296,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
                 // 重置状态
                 enterSuccess = false;
-                startActivityForResult(new Intent(this, SinglePlayerActivity.class), 1);
+                Intent intent = new Intent(this, SinglePlayerActivity.class);
+                intent.putExtra("type", ConstUtils.HANDLER_ENTER_THE_GAME);
+                startActivityForResult(intent, 1);
                 break;
             }
             case ConstUtils.HANDLER_CHAT_WINDOW: {
@@ -272,6 +310,44 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 int toChatUsername;
                 toChatUsername = msg.arg1;
                 MessageManager.getInstance().showMessageDialog(this, Integer.toString(toChatUsername));
+                break;
+            }
+            //别人准备
+            case ConstUtils.HANDLER_PREPARE: {
+                buttonYou.setText("取消");
+                break;
+            }
+            //别人取消
+            case ConstUtils.HANDLER_PREPARE_CANCEL: {
+                buttonYou.setText("准备");
+                break;
+            }
+            //另外一人退出房间
+            case ConstUtils.HANDLER_EXIT_ROOM: {
+                buttonYou.setText("准备");
+                youHead.setImageDrawable(ResourcesCompat.getDrawable(getResources(),
+                        R.color.colorTransparent, null));
+                youName.setText("等待进入");
+                break;
+            }
+            //另外一人加入房间
+            case ConstUtils.HANDLER_JOIN_ROOM: {
+                youUser = JSONObject.parseObject((String) obj).toJavaObject(Users.class);
+                buttonYou.setText("准备");
+                Glide.with(this)
+                        .load(youUser.getHeadSculpture())
+                        .apply(options)
+                        .into(youHead);
+                youName.setText(youUser.getGameName());
+                break;
+            }
+            case ConstUtils.HANDLER_START_CUSTOMIZATION: {
+                //进入单人匹配游戏
+                resetRoomState();
+                alertDialog.cancel();
+                Intent intent = new Intent(this, SinglePlayerActivity.class);
+                intent.putExtra("type", ConstUtils.HANDLER_START_CUSTOMIZATION);
+                startActivityForResult(intent, 1);
                 break;
             }
             default:
@@ -352,6 +428,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         SocketServerManager.getInstance().init();
         //播放背景音乐
         MusicManager.getInstance().startBackgroundMusic();
+        // 添加头部
+        roomAdapter.addHeaderView(View.inflate(context, R.layout.room_list_head, null));
     }
 
     /**
@@ -654,6 +732,251 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 enterSuccess = false;
             }
         });
+    }
+
+    /**
+     * 创建房间
+     */
+    private void createRoom() {
+        RoomItem roomItem = new RoomItem();
+        AlertDialog alertDialog = DialogUtils.showDialogDefault(context);
+        View inflate = View.inflate(context, R.layout.alert_dialog_create_room, null);
+        inflate.findViewById(R.id.alert_finish).setOnClickListener(v -> alertDialog.cancel());
+        inflate.findViewById(R.id.create_room_cancel).setOnClickListener(v -> alertDialog.cancel());
+        //房间游戏类型
+        RadioGroup radioGroup = inflate.findViewById(R.id.radioGroup_type);
+        //房间名称
+        EditText nameEdit = inflate.findViewById(R.id.room_name_edit);
+        //确定创建
+        inflate.findViewById(R.id.create_room_sure).setOnClickListener(v -> {
+            String name = nameEdit.getText().toString();
+            if (name.equals("")) {
+                Toast.makeText(context, "房间名不能为空", Toast.LENGTH_SHORT).show();
+                return;
+            }
+             for (int i = 1; i <= radioGroup.getChildCount(); i++) {
+                RadioButton childAt = (RadioButton) radioGroup.getChildAt(i - 1);
+                if (childAt.isChecked()) {
+                    roomItem.setRoomType(i);
+                    break;
+                }
+            }
+            roomItem.setRoomName(name);
+            roomItem.setCreateUser(users.getGameName());
+             //创建小圆弹窗开始创建房间
+            AlertDialog yuan = DialogUtils.showDialog(context);
+            ThreadPoolManager.getInstance().execute(() -> {
+                JSONObject params = new JSONObject();
+                params.put("roomMsg", roomItem);
+                params.put("userMsg", users);
+                JSONObject jsonObject = SocketServerManager.getInstance().joinRoom(params, false);
+                roomNum = jsonObject.getIntValue("roomNum");
+                runOnUiThread(yuan::cancel);
+                if (roomNum != 0) {
+                    enterSuccess = true;
+                    runOnUiThread(() -> {
+                        alertDialog.cancel();
+                        //进入房间界面
+                        initGameRoom(false);
+                    });
+                } else {
+                    runOnUiThread(() -> Toast.makeText(context, "创建房间失败，请检查网络", Toast.LENGTH_SHORT).show());
+                }
+            });
+        });
+        alertDialog.setContentView(inflate);
+    }
+
+    /**
+     * 初始化游戏房间列表
+     */
+    private void initGameRoomList() {
+        initRoomListData();
+        AlertDialog alertDialog = DialogUtils.showDialogDefault(context);
+        alertDialog.setCancelable(false);
+        View inflate = View.inflate(context, R.layout.alert_dialog_room_list, null);
+        inflate.findViewById(R.id.alert_finish).setOnClickListener(v -> {
+            alertDialog.cancel();
+            roomNum = 0;
+        });
+        //刷新房间
+        inflate.findViewById(R.id.refresh_room).setOnClickListener(v -> initRoomListData());
+        //加入房间
+        Button joinRoom = inflate.findViewById(R.id.join_room);
+        joinRoom.setOnClickListener(v -> {
+            if (roomNum == 0) {
+                Toast.makeText(context, "请选择需要加入的房间！", Toast.LENGTH_SHORT).show();
+            } else {
+                AlertDialog yuan = DialogUtils.showDialog(context);
+                ThreadPoolManager.getInstance().execute(() -> {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("roomNum", roomNum);
+                    jsonObject.put("userMsg", users);
+                    JSONObject youMsg = SocketServerManager.getInstance().joinRoom(jsonObject, true);
+                    if (youMsg != null) {
+                        //保存其他人信息
+                        youUser = youMsg.toJavaObject(Users.class);
+                        runOnUiThread(() -> {
+                            yuan.cancel();
+                            alertDialog.cancel();
+                            //加入房间
+                            initGameRoom(true);
+                        });
+                    } else {
+                        runOnUiThread(() -> {
+                            yuan.cancel();
+                            Toast.makeText(context, "加入失败，请检查网络", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+            }
+        });
+        //内容
+        RecyclerView roomRecyclerView = inflate.findViewById(R.id.room_recyclerView);
+        // 设置布局管理器
+        roomRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        roomRecyclerView.setAdapter(roomAdapter);
+        alertDialog.setContentView(inflate);
+    }
+
+    /**
+     * 获取房间列表
+     */
+    private void initRoomListData() {
+        ThreadPoolManager.getInstance().execute(() -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("token", users.getToken());
+            try {
+                JSONObject response = OkHttpUtils.post("/match/getRoomList", jsonObject.toJSONString());
+                if (response.getIntValue(ConstUtils.CODE) == ConstUtils.CODE_SUCCESS) {
+                    List<RoomItem> roomItems = JSONObject.parseArray(response.getString(ConstUtils.RESULT), RoomItem.class);
+                    MainActivity.this.roomItems.clear();
+                    // 设置adapter适配器
+                    MainActivity.this.roomItems.addAll(roomItems);
+                    //更新
+                    runOnUiThread(() -> roomAdapter.notifyDataSetChanged());
+                } else {
+                    throw new Exception(response.getString(ConstUtils.MSG));
+                }
+            } catch (Exception e) {
+                LoggerUtils.i(e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * 初始化房间
+     * @param join 是否是加入 true是加入
+     */
+    private void initGameRoom(boolean join) {
+        alertDialog = DialogUtils.showDialogDefault(context);
+        alertDialog.setCancelable(false);
+        View inflate = View.inflate(context, R.layout.alert_dialog_room_view, null);
+        TextView roomTips = inflate.findViewById(R.id.room_tips);
+        roomTips.setText("组队中");
+        TextView roomName = inflate.findViewById(R.id.room_name);
+        roomName.setText("房间号：".concat(String.valueOf(roomNum)));
+        inflate.findViewById(R.id.alert_finish).setOnClickListener(v -> {
+            //退出房间
+            ThreadPoolManager.getInstance().execute(() -> {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("roomNum", roomNum);
+                    jsonObject.put("userId", users.getId());
+                    OkHttpUtils.post("/match/exitRoom", jsonObject.toJSONString());
+                    resetRoomState();
+                    SocketServerManager.getInstance().stopSocketServer();
+                    runOnUiThread(alertDialog::cancel);
+                } catch (Exception e) {
+                    LoggerUtils.i("initGameRoom:" + e.getMessage());
+                    runOnUiThread(() ->
+                            Toast.makeText(context, "退出失败", Toast.LENGTH_SHORT).show());
+                }
+            });
+        });
+        //赋值
+        //房间我的头像
+        ImageView myHead;
+        //房间我的名字
+        TextView myName;
+        if (join) {
+            //自己信息
+            myHead = inflate.findViewById(R.id.you_head);
+            myName = inflate.findViewById(R.id.you_name);
+            myName.setText(users.getGameName());
+            myName.setVisibility(View.VISIBLE);
+            Glide.with(this)
+                    .load(users.getHeadSculpture())
+                    .apply(options)
+                    .into(myHead);
+            buttonMy = inflate.findViewById(R.id.you_prepare);
+            buttonMy.setVisibility(View.VISIBLE);
+            //读取其他人信息
+            youHead = inflate.findViewById(R.id.my_head);
+            youName = inflate.findViewById(R.id.my_name);
+            youName.setText(youUser.getGameName());
+            Glide.with(this)
+                    .load(youUser.getHeadSculpture())
+                    .apply(options)
+                    .into(youHead);
+            buttonYou = inflate.findViewById(R.id.my_prepare);
+        } else {
+            buttonYou = inflate.findViewById(R.id.you_prepare);
+            youHead = inflate.findViewById(R.id.you_head);
+            youName = inflate.findViewById(R.id.you_name);
+            myHead = inflate.findViewById(R.id.my_head);
+            myName = inflate.findViewById(R.id.my_name);
+            myName.setText(users.getGameName());
+            Glide.with(this)
+                    .load(users.getHeadSculpture())
+                    .apply(options)
+                    .into(myHead);
+            buttonMy = inflate.findViewById(R.id.my_prepare);
+        }
+        buttonYou.setEnabled(false);
+        //发送准备的房间号和用户id
+        buttonMy.setOnClickListener(v -> {
+            //防止重复点击
+            if (prepareClick) {
+                prepareClick = false;
+                ThreadPoolManager.getInstance().execute(() -> {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("roomNum", roomNum);
+                    //偶数为准备 基数为取消
+                    if (prepareNum % 2 == 0) {
+                        jsonObject.put("prepare", true);
+                    } else {
+                        jsonObject.put("prepare", false);
+                    }
+                    jsonObject.put("userId", users.getId());
+                    try {
+                        OkHttpUtils.post("/match/prepare", jsonObject.toJSONString());
+                        if (prepareNum % 2 == 0) {
+                            buttonMy.setText("取消");
+                        } else {
+                            buttonMy.setText("准备");
+                        }
+                        prepareNum++;
+                    } catch (Exception e) {
+                        runOnUiThread(() ->
+                                Toast.makeText(context, "请检查网络连接！", Toast.LENGTH_SHORT).show());
+                        LoggerUtils.i("initGameRoom:" + e.getMessage());
+                    }
+                    prepareClick = true;
+                });
+            }
+        });
+        alertDialog.setContentView(inflate);
+    }
+
+    /**
+     * 重置房间状态使得可以再次游戏
+     */
+    private void resetRoomState() {
+        roomNum = 0;
+        prepareClick = true;
+        prepareNum = 2;
+        enterSuccess = false;
     }
 
     /**
@@ -1038,6 +1361,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         view.findViewById(R.id.single_player_game).setOnClickListener(v -> {
             dialog.cancel();
             startSinglePlayer();
+        });
+        view.findViewById(R.id.join_game).setOnClickListener(v -> {
+            dialog.cancel();
+            initGameRoomList();
+        });
+        view.findViewById(R.id.create_room).setOnClickListener(v -> {
+            dialog.cancel();
+            createRoom();
         });
         //设置双人游戏
         dialog.setContentView(view);

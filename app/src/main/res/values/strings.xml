@@ -76,4 +76,23 @@
     <string name="swh_text">背景音乐</string>
     <string name="stand_alone_text">单机</string>
     <string name="add_group_text">QQ群</string>
+    <string name="room_name_text">房间名</string>
+    <string name="refresh_room_text">刷新房间</string>
+    <string name="join_room_text">加入房间</string>
+    <string name="prepare_text">准备</string>
+    <string name="you_name_text">等待进入</string>
+    <string name="room_num_text">编号</string>
+    <string name="room_list_text">房间列表</string>
+    <string name="room_type_text">类型</string>
+    <string name="room_user_text">创建者</string>
+    <string name="join_game_text">加入游戏</string>
+    <string name="create_room_text">创建房间</string>
+    <string name="room_name_edit_label">房间名：</string>
+    <string name="room_name_edit_text">房间名</string>
+    <string name="create_room_page_text">新房间</string>
+    <string name="game_type_text_label">游戏类型：</string>
+    <string name="player_match_text">单人匹配</string>
+    <string name="two_player_rank_text">双人排位</string>
+    <string name="create_room_cancel_text">取消</string>
+    <string name="create_room_sure_text">创建</string>
 </resources>
